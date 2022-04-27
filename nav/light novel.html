@@ -19,7 +19,7 @@
     z-index: 1;
     top: 0;
     left: 0;
-    background-color: #111;
+    background-color: white;
     overflow-x: hidden;
     transition: 0.5s;
     padding-top: 60px;
@@ -55,7 +55,14 @@
   .sidenav {padding-top: 15px;}
   .sidenav a {font-size: 18px;}
 }
-
+.imgnav {
+width:40px
+border-raduis:50px;
+float:left;
+}
+.m-title {
+text-size:50px;
+}
 </style>
 <body>
 
@@ -64,10 +71,17 @@
   class="closebtn"
   onclick="closeNav()">&times;</a>
 
+   <img class="imgnav"src="img/slime.jpeg"> 
+  <a style="overflow:hidden;" class="m-title"><p><small>AnimeStuff</p></a>
+		<hr/>
   <a href="https://animestuff.me/">Home</a>
+                <hr/>
   <a href="#">Manga</a>
+                <hr/>
   <a href="">Light novels</a>
+                <hr/>
   <a href="#">Contact</a>
+                <hr/>
 
 </div>
 
