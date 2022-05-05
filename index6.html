@@ -269,12 +269,47 @@ a:hover {
 </div>
 
 <body>
-<a href="index6.html" class="previous">&laquo; Previous <br> Novels</a>
-<a href="index4.html" class="next">Newest <br> Novels &raquo;</a>
+<a href="index5.html" class="previous">&laquo; Previous <br> Novels</a>
+<a href="index7.html" class="next">Newest <br> Novels &raquo;</a>
 
-<a href="index6.html" class="previous round">&#8249;</a>
-<a href="index4.html" class="next round">&#8250;</a>
+<a href="index5.html" class="previous round">&#8249;</a>
+<a href="index7.html" class="next round">&#8250;</a>
 </body>
+
+<style>
+.pagination {
+  display: inline-block;
+}
+.pagination a {
+  color: black;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  margin:4px;
+}
+.pagination a.active {
+  background-color: lightgrey;
+  color: white;
+  border-radius: 5px;
+}
+.pagination a:hover:not(.active) {
+  background-color: #ddd;
+  border-radius: 5px;
+}
+</style>
+
+<body>
+				<div class="pagination">
+  <a href="#">1</a>
+  <a href="#">2</a>
+  <a href="#">3</a>
+  <a href="#">4</a>
+  <a href="#">5</a>
+  <a href="#" class="active">6</a>
+  <a href="#">7</a>
+     </div>
+</body>
+
 <footer>
 				Copyright 2022
 </footer>
