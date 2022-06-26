@@ -5,6 +5,7 @@
 			<meta name="viewport" content="width=Device-width, initial-scale=1.0">
 			<meta name="keyword" content="TestUpdate, Free light novel"
 			<meta name="discription" content="Free light in format EPUB and PDF"	
+			<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 			</head>
 			
 	   <head>
@@ -16,11 +17,41 @@ float:right;
 border: 3px solid darkgrey;
 border-radius:50%;
 }
+/*Advertisement*/
+.wel{
+  padding: 0
+}
+.welcome{
+  text-align: center;
+  width: 100%;
+}
+.welcome p:first-child{
+  padding: 2px;
+  font-size: 17px;
+  font-weight: 800;
+}
+.welcome p, .welcome p a{
+  margin: 0 7px;
+  font-size: 13px;
+  padding: 0 2px;
+}
+.welcome hr{
+  margin: 0;
+  padding: 0;
+}
+.post{
+  border-radius: 10px;
+  background: #fff;
+  box-shadow:  16px 16px 23px #d7d7d7,
+             -16px -16px 23px #e9e9e9;
+  padding: 0;
+  margin: 10px 0;
+}
 	   </style>
 	   
 	   <img class="slime-icon" src="img/slime.jpeg"</a>
 	   </head>
-			
+	   
 <head>
 				<style>
 								body {
@@ -150,12 +181,14 @@ function closeNav() {
 <style>
 
 img {
-				width:300px;
+width:300px;
+border-radius:5px;
+box-shadow: 3px 3px 4px #888888;		
 }
 .header-icon {
-				width:312px;
-				border-radius:1%;
-				border: 5px solid darkgrey;
+width:312px;
+border-radius:5px;
+border: 1px solid darkgrey;
 }
 header {
     color:black;
@@ -163,16 +196,17 @@ header {
     margin: auto;    
 }
 footer {
-    background-color:darkgrey;
+    background-color: lightgrey;
+    border: solid darkgrey 1px;
     color:black;
     clear:both;
     text-align:center;
     padding:10px;   
     margin: auto;
+    border-radius:5px;
 }
 </style>
 </head>
-
 <hr/>
 
 					<header>
@@ -207,8 +241,10 @@ footer {
 .ani {
   background-color:lightgrey;
   margin: 10px;
-  border: 5px solid darkgrey;
+  border: 1px solid darkgrey;
   padding: 7px;
+  border-radius: 15px;
+  box-shadow: 3px 3px 4px #888888;		
 }
 a {
   text-decoration: none;
@@ -222,31 +258,53 @@ a:hover {
 }
 
 .previous {
-  background-color: #A9A9A9;
+  background-color: lightgrey;
   color: black;
   float:left;
   margin:5px;
   text-align:center;
+  border-radius: 15px;
+  box-shadow: 3px 3px 4px #888888;		
   
 }
 
 .next {
-  background-color: #A9A9A9;
+  background-color: lightgrey;
   color: black;
   float:right; 
   margin:5px;
   text-align:center;
+  border-radius: 15px;
+  box-shadow: 3px 3px 4px #888888;		
 }
 
 .round {
   border-radius: 50%;
   margin:5px;
+  box-shadow: 3px 3px 4px #888888;		
+}
+.link-a {
+background-color:white;
+border: none;
+border-radius:15px;
+box-shadow: 3px 3px 4px #888888;		
 }
 
 </style>
-</head>
 
 <body>
+ <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+<script>
+  kofiWidgetOverlay.draw('animestuff85370', {
+    'type': 'floating-chat',
+    'floating-chat.donateButton.text': 'Support me',
+    'floating-chat.donateButton.background-color': '#00b9fe',
+    'floating-chat.donateButton.text-color': '#fff'
+  });
+</script>
+</body>
+
+</head>
 
 <div class="ani">
 				
@@ -256,21 +314,21 @@ a:hover {
 
 <h4>Download Here!~~</h4>
 
-<a href="docs/assets/html/ousama no propose.html">Click Here!~~</a>
+<a class="link-a" href="docs/assets/html/ousama no propose.html">Click Here!~~</a>
 			</div>
 			
 			<div class="ani">
 							<h2>Apocalypse Bringer Mynoghra </h2>
 							<img src="docs/assets/html/img/apocalypse.png">
 							<h4>Download Here!~~</h4>
-							<a href="docs/assets/html/apocalypse bringer mynoghra.html">Click Here!~~</a>
+							<a class="link-a" href="docs/assets/html/apocalypse bringer mynoghra.html">Click Here!~~</a>
 			</div>
 			
 			<div class="ani">
 											<h2>Spy Classroom</h2>
 											<img src="docs/assets/html/img/spy.png">
 											<h4>Download Here!~~</h4>
-											<a href="docs/assets/html/spy classroom.html">Click Here!~~</a>
+											<a class="link-a" href="docs/assets/html/spy classroom.html">Click Here!~~</a>
 							</div>
 			
 <a href="index8.html" class="previous">&laquo; Previous <br>
@@ -305,7 +363,7 @@ Novels</a>
 
 <body>
 				<div class="pagination">
-  <a href="index.html">8</a>
+  <a href="index8.html">8</a>
   <a href="index9.html" class="active">9</a>
   <a href="index10.html">10</a>
   <a href="index11.html">11</a>
@@ -315,17 +373,6 @@ Novels</a>
      </div>
 </body>
 
-<body>
-<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
-<script>
-  kofiWidgetOverlay.draw('animestuff85370', {
-    'type': 'floating-chat',
-    'floating-chat.donateButton.text': 'Support me',
-    'floating-chat.donateButton.background-color': '#00b9fe',
-    'floating-chat.donateButton.text-color': '#fff'
-  });
-</script>
-</body>
 
 <footer>Copyright 2022</footer>
 
