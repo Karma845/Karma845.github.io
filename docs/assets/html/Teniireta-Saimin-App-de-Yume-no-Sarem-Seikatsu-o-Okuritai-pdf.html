@@ -1,266 +1,269 @@
 <!DOCTYPE html>
-<html>
-				<head>
-			<meta charset="utf-8">
-			<meta name="keyword" content="TestUpdate, Free light novel">
-			<meta name="discription" content="Free light in format EPUB and PDF">
-			<link rel="icon" type="image/png" size="512x512" href="img/android-chrome-512x512.png">
-<link rel="apple-touch-icon" sizes="76x76" href="img/apple-icon-76x76.png">
-</head>	
-<meta name="viewport" content="width=device-width, initial-scale=1">
-			<head>
-			<style>
-.small-icon {
-width: 60px;
-height:60px;
-float:right;
-border-radius:50px;
-border: 3px solid darkgrey;
-}
-	</style>	 
-	
-	<img class="small-icon" src="img/slime.jpeg"</a>
-	</head>
-			
+<html lang="en">
 <head>
-				<style>
-								body {
-    font-family: "Lato", sans-serif;
-    transition: background-color .5s;
-}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-.sidenav {
-    height: 100%;
-    width: 0;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    background-color: white;
-    overflow-x: hidden;
-    transition: 0.5s;
-    padding-top: 60px;
-}
+  <!-- SEO -->
+  <meta name="keywords" content="TestUpdate, Free light novel, EPUB, PDF, Anime">
+  <meta name="description" content="Free light novel downloads in EPUB and PDF format">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-.sidenav a {
-    padding: 8px 8px 8px 32px;
-    text-decoration: none;
-    font-size: 25px;
-    color: #818181;
-    display: block;
-    transition: 0.3s
-}
+  <style>
+    body {
+      font-family: "Lato", sans-serif;
+      margin: 0;
+      background: white;
+      transition: background-color .5s;
+    }
 
-.sidenav a:hover, .offcanvas a:focus{
-    color: #f1f1f1;
-}
+    /* Top-right small icon */
+    .small-icon {
+      width: 60px;
+      height: 60px;
+      float: right;
+      border-radius: 50%;
+      border: 3px solid darkgrey;
+      margin: 10px;
+    }
 
-.sidenav .closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px;
-    margin-left: 50px;
-}
+    /* Sidebar */
+    .sidenav {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      left: 0;
+      background-color: white;
+      overflow-x: hidden;
+      transition: 0.5s;
+      padding-top: 60px;
+      box-shadow: 2px 0 5px rgba(0,0,0,.3);
+    }
 
-#main {
-    transition: margin-left .5s;
-    padding: 16px;
-}
+    .sidenav a {
+      padding: 10px 32px;
+      text-decoration: none;
+      font-size: 22px;
+      color: #555;
+      display: block;
+    }
 
-@media screen and (max-height: 450px){
-  .sidenav {padding-top: 15px;}
-  .sidenav a {font-size: 18px;}
-}
-.slime-icon {
-width:150px;
-height:150px;
-margin:44px;
-}
-</style>
+    .sidenav a:hover {
+      background: #f1f1f1;
+    }
+
+    .sidenav .closebtn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .slime-icon {
+      width: 150px;
+      height: 150px;
+      margin: 20px auto;
+      display: block;
+    }
+
+    #main {
+      padding: 16px;
+    }
+
+    .menu-btn {
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    /* Header image */
+    .header-icon {
+      width: 316px;
+      max-width: 100%;
+      border-radius: 5px;
+      border: 1px solid darkgrey;
+      box-shadow: 3px 3px 4px #888;
+    }
+
+    .ani {
+      background-color: lightgrey;
+      margin: 15px auto;
+      max-width: 650px;
+      border: 1px solid darkgrey;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 3px 3px 4px #888;
+    }
+
+    .ani img.cover {
+      width: 300px;
+      max-width: 100%;
+      border-radius: 5px;
+      border: 1px solid lightgrey;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .btn {
+      text-decoration: none;
+      color: black;
+      font-size: 25px;
+    }
+
+    /* Grouped download UI */
+    .download-section {
+      margin-top: 20px;
+    }
+
+    .volume-box {
+      background: #f2f2f2;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+    }
+
+    .volume-title {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .format-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .format-btn {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      font-size: 18px;
+      text-decoration: none;
+      color: black;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #888;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .format-btn i {
+      margin-right: 6px;
+    }
+
+    .fa-file-pdf {
+      color: #d62828;
+    }
+
+    .fa-book {
+      color: #1f6aa5;
+    }
+
+    footer {
+      background-color: lightgrey;
+      text-align: center;
+      padding: 15px;
+      border-top: 1px solid darkgrey;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
 <body>
 
+<!-- Floating icon -->
+<img class="small-icon" src="img/slime.jpeg" alt="AnimeStuff">
+
+<!-- Sidebar -->
 <div id="mySidenav" class="sidenav">
-  <a href="javascript:void(0)"
-  class="closebtn"
-  onclick="closeNav()">&times;</a>
-
-  <img class="slime-icon"src="img/slime.jpeg">
-  <a class="animestuff" style="cursor:default">Animestuff</a>
-  <hr/>  
+  <span class="closebtn" onclick="closeNav()">&times;</span>
+  <img class="slime-icon" src="img/slime.jpeg" alt="AnimeStuff">
+  <a style="cursor:default;"><strong>Animestuff</strong></a>
+  <hr>
   <a href="https://animestuff.me">Home</a>
-   <hr/>
+  <hr>
   <a href="https://animestuff.me/nav/list.html">Light novels</a>
-   <hr/>
+  <hr>
   <a href="https://www.facebook.com/AnimeStuff-164188781071265/">Contact</a>
-   <hr/>	
-
 </div>
 
+<!-- Main -->
 <div id="main">
+  <span class="menu-btn" onclick="openNav()">&#9776;</span>
 
-  <span style="font-size:30px;cursor:
-  pointer"
+  <header style="text-align:center;">
+    <img class="header-icon" src="img/V3_7.jpg" alt="Header">
+  </header>
+  
+  <title>I Want to Live the Harem Life of My Dreams With the Hypnosis App I Got – EPUB & PDF</title>
 
-  onclick="openNav()">&#9776;
-  </span>
+  <div class="ani">
+    <a href="#" onclick="history.back()" class="btn"><strong>&#8592;</strong></a>
 
-</div>
+    <h2>(LN) I Want to Live the Harem Life of My Dreams With the Hypnosis App I Got</h2>
 
-<script>
+    <img class="cover" src="https://cdn.novelupdates.com/images/2024/03/I-want-to-live-the-harem-life-of-my-dreams-with-the-hypnosis-app-I-got.jpeg" alt="Cover">
 
-/* Set the width of the side navigation to
-250px and the left margin of the page content
-to 250px and add a black background color to
-body */ 
-
-function openNav() {
- document.getElementById("mySidenav")
- .style.width="250px";
-
- document.getElementById("main")
- .style.marginLeft="250px";
-
- document.body.style.backgroundColor=
- "rgba(0,0,0,0.4)";
-
-}
-
-function closeNav() {
- document.getElementById("mySidenav")
- .style.width = "0";
-
- document.getElementById("main")
- .style.marginLeft= "0";
-
- document.body.style.backgroundColor =
- "white";
-
-}
-</script>
-
-</head>
-
-<head>
-<style>
-
-img {
-				width:300px;
-				border-radius:5px;
-				border: solid lightgrey 1px;
-				box-shadow: 3px 3px 4px #888888;
-}
-header {    
-    color:black;
-    text-align:center;
-    padding:10px;
-    width:300px;
-}
-footer {
-    background-color: lightgrey;
-    color:black;
-    clear:both;
-    text-align:center;
-    padding:10px;   
-    margin: auto;
-    border-radius:5px;
-    border: solid darkgrey 1px;
-}
-.header-icon {
-border-radius:5px;
-border: solid darkgrey 1px;
-width:316px;
-box-shadow: 3px 3px 4px #888888;
-}
-
-</style>
-</head>
-
-<hr/>
-
-					<header>
-
-          
-
-    <!-- Top header menu containing
-
-         logo and Navigation bar -->
-
-    <div id="top-header">
-
-              
-
-        <!-- Logo -->
-
-        <div id="logo">
-        				
-  <img class="header-icon" src="img/V3_7.jpg"</a>  				
-
-</header>
-
-<body style="background-color:white"></body>
-
-</head>
-
-<body>
-
-</style>
-
-<head>
-<style>
-				
-.ani {
- background-color:lightgrey;
- margin: 10px;
- border: solid darkgrey 1px;
- padding: 7px;
- border-radius:15px;
- box-shadow: 3px 3px 4px #888888;
-}
-.btn {
- text-decoration:none;
- color:black;
- font-size:25px;
-}
-.center {
-text-align: center;
-}
-</style>
-
-<title>I Want to Live the Harem Life of My Dreams With the Hypnosis App I Got</title>
-
-<div class="ani">		
-				
-				<a href="#" onclick="history.back()" class="btn"><strong>&#8592;</strong></a>
-				
-			<h2>(PDF) I Want to Live the Harem Life of My Dreams With the Hypnosis App I Got</h2>
-    <p class= "center"><img src="https://cdn.novelupdates.com/images/2024/03/I-want-to-live-the-harem-life-of-my-dreams-with-the-hypnosis-app-I-got.jpeg"></p>
     <h3 style="color:red">Status:</h3>
     <p>Ongoing.</p>
+
     <h3 style="color:red">Synopsis:</h3>
     <p>I’ve never had a girlfriend. The app installed on my phone was a hypnosis app that could control anyone. After testing it, the app’s power was real. With this, a harem life isn’t just a dream. Let’s do our best, me, now is the time to abandon conscience… wait,</p>
+    <p>“Why do all the girls I target have troubles!?”</p>
+    <p>A beautiful gal, a plain girl with hidden beauty, a cool ojou-sama junior—by the power of the hypnosis app, their secrets that they couldn’t tell anyone are revealed!</p>
+    <p>(I just wanted to do erot*c things…!)</p>
+    <p>The self-proclaimed loser, but fundamentally a good guy protagonist, ends up running around helping people!? All-ages hypnosis harem romantic comedy!</p>
 
-<p>“Why do all the girls I target have troubles!?”</p>
+    <h3 style="color:red">Genre:</h3>
+    <p>Adult, Comedy, Ecchi, Harem, Romance, School Life.</p>
 
-<p>A beautiful gal, a plain girl with hidden beauty, a cool ojou-sama junior—by the power of the hypnosis app, their secrets that they couldn’t tell anyone are revealed!</p>
+    <h3>Download</h3>
 
-<p>(I just wanted to do erot*c things…!)</p>
-
-<p>The self-proclaimed loser, but fundamentally a good guy protagonist, ends up running around helping people!? All-ages hypnosis harem romantic comedy!</p>
-			<h3 style="color:red">Genre:</h3>
-			<p>Adult, Comedy, Ecchi, Harem, Romance, School Life.</p>
-			<h4>Download:</h4>
-			<a href="https://link-center.net/718937/pdf-hypno-vol-1">Volume 1</a>
+    <div class="download-section">
+      <!-- Volume 1 -->
+      <div class="volume-box">
+        <div class="volume-title">Volume 1</div>
+        <div class="format-buttons">
+          <a href="https://link-center.net/718937/epub-hypno-vol-1" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-center.net/718937/pdf-hypno-vol-1" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
+    </div>
+    
+        <div class="download-section">
+      <!-- Volume 1 -->
+      <div class="volume-box">
+        <div class="volume-title">Volume 2</div>
+        <div class="format-buttons">
+          <a href="https://link-center.net/718937/vwozSQX3VHsr" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://direct-link.net/718937/5jTcgrFBNuT1" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="ani"><a href="https://animestuff.me/docs/assets/html/Teniireta-Saimin-App-de-Yume-no-Sarem-Seikatsu-o-Okuritai.html" style="text-decoration:none;">Download Full EPUB Here»</a></div>
+<footer>
+  © 2022 AnimeStuff
+</footer>
 
-<footer>Copyright 2022</footer>
-
-<hr/>
-
-<body>
- <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
 <script>
   kofiWidgetOverlay.draw('animestuff85370', {
     'type': 'floating-chat',
@@ -268,7 +271,17 @@ text-align: center;
     'floating-chat.donateButton.background-color': '#00b9fe',
     'floating-chat.donateButton.text-color': '#fff'
   });
-</script>
-</body>
 
+  function openNav() {
+    document.getElementById("mySidenav").style.width = "250px";
+    document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+  }
+
+  function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+    document.body.style.backgroundColor = "white";
+  }
+</script>
+
+</body>
 </html>
