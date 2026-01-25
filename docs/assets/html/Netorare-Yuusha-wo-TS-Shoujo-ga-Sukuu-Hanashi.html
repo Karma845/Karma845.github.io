@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- SEO -->
+  <meta name="keywords" content="Free light novel, EPUB, PDF, Anime">
+  <meta name="description" content="Free light novel downloads in EPUB and PDF format">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    body {
+      font-family: "Lato", sans-serif;
+      margin: 0;
+      background: white;
+      transition: background-color .5s;
+    }
+
+    /* Top-right small icon (RESTORED) */
+    .small-icon {
+      width: 60px;
+      height: 60px;
+      float: right;
+      border-radius: 50%;
+      border: 3px solid darkgrey;
+      margin: 10px;
+    }
+
+    /* Sidebar */
+    .sidenav {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      left: 0;
+      background-color: white;
+      overflow-x: hidden;
+      transition: 0.5s;
+      padding-top: 60px;
+      box-shadow: 2px 0 5px rgba(0,0,0,.3);
+    }
+
+    .sidenav a {
+      padding: 10px 32px;
+      text-decoration: none;
+      font-size: 22px;
+      color: #555;
+      display: block;
+    }
+
+    .sidenav a:hover {
+      background: #f1f1f1;
+    }
+
+    .sidenav .closebtn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .slime-icon {
+      width: 150px;
+      height: 150px;
+      margin: 20px auto;
+      display: block;
+    }
+
+    #main {
+      padding: 16px;
+    }
+
+    .menu-btn {
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    /* Header image (RESTORED) */
+    .header-icon {
+      width: 316px;
+      max-width: 100%;
+      border-radius: 5px;
+      border: 1px solid darkgrey;
+      box-shadow: 3px 3px 4px #888;
+    }
+
+    .ani {
+      background-color: lightgrey;
+      margin: 15px auto;
+      max-width: 650px;
+      border: 1px solid darkgrey;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 3px 3px 4px #888;
+    }
+
+    .ani img {
+      width: 300px;
+      max-width: 100%;
+      border-radius: 5px;
+      border: 1px solid lightgrey;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .btn {
+      text-decoration: none;
+      color: black;
+      font-size: 25px;
+    }
+
+    /* Download buttons */
+    .download a {
+      display: inline-block;
+      margin: 6px;
+      padding: 8px 14px;
+      background: white;
+      border: 1px solid #888;
+      border-radius: 8px;
+      font-weight: bold;
+      text-decoration: none;
+      color: black;
+    }
+
+    footer {
+      background-color: lightgrey;
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid darkgrey;
+      margin-top: 20px;
+    }
+    
+    /* New grouped download UI */
+.download-section {
+  margin-top: 20px;
+}
+
+.volume-box {
+  background: #f2f2f2;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+}
+
+.volume-title {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.format-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.format-btn {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  font-size: 18px;
+  text-decoration: none;
+  color: black;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #888;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+}
+
+.format-btn i {
+  margin-right: 6px;
+}
+
+.fa-file-pdf {
+  color: #d62828;
+}
+
+.fa-book {
+  color: #1f6aa5;
+}
+
+  </style>
+</head>
+
+<body>
+
+<!-- Floating icon -->
+<img class="small-icon" src="img/slime.jpeg" alt="AnimeStuff">
+
+<!-- Sidebar -->
+<div id="mySidenav" class="sidenav">
+  <span class="closebtn" onclick="closeNav()">&times;</span>
+
+  <img class="slime-icon" src="img/slime.jpeg" alt="AnimeStuff">
+  <a style="cursor:default;"><strong>Animestuff</strong></a>
+  <hr>
+  <a href="https://animestuff.me">Home</a>
+  <hr>
+  <a href="https://animestuff.me/nav/list.html">Light novels</a>
+  <hr>
+  <a href="https://www.facebook.com/AnimeStuff-164188781071265/">Contact</a>
+</div>
+
+<!-- Main -->
+<div id="main">
+  <span class="menu-btn" onclick="openNav()">&#9776;</span>
+
+  <header style="text-align:center;">
+    <img class="header-icon" src="img/V3_7.jpg" alt="Header">
+  </header>
+  
+  <title>Story About TS Girl Saving the NTR-ed Hero – EPUB & PDF</title>
+
+  <div class="ani">
+    <a href="#" onclick="history.back()" class="btn">&#8592;</a>
+
+    <h2>(WN) Story About TS Girl Saving the NTR-ed Hero</h2>
+
+     <p style= "text-align: center;"><img src="https://i.imgur.com/alxQHca.jpeg" alt="Cover"></p>
+
+    <h3 style="color:red">Status:</h3>
+    <p>Ongoing</p>
+
+    <h3 style="color:red">Synopsis:</h3>
+    <p>The story is about a former male who has been TS-ed as a girl and is transported to the world of a NTR erot*c game, where she uses her body and mentally saves the hero, the main character.</p>
+
+<p>*If there is a “♂” next to the title, it is an erot*c scene from the male perspective, and if there is a “♀” it is the scene from the female perspective. Other erot*c scenes start from chapter 4.</p>
+
+    <h3 style="color:red">Genre:</h3>
+    <p>Adult, Adventure, Drama, Ecchi, Fantasy, Gender Bender, Mature, Psychological, Romance, Seinen.</p>
+<h3>Download</h3>
+
+<div class="download-section">
+
+  <!-- Volume 1 -->
+  <div class="volume-box">
+    <div class="volume-title">Volume 1</div>
+    <div class="format-buttons">
+     <a href="https://link-target.net/718937/CBrGcK2dOvEM" class="format-btn">
+       <i class="fa-solid fa-book"></i> EPUB
+     </a>
+      <a href="https://link-hub.net/718937/86k4mpnotras" class="format-btn">
+        <i class="fa-solid fa-file-pdf"></i> PDF
+      </a>
+    </div>
+  </div>
+  
+  
+  </div>
+</div>
+
+<footer>
+  © 2022 AnimeStuff
+</footer>
+
+<script>
+  function openNav() {
+    document.getElementById("mySidenav").style.width = "250px";
+    document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+  }
+
+  function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+    document.body.style.backgroundColor = "white";
+  }
+</script>
+
+</body>
+</html>
