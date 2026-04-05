@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="Free light novel, EPUB, PDF, Anime, Search">
+  <meta name="description" content="Search free light novel downloads in EPUB and PDF format">
+  <title>Search Light Novels – AnimeStuff</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    body {
+      font-family: "Lato", sans-serif;
+      margin: 0;
+      background: white;
+      transition: background-color .5s;
+    }
+
+    /* Top-right small icon */
+    .small-icon {
+      width: 60px;
+      height: 60px;
+      float: right;
+      border-radius: 50%;
+      border: 3px solid darkgrey;
+      margin: 10px;
+    }
+
+    /* Sidebar */
+    .sidenav {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      left: 0;
+      background-color: white;
+      overflow-x: hidden;
+      transition: 0.5s;
+      padding-top: 60px;
+      box-shadow: 2px 0 5px rgba(0,0,0,.3);
+    }
+
+    .sidenav a {
+      padding: 10px 32px;
+      text-decoration: none;
+      font-size: 22px;
+      color: #555;
+      display: block;
+    }
+
+    .sidenav a:hover {
+      background: #f1f1f1;
+    }
+
+    .sidenav .closebtn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .slime-icon {
+      width: 150px;
+      height: 150px;
+      margin: 20px auto;
+      display: block;
+    }
+
+    #main {
+      padding: 16px;
+    }
+
+    .menu-btn {
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    /* Header image */
+    .header-icon {
+      width: 316px;
+      max-width: 100%;
+      border-radius: 5px;
+      border: 1px solid darkgrey;
+      box-shadow: 3px 3px 4px #888;
+    }
+
+    footer {
+      background-color: lightgrey;
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid darkgrey;
+      margin-top: 20px;
+    }
+
+    /* ── Search UI ── */
+    .search-container {
+      max-width: 650px;
+      margin: 20px auto;
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #f5f5f5;
+      border: 2px solid #ddd;
+      border-radius: 30px;
+      padding: 10px 20px;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-box:focus-within {
+      border-color: #b00;
+      box-shadow: 0 0 0 3px rgba(180,0,0,0.1);
+    }
+
+    .search-box i {
+      color: #999;
+      font-size: 18px;
+      margin-right: 10px;
+    }
+
+    #searchInput {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 17px;
+      font-family: "Lato", sans-serif;
+      outline: none;
+      color: #333;
+    }
+
+    #searchInput::placeholder {
+      color: #aaa;
+    }
+
+    #clearBtn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #aaa;
+      font-size: 18px;
+      padding: 0;
+      display: none;
+    }
+
+    #clearBtn:hover { color: #b00; }
+
+    /* Stats bar */
+    #statsBar {
+      text-align: center;
+      margin: 10px 0 4px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    /* Results */
+    #results {
+      margin-top: 12px;
+    }
+
+    .novel-card {
+      background: lightgrey;
+      border: 1px solid darkgrey;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .novel-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 3px 4px 10px rgba(0,0,0,0.2);
+      background: #e8e8e8;
+    }
+
+    .novel-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #222;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .novel-title mark {
+      background: rgba(180, 0, 0, 0.15);
+      color: #b00;
+      border-radius: 3px;
+      padding: 0 2px;
+    }
+
+    .go-btn {
+      background: white;
+      border: 1px solid #888;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .novel-card:hover .go-btn {
+      background: #b00;
+      color: white;
+      border-color: #b00;
+    }
+
+    /* Empty / loading states */
+    #emptyState {
+      text-align: center;
+      padding: 40px 20px;
+      color: #888;
+      display: none;
+    }
+
+    #emptyState i {
+      font-size: 48px;
+      margin-bottom: 12px;
+      display: block;
+      color: #ccc;
+    }
+
+    #initialState {
+      text-align: center;
+      padding: 30px 20px;
+      color: #999;
+    }
+
+    #initialState i {
+      font-size: 44px;
+      display: block;
+      margin-bottom: 10px;
+      color: #ddd;
+    }
+
+    #initialState p {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    /* Scroll-to-top */
+    #scrollTop {
+      position: fixed;
+      bottom: 24px;
+      right: 20px;
+      background: #b00;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      font-size: 18px;
+      cursor: pointer;
+      display: none;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+      z-index: 500;
+    }
+
+    #scrollTop:hover { background: #900; }
+
+    /* Alphabet filter */
+    .alpha-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: center;
+      margin: 12px 0;
+    }
+
+    .alpha-btn {
+      background: white;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      padding: 4px 9px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #555;
+      font-weight: bold;
+      transition: all 0.15s;
+    }
+
+    .alpha-btn:hover, .alpha-btn.active {
+      background: #b00;
+      color: white;
+      border-color: #b00;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Floating icon -->
+<img class="small-icon" src="img/slime.jpeg" alt="AnimeStuff">
+
+<!-- Sidebar -->
+<div id="mySidenav" class="sidenav">
+  <span class="closebtn" onclick="closeNav()">&times;</span>
+  <img class="slime-icon" src="img/slime.jpeg" alt="AnimeStuff">
+  <a style="cursor:default;"><strong>Animestuff</strong></a>
+  <hr>
+  <a href="https://animestuff.me">Home</a>
+  <hr>
+  <a href="https://animestuff.me/nav/list.html">Light novels</a>
+  <hr>
+  <a href="https://www.facebook.com/AnimeStuff-164188781071265/">Contact</a>
+</div>
+
+<!-- Main -->
+<div id="main">
+  <span class="menu-btn" onclick="openNav()">&#9776;</span>
+
+  <header style="text-align:center;">
+    <img class="header-icon" src="img/V3_7.jpg" alt="Header">
+  </header>
+
+  <div class="search-container">
+    <h2 style="text-align:center; color:#b00; margin-bottom:16px;">
+      <i class="fa-solid fa-magnifying-glass"></i> Search Light Novels
+    </h2>
+
+    <!-- Search box -->
+    <div class="search-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Type a title or keyword..."
+        autocomplete="off"
+        autofocus
+      >
+      <button id="clearBtn" onclick="clearSearch()" title="Clear">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Alphabet filter -->
+    <div class="alpha-filter" id="alphaFilter"></div>
+
+    <!-- Stats -->
+    <div id="statsBar"></div>
+
+    <!-- Results area -->
+    <div id="results">
+      <div id="initialState">
+        <i class="fa-solid fa-book-open"></i>
+        <p>Search from <strong id="totalCount">595</strong> light novels</p>
+      </div>
+      <div id="emptyState">
+        <i class="fa-solid fa-face-sad-tear"></i>
+        <p>No novels found for "<span id="emptyQuery"></span>"</p>
+        <p style="font-size:13px; margin-top:6px;">Try a different keyword or browse by letter above.</p>
+      </div>
+      <div id="novelList"></div>
+    </div>
+  </div>
+</div>
+
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">
+  <i class="fa-solid fa-arrow-up"></i>
+</button>
+
+<footer>
+  © 2022 AnimeStuff
+</footer>
+
+<script>
+  // ──────────────────────────────────────────────
+  //  Load novels data
+  //  novels.json must be in the same directory as this file
+  // ──────────────────────────────────────────────
+  let novels = [];
+  let activeAlpha = null;
+
+  async function loadNovels() {
+    try {
+      const res = await fetch('novels.json');
+      novels = await res.json();
+      document.getElementById('totalCount').textContent = novels.length;
+    } catch (e) {
+      console.error('Failed to load novels.json', e);
+    }
+  }
+
+  // ──────────────────────────────────────────────
+  //  Alphabet filter buttons
+  // ──────────────────────────────────────────────
+  function buildAlphaFilter() {
+    const container = document.getElementById('alphaFilter');
+    const letters = ['#', ...Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ')];
+    letters.forEach(letter => {
+      const btn = document.createElement('button');
+      btn.className = 'alpha-btn';
+      btn.textContent = letter;
+      btn.onclick = () => toggleAlpha(letter, btn);
+      container.appendChild(btn);
+    });
+  }
+
+  function toggleAlpha(letter, btn) {
+    const allBtns = document.querySelectorAll('.alpha-btn');
+    if (activeAlpha === letter) {
+      activeAlpha = null;
+      btn.classList.remove('active');
+    } else {
+      allBtns.forEach(b => b.classList.remove('active'));
+      activeAlpha = letter;
+      btn.classList.add('active');
+    }
+    renderResults(document.getElementById('searchInput').value.trim());
+  }
+
+  // ──────────────────────────────────────────────
+  //  Search & render
+  // ──────────────────────────────────────────────
+  function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function highlight(text, query) {
+    if (!query) return escapeHtml(text);
+    const escaped = escapeRegex(query);
+    const regex = new RegExp(`(${escaped})`, 'gi');
+    return escapeHtml(text).replace(regex, '<mark>$1</mark>');
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function renderResults(query) {
+    const list = document.getElementById('novelList');
+    const emptyState = document.getElementById('emptyState');
+    const initialState = document.getElementById('initialState');
+    const statsBar = document.getElementById('statsBar');
+    const clearBtn = document.getElementById('clearBtn');
+
+    clearBtn.style.display = query ? 'block' : 'none';
+
+    // Filter by alpha
+    let filtered = novels;
+    if (activeAlpha) {
+      filtered = filtered.filter(n => {
+        const first = n.title.trim()[0]?.toUpperCase() || '';
+        if (activeAlpha === '#') return !'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.includes(first);
+        return first === activeAlpha;
+      });
+    }
+
+    // Filter by search query
+    if (query) {
+      const lower = query.toLowerCase();
+      filtered = filtered.filter(n => n.title.toLowerCase().includes(lower));
+    }
+
+    list.innerHTML = '';
+
+    // No input, no alpha filter = show initial prompt
+    if (!query && !activeAlpha) {
+      initialState.style.display = 'block';
+      emptyState.style.display = 'none';
+      statsBar.textContent = '';
+      return;
+    }
+
+    initialState.style.display = 'none';
+
+    if (filtered.length === 0) {
+      emptyState.style.display = 'block';
+      document.getElementById('emptyQuery').textContent = query || ('Letter: ' + activeAlpha);
+      statsBar.textContent = '';
+      return;
+    }
+
+    emptyState.style.display = 'none';
+    statsBar.textContent = `Showing ${filtered.length} novel${filtered.length !== 1 ? 's' : ''}`;
+
+    const fragment = document.createDocumentFragment();
+    filtered.forEach(n => {
+      const card = document.createElement('a');
+      card.className = 'novel-card';
+      card.href = n.url;
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+      card.innerHTML = `
+        <span class="novel-title">${highlight(n.title, query)}</span>
+        <span class="go-btn">Read &rarr;</span>
+      `;
+      fragment.appendChild(card);
+    });
+    list.appendChild(fragment);
+  }
+
+  function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    renderResults('');
+    document.getElementById('searchInput').focus();
+  }
+
+  // Debounce search
+  let debounceTimer;
+  document.getElementById('searchInput').addEventListener('input', function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => renderResults(this.value.trim()), 120);
+  });
+
+  // Scroll-to-top button
+  window.addEventListener('scroll', () => {
+    document.getElementById('scrollTop').style.display =
+      window.scrollY > 300 ? 'block' : 'none';
+  });
+
+  // Sidebar
+  function openNav() {
+    document.getElementById('mySidenav').style.width = '250px';
+    document.body.style.backgroundColor = 'rgba(0,0,0,0.4)';
+  }
+
+  function closeNav() {
+    document.getElementById('mySidenav').style.width = '0';
+    document.body.style.backgroundColor = 'white';
+  }
+
+  // Init
+  (async () => {
+    buildAlphaFilter();
+    await loadNovels();
+  })();
+</script>
+
+</body>
+</html>
