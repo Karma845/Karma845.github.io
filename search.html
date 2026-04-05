@@ -1,547 +1,553 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="keywords" content="Free light novel, EPUB, PDF, Anime, Search">
-  <meta name="description" content="Search free light novel downloads in EPUB and PDF format">
-  <title>Search Light Novels – AnimeStuff</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta name="keywords" content="TestUpdate, Free light novel">
+  <meta name="description" content="Free light novels in EPUB and PDF format">
+  <title>AnimeStuff – Free Light Novels</title>
+
+  <link rel="icon" type="image/png" sizes="512x512" href="img/android-chrome-512x512.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="img/apple-icon-76x76.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
+    /* ── Base ── */
+    * { box-sizing: border-box; }
     body {
       font-family: "Lato", sans-serif;
-      margin: 0;
-      background: white;
+      background-color: white;
       transition: background-color .5s;
+      margin: 0;
     }
 
-    /* Top-right small icon */
-    .small-icon {
-      width: 60px;
-      height: 60px;
-      float: right;
-      border-radius: 50%;
-      border: 3px solid darkgrey;
-      margin: 10px;
-    }
-
-    /* Sidebar */
+    /* ── Sidenav ── */
     .sidenav {
       height: 100%;
       width: 0;
       position: fixed;
-      z-index: 1000;
+      z-index: 100;
       top: 0;
       left: 0;
       background-color: white;
       overflow-x: hidden;
       transition: 0.5s;
-      padding-top: 60px;
-      box-shadow: 2px 0 5px rgba(0,0,0,.3);
+      padding-top: 10px;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.12);
     }
-
     .sidenav a {
-      padding: 10px 32px;
+      padding: 8px 8px 8px 32px;
       text-decoration: none;
       font-size: 22px;
       color: #555;
       display: block;
+      transition: 0.2s;
     }
-
-    .sidenav a:hover {
-      background: #f1f1f1;
-    }
-
+    .sidenav a:hover { color: #b00; background: #fef0f0; }
     .sidenav .closebtn {
       position: absolute;
-      top: 10px;
+      top: 0;
       right: 20px;
-      font-size: 30px;
-      cursor: pointer;
-    }
-
-    .slime-icon {
-      width: 150px;
-      height: 150px;
-      margin: 20px auto;
-      display: block;
-    }
-
-    #main {
-      padding: 16px;
-    }
-
-    .menu-btn {
-      font-size: 30px;
-      cursor: pointer;
-    }
-
-    /* Header image */
-    .header-icon {
-      width: 316px;
-      max-width: 100%;
-      border-radius: 5px;
-      border: 1px solid darkgrey;
-      box-shadow: 3px 3px 4px #888;
-    }
-
-    footer {
-      background-color: lightgrey;
-      text-align: center;
-      padding: 10px;
-      border-top: 1px solid darkgrey;
-      margin-top: 20px;
-    }
-
-    /* ── Search UI ── */
-    .search-container {
-      max-width: 650px;
-      margin: 20px auto;
-    }
-
-    .search-box {
-      position: relative;
-      display: flex;
-      align-items: center;
-      background: #f5f5f5;
-      border: 2px solid #ddd;
-      border-radius: 30px;
-      padding: 10px 20px;
-      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .search-box:focus-within {
-      border-color: #b00;
-      box-shadow: 0 0 0 3px rgba(180,0,0,0.1);
-    }
-
-    .search-box i {
-      color: #999;
-      font-size: 18px;
-      margin-right: 10px;
-    }
-
-    #searchInput {
-      flex: 1;
-      border: none;
-      background: transparent;
-      font-size: 17px;
-      font-family: "Lato", sans-serif;
-      outline: none;
-      color: #333;
-    }
-
-    #searchInput::placeholder {
-      color: #aaa;
-    }
-
-    #clearBtn {
+      font-size: 36px;
+      margin-left: 50px;
       background: none;
       border: none;
       cursor: pointer;
-      color: #aaa;
-      font-size: 18px;
-      padding: 0;
-      display: none;
-    }
-
-    #clearBtn:hover { color: #b00; }
-
-    /* Stats bar */
-    #statsBar {
-      text-align: center;
-      margin: 10px 0 4px;
-      font-size: 13px;
       color: #888;
+      padding: 0;
     }
+    .nav-icon { width: 120px; height: 120px; margin: 20px auto; display: block; border-radius: 50%; border: 2px solid #ddd; }
+    #main { transition: margin-left .5s; padding: 10px 16px; }
 
-    /* Results */
-    #results {
-      margin-top: 12px;
+    /* ── Welcome banner ── */
+    .welcome-card {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 0;
+      margin: 10px 0;
+      overflow: hidden;
     }
+    .welcome-card img { width: 70px; height: 70px; object-fit: cover; flex-shrink: 0; }
+    .welcome-text { flex: 1; text-align: center; padding: 10px; }
+    .welcome-text p { margin: 2px 0; }
+    .welcome-text .title { font-size: 17px; font-weight: 800; }
+    .welcome-text .subtitle { font-size: 13px; color: #555; }
+    .welcome-text .latest a { font-size: 13px; color: #b00; text-decoration: none; display: inline; padding: 0; }
+    .welcome-text .latest a:hover { text-decoration: underline; background: none; }
 
-    .novel-card {
-      background: lightgrey;
-      border: 1px solid darkgrey;
-      border-radius: 12px;
-      padding: 14px 18px;
-      margin-bottom: 10px;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+    /* ── Header logo ── */
+    header { text-align: center; margin: auto; }
+    .header-icon { width: 312px; border-radius: 5px; border: 1px solid darkgrey; display: inline-block; }
+
+    /* ── Search + Filter section ── */
+    .filter-section {
+      max-width: 860px;
+      margin: 16px auto;
+      padding: 0 12px;
+    }
+    .filter-box {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e0e0e0;
+      padding: 18px;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.06);
+    }
+    .search-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+    }
+    .search-icon-inner {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      font-size: 15px;
+      pointer-events: none;
+    }
+    #searchInput {
+      width: 100%;
+      padding: 10px 14px 10px 36px;
+      border: 1.5px solid #ccc;
+      border-radius: 25px;
+      font-size: 15px;
+      font-family: "Lato", sans-serif;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #searchInput:focus { border-color: #b00; box-shadow: 0 0 0 3px rgba(180,0,0,0.1); }
+    .go-btn {
+      height: 42px;
+      padding: 0 22px;
+      background: #b00;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: "Lato", sans-serif;
+      transition: background .2s;
+    }
+    .go-btn:hover { background: #900; }
+
+    /* ── Genre toggle header ── */
+    .genre-toggle-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      text-decoration: none;
-      color: inherit;
-      transition: transform 0.15s, box-shadow 0.15s;
+      margin-top: 14px;
+    }
+    .genre-label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .genre-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1.5px solid #ccc;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+      font-family: "Lato", sans-serif;
+      transition: all .2s;
+    }
+    .genre-toggle-btn:hover { border-color: #b00; color: #b00; }
+    .genre-toggle-btn.open { border-color: #b00; color: #b00; background: rgba(180,0,0,0.05); }
+    .toggle-arrow { display: inline-block; transition: transform .25s; font-style: normal; }
+    .genre-toggle-btn.open .toggle-arrow { transform: rotate(180deg); }
+
+    /* ── Collapsible genre panel ── */
+    .genre-panel {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height .35s ease, padding .35s ease;
+      padding: 0;
+    }
+    .genre-panel.open {
+      max-height: 1200px;
+      padding-top: 10px;
     }
 
-    .novel-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 3px 4px 10px rgba(0,0,0,0.2);
-      background: #e8e8e8;
+    .genre-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .genre-chip {
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1.5px solid #ccc;
+      background: white;
+      font-size: 13px;
+      cursor: pointer;
+      color: #444;
+      transition: all .15s;
+      user-select: none;
+      font-family: "Lato", sans-serif;
     }
+    .genre-chip:hover { border-color: #b00; color: #b00; }
+    .genre-chip.selected {
+      background: #b00;
+      border-color: #b00;
+      color: white;
+      font-weight: bold;
+    }
+    .filter-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+    #selectedInfo { font-size: 13px; color: #888; }
+    .clear-btn {
+      background: none;
+      border: none;
+      font-size: 13px;
+      color: #b00;
+      cursor: pointer;
+      font-family: "Lato", sans-serif;
+      padding: 0;
+    }
+    .clear-btn:hover { text-decoration: underline; }
 
-    .novel-title {
-      font-size: 15px;
+    /* ── Results ── */
+    #resultsSection { display: none; margin-top: 6px; }
+    #resultsHeader { font-size: 14px; color: #666; margin-bottom: 12px; }
+    .novel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 10px;
+    }
+    .novel-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 14px;
+      box-shadow: 1px 1px 4px rgba(0,0,0,0.05);
+      transition: border-color .15s;
+    }
+    .novel-card:hover { border-color: #b00; }
+    .novel-card a {
+      display: block;
+      font-size: 14px;
       font-weight: bold;
       color: #222;
+      text-decoration: none;
+      margin-bottom: 8px;
       line-height: 1.4;
-      flex: 1;
+      padding: 0;
+      background: none;
     }
-
-    .novel-title mark {
-      background: rgba(180, 0, 0, 0.15);
+    .novel-card a:hover { color: #b00; background: none; }
+    .card-genres { display: flex; flex-wrap: wrap; gap: 4px; }
+    .card-genre {
+      background: #eee;
+      color: #666;
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-size: 11px;
+    }
+    .card-genre.matched {
+      background: rgba(180,0,0,0.1);
+      color: #b00;
+    }
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 2rem;
+      color: #999;
+      background: #f9f9f9;
+      border-radius: 12px;
+      border: 1px solid #eee;
+    }
+    mark {
+      background: rgba(180,0,0,0.13);
       color: #b00;
       border-radius: 3px;
       padding: 0 2px;
     }
 
-    .go-btn {
-      background: white;
-      border: 1px solid #888;
-      border-radius: 8px;
-      padding: 7px 14px;
-      font-size: 14px;
-      font-weight: bold;
-      color: #333;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .novel-card:hover .go-btn {
-      background: #b00;
-      color: white;
-      border-color: #b00;
-    }
-
-    /* Empty / loading states */
-    #emptyState {
+    /* ── Navigation arrows ── */
+    .previous, .next {
+      background-color: lightgrey;
+      color: black;
+      margin: 5px;
       text-align: center;
-      padding: 40px 20px;
-      color: #888;
-      display: none;
+      border-radius: 15px;
+      box-shadow: 3px 3px 4px #888;
+      display: inline-block;
     }
+    .previous { float: left; }
+    .next { float: right; }
+    .previous a, .next a { padding: 8px 16px; display: block; color: black; text-decoration: none; }
+    .previous a:hover, .next a:hover { background: #ddd; color: black; }
 
-    #emptyState i {
-      font-size: 48px;
-      margin-bottom: 12px;
-      display: block;
-      color: #ccc;
-    }
-
-    #initialState {
+    /* ── Footer ── */
+    footer {
+      background-color: lightgrey;
+      border: solid darkgrey 1px;
+      color: black;
+      clear: both;
       text-align: center;
-      padding: 30px 20px;
-      color: #999;
-    }
-
-    #initialState i {
-      font-size: 44px;
-      display: block;
-      margin-bottom: 10px;
-      color: #ddd;
-    }
-
-    #initialState p {
-      margin: 0;
-      font-size: 15px;
-    }
-
-    /* Scroll-to-top */
-    #scrollTop {
-      position: fixed;
-      bottom: 24px;
-      right: 20px;
-      background: #b00;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 42px;
-      height: 42px;
-      font-size: 18px;
-      cursor: pointer;
-      display: none;
-      box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
-      z-index: 500;
-    }
-
-    #scrollTop:hover { background: #900; }
-
-    /* Alphabet filter */
-    .alpha-filter {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      justify-content: center;
-      margin: 12px 0;
-    }
-
-    .alpha-btn {
-      background: white;
-      border: 1px solid #bbb;
-      border-radius: 6px;
-      padding: 4px 9px;
-      font-size: 13px;
-      cursor: pointer;
-      color: #555;
-      font-weight: bold;
-      transition: all 0.15s;
-    }
-
-    .alpha-btn:hover, .alpha-btn.active {
-      background: #b00;
-      color: white;
-      border-color: #b00;
+      padding: 10px;
+      margin: 16px auto 0;
+      border-radius: 5px;
     }
   </style>
 </head>
 
 <body>
 
-<!-- Floating icon -->
-<img class="small-icon" src="img/slime.jpeg" alt="AnimeStuff">
+  <!-- ══ SIDENAV ══ -->
+  <div id="mySidenav" class="sidenav">
+    <button class="closebtn" onclick="closeNav()">&times;</button>
+    <img class="nav-icon" src="img/slime.jpeg" alt="Slime icon">
+    <a style="cursor:default;color:#333;font-weight:700">Animestuff</a>
+    <hr>
+    <a href="https://animestuff.me">Home</a>
+    <hr>
+    <a href="https://animestuff.me/nav/list.html">Light Novels</a>
+    <hr>
+    <a href="https://www.facebook.com/AnimeStuff-164188781071265/">Contact</a>
+    <hr>
+  </div>
 
-<!-- Sidebar -->
-<div id="mySidenav" class="sidenav">
-  <span class="closebtn" onclick="closeNav()">&times;</span>
-  <img class="slime-icon" src="img/slime.jpeg" alt="AnimeStuff">
-  <a style="cursor:default;"><strong>Animestuff</strong></a>
-  <hr>
-  <a href="https://animestuff.me">Home</a>
-  <hr>
-  <a href="https://animestuff.me/nav/list.html">Light novels</a>
-  <hr>
-  <a href="https://www.facebook.com/AnimeStuff-164188781071265/">Contact</a>
-</div>
+  <!-- ══ MENU TOGGLE ══ -->
+  <div id="main">
+    <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+  </div>
 
-<!-- Main -->
-<div id="main">
-  <span class="menu-btn" onclick="openNav()">&#9776;</span>
-
-  <header style="text-align:center;">
-    <img class="header-icon" src="img/V3_7.jpg" alt="Header">
-  </header>
-
-  <div class="search-container">
-    <h2 style="text-align:center; color:#b00; margin-bottom:16px;">
-      <i class="fa-solid fa-magnifying-glass"></i> Search Light Novels
-    </h2>
-
-    <!-- Search box -->
-    <div class="search-box">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input
-        type="text"
-        id="searchInput"
-        placeholder="Type a title or keyword..."
-        autocomplete="off"
-        autofocus
-      >
-      <button id="clearBtn" onclick="clearSearch()" title="Clear">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-
-    <!-- Alphabet filter -->
-    <div class="alpha-filter" id="alphaFilter"></div>
-
-    <!-- Stats -->
-    <div id="statsBar"></div>
-
-    <!-- Results area -->
-    <div id="results">
-      <div id="initialState">
-        <i class="fa-solid fa-book-open"></i>
-        <p>Search from <strong id="totalCount">595</strong> light novels</p>
+  <!-- ══ WELCOME BANNER ══ -->
+  <div class="container-fluid" style="max-width:860px;margin:0 auto;padding:0 12px">
+    <div class="welcome-card">
+      <img src="img/elaina.jpg" alt="Icon">
+      <div class="welcome-text">
+        <p class="title">Welcome to AnimeStuff</p>
+        <p class="subtitle">Download Novels for Free</p>
+        <hr style="margin:4px 0">
+        <p class="latest"><a href="index40.html">« Latest Novels Here »</a></p>
       </div>
-      <div id="emptyState">
-        <i class="fa-solid fa-face-sad-tear"></i>
-        <p>No novels found for "<span id="emptyQuery"></span>"</p>
-        <p style="font-size:13px; margin-top:6px;">Try a different keyword or browse by letter above.</p>
-      </div>
-      <div id="novelList"></div>
     </div>
   </div>
-</div>
 
-<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">
-  <i class="fa-solid fa-arrow-up"></i>
-</button>
+  <hr>
 
-<footer>
-  © 2022 AnimeStuff
-</footer>
+  <!-- ══ HEADER LOGO ══ -->
+  <header>
+    <a href="https://animestuff.me">
+      <img class="header-icon" src="img/V3_7.jpg" alt="AnimeStuff Logo">
+    </a>
+  </header>
 
-<script>
-  // ──────────────────────────────────────────────
-  //  Load novels data
-  //  novels.json must be in the same directory as this file
-  // ──────────────────────────────────────────────
-  let novels = [];
-  let activeAlpha = null;
+  <hr>
 
-  async function loadNovels() {
-    try {
-      const res = await fetch('novels.json');
-      novels = await res.json();
-      document.getElementById('totalCount').textContent = novels.length;
-    } catch (e) {
-      console.error('Failed to load novels.json', e);
-    }
-  }
+  <!-- ══ SEARCH + FILTER + RESULTS ══ -->
+  <div class="filter-section">
+    <div class="filter-box">
 
-  // ──────────────────────────────────────────────
-  //  Alphabet filter buttons
-  // ──────────────────────────────────────────────
-  function buildAlphaFilter() {
-    const container = document.getElementById('alphaFilter');
-    const letters = ['#', ...Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ')];
-    letters.forEach(letter => {
-      const btn = document.createElement('button');
-      btn.className = 'alpha-btn';
-      btn.textContent = letter;
-      btn.onclick = () => toggleAlpha(letter, btn);
-      container.appendChild(btn);
+      <!-- Search bar -->
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <span class="search-icon-inner">&#128269;</span>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search light novels..."
+            autocomplete="off"
+          >
+        </div>
+        <button class="go-btn" onclick="doSearch()">Go</button>
+      </div>
+
+      <!-- Genre filter toggle -->
+      <div class="genre-toggle-row">
+        <span class="genre-label">Filter by Genre</span>
+        <button class="genre-toggle-btn open" id="genreToggleBtn" onclick="toggleGenrePanel()">
+          &#9776; Hide Genres <i class="toggle-arrow">&#9660;</i>
+        </button>
+      </div>
+
+      <!-- Collapsible genre panel -->
+      <div class="genre-panel open" id="genrePanel">
+        <div class="genre-chips" id="genreChips"></div>
+        <div class="filter-footer">
+          <span id="selectedInfo"></span>
+          <button class="clear-btn" onclick="clearAllFilters()">Clear all</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsSection">
+      <p id="resultsHeader"></p>
+      <div class="novel-grid" id="novelGrid"></div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>Copyright 2022</footer>
+
+  <!-- ══ KO-FI ══ -->
+  <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
+  <script>
+    kofiWidgetOverlay.draw('animestuff85370', {
+      'type': 'floating-chat',
+      'floating-chat.donateButton.text': 'Support me',
+      'floating-chat.donateButton.background-color': '#00b9fe',
+      'floating-chat.donateButton.text-color': '#fff'
     });
-  }
+  </script>
 
-  function toggleAlpha(letter, btn) {
-    const allBtns = document.querySelectorAll('.alpha-btn');
-    if (activeAlpha === letter) {
-      activeAlpha = null;
-      btn.classList.remove('active');
-    } else {
-      allBtns.forEach(b => b.classList.remove('active'));
-      activeAlpha = letter;
-      btn.classList.add('active');
+  <!-- ══ SIDENAV SCRIPT ══ -->
+  <script>
+    function openNav() {
+      document.getElementById("mySidenav").style.width = "250px";
+      document.getElementById("main").style.marginLeft = "250px";
+      document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
     }
-    renderResults(document.getElementById('searchInput').value.trim());
-  }
+    function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+      document.getElementById("main").style.marginLeft = "0";
+      document.body.style.backgroundColor = "white";
+    }
+  </script>
 
-  // ──────────────────────────────────────────────
-  //  Search & render
-  // ──────────────────────────────────────────────
-  function escapeRegex(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  }
+  <!-- ══ SEARCH + FILTER LOGIC ══ -->
+  <script>
+    let novels = [];
+    let selectedGenres = new Set();
 
-  function highlight(text, query) {
-    if (!query) return escapeHtml(text);
-    const escaped = escapeRegex(query);
-    const regex = new RegExp(`(${escaped})`, 'gi');
-    return escapeHtml(text).replace(regex, '<mark>$1</mark>');
-  }
+    const ALL_GENRES = [
+      "Action","Adult","Adventure","Age Gap","Antihero Protagonist","Apocalypse",
+      "Comedy","Dark Fantasy","Dragon","Drama","Ecchi","Fantasy","Gender Bender",
+      "Harem","Historical","Horror","Isekai","Josei","Magic","Martial Arts",
+      "Mature","Mecha","Mystery","Psychological","R-18","Romance","School Life",
+      "Sci-Fi","Seinen","Shoujo","Shoujo Ai","Shounen","Shounen Ai","Slice of Life",
+      "Smut","Sports","Supernatural","Tragedy","Yuri"
+    ];
 
-  function escapeHtml(str) {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
+    buildChips();
 
-  function renderResults(query) {
-    const list = document.getElementById('novelList');
-    const emptyState = document.getElementById('emptyState');
-    const initialState = document.getElementById('initialState');
-    const statsBar = document.getElementById('statsBar');
-    const clearBtn = document.getElementById('clearBtn');
+    fetch('novels.json')
+      .then(r => r.json())
+      .then(data => { novels = data; })
+      .catch(() => console.warn('novels.json not found — place it in the same folder as this file'));
 
-    clearBtn.style.display = query ? 'block' : 'none';
+    function toggleGenrePanel() {
+      const panel = document.getElementById('genrePanel');
+      const btn = document.getElementById('genreToggleBtn');
+      const isOpen = panel.classList.toggle('open');
+      btn.classList.toggle('open', isOpen);
+      btn.innerHTML = isOpen
+        ? '&#9776; Hide Genres <i class="toggle-arrow">&#9660;</i>'
+        : '&#9776; Show Genres <i class="toggle-arrow">&#9660;</i>';
+    }
 
-    // Filter by alpha
-    let filtered = novels;
-    if (activeAlpha) {
-      filtered = filtered.filter(n => {
-        const first = n.title.trim()[0]?.toUpperCase() || '';
-        if (activeAlpha === '#') return !'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.includes(first);
-        return first === activeAlpha;
+    function buildChips() {
+      const container = document.getElementById('genreChips');
+      ALL_GENRES.forEach(genre => {
+        const btn = document.createElement('button');
+        btn.className = 'genre-chip';
+        btn.textContent = genre;
+        btn.dataset.genre = genre;
+        btn.onclick = () => toggleGenre(genre, btn);
+        container.appendChild(btn);
       });
     }
 
-    // Filter by search query
-    if (query) {
-      const lower = query.toLowerCase();
-      filtered = filtered.filter(n => n.title.toLowerCase().includes(lower));
+    function toggleGenre(genre, btn) {
+      if (selectedGenres.has(genre)) {
+        selectedGenres.delete(genre);
+        btn.classList.remove('selected');
+      } else {
+        selectedGenres.add(genre);
+        btn.classList.add('selected');
+      }
+      const info = document.getElementById('selectedInfo');
+      info.textContent = selectedGenres.size > 0
+        ? `${selectedGenres.size} genre${selectedGenres.size > 1 ? 's' : ''} selected` : '';
     }
 
-    list.innerHTML = '';
-
-    // No input, no alpha filter = show initial prompt
-    if (!query && !activeAlpha) {
-      initialState.style.display = 'block';
-      emptyState.style.display = 'none';
-      statsBar.textContent = '';
-      return;
+    function clearAllFilters() {
+      selectedGenres.clear();
+      document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('selected'));
+      document.getElementById('selectedInfo').textContent = '';
     }
 
-    initialState.style.display = 'none';
-
-    if (filtered.length === 0) {
-      emptyState.style.display = 'block';
-      document.getElementById('emptyQuery').textContent = query || ('Letter: ' + activeAlpha);
-      statsBar.textContent = '';
-      return;
+    function escHtml(s) {
+      return String(s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    emptyState.style.display = 'none';
-    statsBar.textContent = `Showing ${filtered.length} novel${filtered.length !== 1 ? 's' : ''}`;
+    function highlight(text, query) {
+      if (!query) return escHtml(text);
+      const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return escHtml(text).replace(new RegExp(`(${esc})`, 'gi'), '<mark>$1</mark>');
+    }
 
-    const fragment = document.createDocumentFragment();
-    filtered.forEach(n => {
-      const card = document.createElement('a');
-      card.className = 'novel-card';
-      card.href = n.url;
-      card.target = '_blank';
-      card.rel = 'noopener noreferrer';
-      card.innerHTML = `
-        <span class="novel-title">${highlight(n.title, query)}</span>
-        <span class="go-btn">Read &rarr;</span>
-      `;
-      fragment.appendChild(card);
+    function doSearch() {
+      const q = document.getElementById('searchInput').value.trim();
+      let results = novels;
+
+      if (selectedGenres.size > 0) {
+        results = results.filter(n =>
+          [...selectedGenres].every(g => n.genres && n.genres.includes(g))
+        );
+      }
+      if (q) {
+        const low = q.toLowerCase();
+        results = results.filter(n => n.title.toLowerCase().includes(low));
+      }
+
+      const sec = document.getElementById('resultsSection');
+      const header = document.getElementById('resultsHeader');
+      const grid = document.getElementById('novelGrid');
+      sec.style.display = 'block';
+
+      const genreNote = selectedGenres.size > 0
+        ? ` in <strong>${escHtml([...selectedGenres].join(' + '))}</strong>` : '';
+      header.innerHTML =
+        `<strong>${results.length}</strong> novel${results.length !== 1 ? 's' : ''} found` +
+        (q ? ` matching "<strong>${escHtml(q)}</strong>"` : '') + genreNote;
+
+      if (results.length === 0) {
+        grid.innerHTML = '<div class="no-results">No novels matched. Try different filters.</div>';
+        return;
+      }
+
+      grid.innerHTML = results.map(n => {
+        const tags = (n.genres || []).slice(0, 4).map(g =>
+          `<span class="card-genre${selectedGenres.has(g) ? ' matched' : ''}">${escHtml(g)}</span>`
+        ).join('');
+        return `<div class="novel-card">
+          <a href="${escHtml(n.url)}">${highlight(n.title, q)}</a>
+          <div class="card-genres">${tags}</div>
+        </div>`;
+      }).join('');
+    }
+
+    document.getElementById('searchInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSearch();
     });
-    list.appendChild(fragment);
-  }
+  </script>
 
-  function clearSearch() {
-    document.getElementById('searchInput').value = '';
-    renderResults('');
-    document.getElementById('searchInput').focus();
-  }
-
-  // Debounce search
-  let debounceTimer;
-  document.getElementById('searchInput').addEventListener('input', function () {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => renderResults(this.value.trim()), 120);
-  });
-
-  // Scroll-to-top button
-  window.addEventListener('scroll', () => {
-    document.getElementById('scrollTop').style.display =
-      window.scrollY > 300 ? 'block' : 'none';
-  });
-
-  // Sidebar
-  function openNav() {
-    document.getElementById('mySidenav').style.width = '250px';
-    document.body.style.backgroundColor = 'rgba(0,0,0,0.4)';
-  }
-
-  function closeNav() {
-    document.getElementById('mySidenav').style.width = '0';
-    document.body.style.backgroundColor = 'white';
-  }
-
-  // Init
-  (async () => {
-    buildAlphaFilter();
-    await loadNovels();
-  })();
-</script>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
