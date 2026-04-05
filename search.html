@@ -457,6 +457,7 @@
       btn.innerHTML = isOpen
         ? '&#9776; Hide Genres <i class="toggle-arrow">&#9660;</i>'
         : '&#9776; Show Genres <i class="toggle-arrow">&#9660;</i>';
+      if (!isOpen) clearAllFilters();
     }
 
     function buildChips() {
