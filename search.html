@@ -229,31 +229,63 @@
     #resultsHeader { font-size: 14px; color: #666; margin-bottom: 12px; }
     .novel-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
       gap: 10px;
     }
     .novel-card {
       background: #fff;
       border: 1px solid #e0e0e0;
-      border-radius: 12px;
-      padding: 14px;
+      border-radius: 10px;
+      overflow: hidden;
       box-shadow: 1px 1px 4px rgba(0,0,0,0.05);
       transition: border-color .15s;
+      display: flex;
+      flex-direction: column;
     }
     .novel-card:hover { border-color: #b00; }
-    .novel-card a {
+    .novel-cover-link {
       display: block;
-      font-size: 14px;
+      width: 100%;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+    .novel-cover {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      background: #f0f0f0;
+    }
+    .novel-cover-placeholder {
+      width: 100%;
+      height: 180px;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #ccc;
+    }
+    .novel-card-body { padding: 8px; flex: 1; display: flex; flex-direction: column; gap: 5px; }
+    .novel-card-title {
+      font-size: 12px;
       font-weight: bold;
       color: #222;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
       text-decoration: none;
-      margin-bottom: 8px;
-      line-height: 1.4;
+    }
+    .novel-card-title:hover { color: #b00; }
+    .novel-card a {
       padding: 0;
       background: none;
+      text-decoration: none;
     }
-    .novel-card a:hover { color: #b00; background: none; }
-    .card-genres { display: flex; flex-wrap: wrap; gap: 4px; }
+    .novel-card a:hover { background: none; }
+    .card-genres { display: flex; flex-wrap: wrap; gap: 3px; }
     .card-genre {
       background: #eee;
       color: #666;
@@ -537,9 +569,15 @@
         const tags = (n.genres || []).slice(0, 4).map(g =>
           `<span class="card-genre${selectedGenres.has(g) ? ' matched' : ''}">${escHtml(g)}</span>`
         ).join('');
+        const coverImg = n.cover
+          ? `<img class="novel-cover" src="${escHtml(n.cover)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\'novel-cover-placeholder\'>📖</div>'">`
+          : `<div class="novel-cover-placeholder">📖</div>`;
         return `<div class="novel-card">
-          <a href="${escHtml(n.url)}">${highlight(n.title, q)}</a>
-          <div class="card-genres">${tags}</div>
+          <a class="novel-cover-link" href="${escHtml(n.url)}">${coverImg}</a>
+          <div class="novel-card-body">
+            <a class="novel-card-title" href="${escHtml(n.url)}">${highlight(n.title, q)}</a>
+            <div class="card-genres">${tags}</div>
+          </div>
         </div>`;
       }).join('');
     }
