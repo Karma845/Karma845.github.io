@@ -259,12 +259,8 @@
     .novel-cover-placeholder {
       width: 100%;
       height: 180px;
-      background: #f0f0f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      color: #ccc;
+      display: block;
+      overflow: hidden;
     }
     .novel-card-body { padding: 8px; flex: 1; display: flex; flex-direction: column; gap: 5px; }
     .novel-card-title {
@@ -535,6 +531,31 @@
       return escHtml(text).replace(new RegExp(`(${esc})`, 'gi'), '<mark>$1</mark>');
     }
 
+    function makePlaceholder(title) {
+      const initials = title.replace(/[^a-zA-Z0-9぀-鿿 ]/g, '').trim().slice(0, 2).toUpperCase() || '??';
+      const colors = [
+        ['#c0392b','#e74c3c'],['#8e44ad','#9b59b6'],['#2471a3','#2e86c1'],
+        ['#1e8449','#27ae60'],['#d35400','#e67e22'],['#616a6b','#808b96']
+      ];
+      const idx = (title.charCodeAt(0) + (title.charCodeAt(1) || 0)) % colors.length;
+      const [dark, light] = colors[idx];
+      const div = document.createElement('div');
+      div.className = 'novel-cover-placeholder';
+      div.style.cssText = `background: linear-gradient(145deg, ${dark}, ${light});`;
+      div.innerHTML = `
+        <svg width="100%" height="100%" viewBox="0 0 130 180" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="110" height="160" rx="4" fill="rgba(255,255,255,0.12)"/>
+          <rect x="14" y="10" width="6" height="160" rx="2" fill="rgba(0,0,0,0.2)"/>
+          <text x="65" y="90" text-anchor="middle" dominant-baseline="middle"
+            font-family="Lato,sans-serif" font-size="32" font-weight="bold"
+            fill="rgba(255,255,255,0.9)">${initials}</text>
+          <text x="65" y="130" text-anchor="middle" dominant-baseline="middle"
+            font-family="Lato,sans-serif" font-size="9"
+            fill="rgba(255,255,255,0.6)">NO COVER</text>
+        </svg>`;
+      return div;
+    }
+
     function doSearch() {
       const q = document.getElementById('searchInput').value.trim();
       let results = novels;
@@ -565,21 +586,58 @@
         return;
       }
 
-      grid.innerHTML = results.map(n => {
+      // Build cards as DOM nodes so onerror fires reliably on mobile
+      grid.innerHTML = '';
+      results.forEach(n => {
         const tags = (n.genres || []).slice(0, 4).map(g =>
           `<span class="card-genre${selectedGenres.has(g) ? ' matched' : ''}">${escHtml(g)}</span>`
         ).join('');
-        const coverImg = n.cover
-          ? `<img class="novel-cover" src="${escHtml(n.cover)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\'novel-cover-placeholder\'>📖</div>'">`
-          : `<div class="novel-cover-placeholder">📖</div>`;
-        return `<div class="novel-card">
-          <a class="novel-cover-link" href="${escHtml(n.url)}">${coverImg}</a>
-          <div class="novel-card-body">
-            <a class="novel-card-title" href="${escHtml(n.url)}">${highlight(n.title, q)}</a>
-            <div class="card-genres">${tags}</div>
-          </div>
-        </div>`;
-      }).join('');
+
+        // Build cover element
+        const rawCover = n.cover || '';
+        const proxied = rawCover.includes('novelupdates.com')
+          ? 'https://images.weserv.nl/?url=' + encodeURIComponent(rawCover) + '&w=200&output=webp'
+          : rawCover;
+
+        let coverEl;
+        if (proxied) {
+          coverEl = document.createElement('img');
+          coverEl.className = 'novel-cover';
+          coverEl.loading = 'lazy';
+          coverEl.alt = '';
+          coverEl.onerror = function() { this.replaceWith(makePlaceholder(n.title)); };
+          coverEl.src = proxied;
+        } else {
+          coverEl = makePlaceholder(n.title);
+        }
+
+        // Build card
+        const card = document.createElement('div');
+        card.className = 'novel-card';
+
+        const coverLink = document.createElement('a');
+        coverLink.className = 'novel-cover-link';
+        coverLink.href = n.url;
+        coverLink.appendChild(coverEl);
+
+        const body = document.createElement('div');
+        body.className = 'novel-card-body';
+
+        const titleLink = document.createElement('a');
+        titleLink.className = 'novel-card-title';
+        titleLink.href = n.url;
+        titleLink.innerHTML = highlight(n.title, q);
+
+        const genreDiv = document.createElement('div');
+        genreDiv.className = 'card-genres';
+        genreDiv.innerHTML = tags;
+
+        body.appendChild(titleLink);
+        body.appendChild(genreDiv);
+        card.appendChild(coverLink);
+        card.appendChild(body);
+        grid.appendChild(card);
+      });
     }
 
     document.getElementById('searchInput').addEventListener('keydown', e => {
