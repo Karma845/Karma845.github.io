@@ -226,7 +226,48 @@
 
     /* ── Results ── */
     #resultsSection { display: none; margin-top: 6px; }
-    #resultsHeader { font-size: 14px; color: #666; margin-bottom: 12px; }
+
+    /* ── Results header row (count + sort) ── */
+    .results-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    #resultsHeader { font-size: 14px; color: #666; margin: 0; }
+
+    /* ── Sort toggle ── */
+    .sort-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1.5px solid #ccc;
+      border-radius: 20px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sort-btn {
+      background: #fff;
+      border: none;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: "Lato", sans-serif;
+      color: #666;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      line-height: 1.4;
+      letter-spacing: .3px;
+    }
+    .sort-btn:first-child { border-right: 1.5px solid #ccc; }
+    .sort-btn:hover { background: #fef0f0; color: #b00; }
+    .sort-btn.active {
+      background: #b00;
+      color: #fff;
+    }
+
     .novel-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -425,7 +466,14 @@
 
     <!-- Results -->
     <div id="resultsSection">
-      <p id="resultsHeader"></p>
+      <!-- Header row: count on left, sort on right -->
+      <div class="results-header-row">
+        <p id="resultsHeader"></p>
+        <div class="sort-toggle">
+          <button class="sort-btn active" id="sortAZ" onclick="setSort('asc')">A → Z</button>
+          <button class="sort-btn" id="sortZA" onclick="setSort('desc')">Z → A</button>
+        </div>
+      </div>
       <div class="novel-grid" id="novelGrid"></div>
     </div>
   </div>
@@ -460,10 +508,12 @@
     }
   </script>
 
-  <!-- ══ SEARCH + FILTER LOGIC ══ -->
+  <!-- ══ SEARCH + FILTER + SORT LOGIC ══ -->
   <script>
     let novels = [];
     let selectedGenres = new Set();
+    let currentSort = 'asc'; // 'asc' = A→Z, 'desc' = Z→A
+    let lastResults  = [];   // cache so sort re-renders without re-filtering
 
     const ALL_GENRES = [
       "Action","Adult","Adventure","Age Gap","Antihero Protagonist","Apocalypse",
@@ -481,6 +531,23 @@
       .then(data => { novels = data; })
       .catch(() => console.warn('novels.json not found — place it in the same folder as this file'));
 
+    /* ── Sort ── */
+    function setSort(dir) {
+      currentSort = dir;
+      document.getElementById('sortAZ').classList.toggle('active', dir === 'asc');
+      document.getElementById('sortZA').classList.toggle('active', dir === 'desc');
+      if (lastResults.length > 0) renderGrid(lastResults);
+    }
+
+    function sortedResults(arr) {
+      return [...arr].sort((a, b) =>
+        currentSort === 'asc'
+          ? a.title.localeCompare(b.title)
+          : b.title.localeCompare(a.title)
+      );
+    }
+
+    /* ── Genre panel ── */
     function toggleGenrePanel() {
       const panel = document.getElementById('genrePanel');
       const btn = document.getElementById('genreToggleBtn');
@@ -523,6 +590,7 @@
       document.getElementById('selectedInfo').textContent = '';
     }
 
+    /* ── Helpers ── */
     function escHtml(s) {
       return String(s)
         .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -535,6 +603,7 @@
       return escHtml(text).replace(new RegExp(`(${esc})`, 'gi'), '<mark>$1</mark>');
     }
 
+    /* ── Search ── */
     function doSearch() {
       const q = document.getElementById('searchInput').value.trim();
       let results = novels;
@@ -549,9 +618,10 @@
         results = results.filter(n => n.title.toLowerCase().includes(low));
       }
 
+      lastResults = results; // cache for sort re-renders
+
       const sec = document.getElementById('resultsSection');
       const header = document.getElementById('resultsHeader');
-      const grid = document.getElementById('novelGrid');
       sec.style.display = 'block';
 
       const genreNote = selectedGenres.size > 0
@@ -560,17 +630,26 @@
         `<strong>${results.length}</strong> novel${results.length !== 1 ? 's' : ''} found` +
         (q ? ` matching "<strong>${escHtml(q)}</strong>"` : '') + genreNote;
 
-      if (results.length === 0) {
+      renderGrid(results);
+    }
+
+    /* ── Render (shared by search + sort) ── */
+    function renderGrid(results) {
+      const q    = document.getElementById('searchInput').value.trim();
+      const grid = document.getElementById('novelGrid');
+      const sorted = sortedResults(results);
+
+      if (sorted.length === 0) {
         grid.innerHTML = '<div class="no-results">No novels matched. Try different filters.</div>';
         return;
       }
 
-      grid.innerHTML = results.map(n => {
+      grid.innerHTML = sorted.map(n => {
         const tags = (n.genres || []).slice(0, 4).map(g =>
           `<span class="card-genre${selectedGenres.has(g) ? ' matched' : ''}">${escHtml(g)}</span>`
         ).join('');
         const coverImg = n.cover
-          ? `<img class="novel-cover" src="${escHtml(n.cover)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\'novel-cover-placeholder\'>📖</div>'">`
+          ? `<img class="novel-cover" src="${escHtml(n.cover)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'novel-cover-placeholder\\'>📖</div>'">`
           : `<div class="novel-cover-placeholder">📖</div>`;
         return `<div class="novel-card">
           <a class="novel-cover-link" href="${escHtml(n.url)}">${coverImg}</a>
