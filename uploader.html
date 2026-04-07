@@ -201,28 +201,6 @@
   }
   .edit-btn:hover { border-color: var(--red); color: var(--red); }
 
-  /* ── Cover paste zone ── */
-  #coverPasteZone {
-    border: 1.5px dashed var(--border);
-    border-radius: 10px;
-    padding: 10px 13px;
-    font-size: 13px;
-    color: var(--muted);
-    background: #fafafa;
-    cursor: pointer;
-    text-align: center;
-    transition: border-color .2s, background .2s;
-    margin-bottom: 6px;
-    min-height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-  #coverPasteZone:focus { outline: none; border-color: var(--red); background: #fff; }
-  #coverPasteZone.has-img { border-style: solid; border-color: var(--success); color: var(--success); background: var(--success-bg); }
-  #coverPasteZone.paste-flash { border-color: var(--red); background: var(--red-light); }
-
   #filePathWrap { margin-top: 12px; }
 
   .btn-upload {
@@ -431,17 +409,12 @@
     </div>
 
     <div class="field">
-      <label>Cover Image — Paste image or enter URL</label>
-      <!-- Paste zone -->
-      <div id="coverPasteZone" tabindex="0"
-           title="Click here then paste (Ctrl+V) a copied image to auto-upload its URL">
-        📋 Click here then paste an image (Ctrl+V / ⌘V)
-      </div>
+      <label>Cover URL (auto-extracted from HTML)</label>
       <div class="field-inline">
-        <input type="text" id="editCover" placeholder="https://... (auto-filled on paste)" oninput="syncCurrentFile('cover'); refreshCoverPreview()">
+        <input type="text" id="editCover" placeholder="Auto-filled from img src in HTML" oninput="syncCurrentFile('cover'); refreshCoverPreview()">
         <button class="edit-btn" onclick="refreshCoverPreview()">Preview</button>
       </div>
-      <div class="hint">Paste a copied image → it uploads to GitHub and the URL fills automatically into this novel's entry in novels.json.</div>
+      <div class="hint">Extracted automatically from the first cover image found in the HTML. Edit if needed — this URL goes directly into novels.json.</div>
     </div>
 
     <div id="filePathWrap" class="field">
@@ -657,7 +630,6 @@ function showPreview(n, idx) {
   document.getElementById('uploadBtn').disabled = false;
 
   checkIfExists(n.title);
-  setupPasteZone();
 }
 
 function refreshCoverPreview() {
@@ -672,115 +644,6 @@ function refreshCoverPreviewWithUrl(url) {
   } else {
     coverBox.innerHTML = `<div class="preview-cover-placeholder">📖</div>`;
   }
-}
-
-// ── Paste Image → upload to GitHub → fill cover URL ──
-let pasteZoneReady = false;
-function setupPasteZone() {
-  if (pasteZoneReady) return;
-  pasteZoneReady = true;
-  const zone = document.getElementById('coverPasteZone');
-
-  zone.addEventListener('paste', async (e) => {
-    e.preventDefault();
-    const items = e.clipboardData?.items || [];
-    let imageFile = null;
-    for (const item of items) {
-      if (item.type.startsWith('image/')) {
-        imageFile = item.getAsFile();
-        break;
-      }
-    }
-    if (!imageFile) return;
-
-    zone.textContent = '⬆️ Uploading image to GitHub…';
-    zone.classList.remove('has-img');
-
-    try {
-      const imgUrl = await uploadCoverImage(imageFile);
-      document.getElementById('editCover').value = imgUrl;
-      syncCurrentFile('cover');
-      refreshCoverPreviewWithUrl(imgUrl);
-      zone.textContent = '✅ Image uploaded! URL filled in cover field.';
-      zone.classList.add('has-img');
-    } catch(err) {
-      zone.textContent = '❌ Image upload failed: ' + err.message;
-      zone.classList.remove('has-img');
-    }
-  });
-
-  // Also listen globally for paste when not focused on another input
-  document.addEventListener('paste', async (e) => {
-    if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
-    const items = e.clipboardData?.items || [];
-    let imageFile = null;
-    for (const item of items) {
-      if (item.type.startsWith('image/')) {
-        imageFile = item.getAsFile();
-        break;
-      }
-    }
-    if (!imageFile) return;
-    zone.classList.add('paste-flash');
-    setTimeout(() => zone.classList.remove('paste-flash'), 400);
-    zone.textContent = '⬆️ Uploading pasted image to GitHub…';
-    zone.classList.remove('has-img');
-    try {
-      const imgUrl = await uploadCoverImage(imageFile);
-      document.getElementById('editCover').value = imgUrl;
-      syncCurrentFile('cover');
-      refreshCoverPreviewWithUrl(imgUrl);
-      zone.textContent = '✅ Image uploaded! URL filled automatically.';
-      zone.classList.add('has-img');
-    } catch(err) {
-      zone.textContent = '❌ ' + err.message;
-    }
-  }, { passive: true });
-}
-
-async function uploadCoverImage(imageFile) {
-  const token = document.getElementById('ghToken').value.trim();
-  if (!token) throw new Error('Enter your GitHub token first.');
-
-  const ext = imageFile.type.split('/')[1] || 'png';
-  const fname = 'cover_' + Date.now() + '.' + ext;
-  const imgFolder = 'docs/assets/covers';
-  const imgPath = imgFolder + '/' + fname;
-
-  // Read as base64
-  const base64 = await new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = rej;
-    r.readAsDataURL(imageFile);
-  });
-
-  const repo = document.getElementById('ghRepo').value.trim();
-  const br   = document.getElementById('ghBranch').value.trim() || 'main';
-
-  const apiUrl = `https://api.github.com/repos/${repo}/contents/${imgPath}`;
-  const resp = await fetch(apiUrl, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'token ' + token,
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      message: 'Add cover image: ' + fname,
-      content: base64,
-      branch: br
-    })
-  });
-
-  if (!resp.ok) {
-    const d = await resp.json();
-    throw new Error(d.message || 'Image upload failed');
-  }
-
-  // Return the public GitHub Pages URL
-  const rawUrl = `https://raw.githubusercontent.com/${repo}/${br}/${imgPath}`;
-  return rawUrl;
 }
 
 // ── GitHub API helpers ──
