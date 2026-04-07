@@ -33,7 +33,6 @@
     padding: 0 0 60px;
   }
 
-  /* ── Header ── */
   .top-bar {
     background: var(--red);
     color: white;
@@ -46,10 +45,8 @@
   .top-bar span { font-size: 13px; opacity: .75; }
   .top-bar-icon { font-size: 22px; }
 
-  /* ── Layout ── */
   .container { max-width: 680px; margin: 0 auto; padding: 0 14px; }
 
-  /* ── Cards ── */
   .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -69,7 +66,6 @@
     gap: 7px;
   }
 
-  /* ── Config fields ── */
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 5px; color: #444; }
   .field input, .field select {
@@ -87,7 +83,6 @@
   .field input:focus, .field select:focus { border-color: var(--red); background: #fff; }
   .field .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-  /* ── Toggle password ── */
   .pw-wrap { position: relative; }
   .pw-wrap input { padding-right: 44px; }
   .pw-eye {
@@ -111,6 +106,41 @@
   .dropzone .dz-label { font-size: 15px; font-weight: 700; color: #333; margin-bottom: 4px; }
   .dropzone .dz-sub { font-size: 12px; color: var(--muted); }
   .dropzone input[type=file] { display: none; }
+
+  /* ── Multi-file queue ── */
+  #fileQueue { margin-top: 14px; display: none; }
+  .file-queue-title {
+    font-size: 12px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .5px;
+    margin-bottom: 8px;
+  }
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .file-item:hover { border-color: #bbb; }
+  .file-item.active { border-color: var(--red); background: var(--red-light); }
+  .file-item-icon { font-size: 18px; flex-shrink: 0; }
+  .file-item-name { font-size: 13px; font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-item-status { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+  .file-item-remove {
+    background: none; border: none; cursor: pointer;
+    font-size: 14px; color: #bbb; padding: 2px 4px;
+    border-radius: 4px; transition: color .15s;
+    flex-shrink: 0;
+  }
+  .file-item-remove:hover { color: var(--red); }
+  .file-status-ok { color: var(--success); font-weight: 700; }
+  .file-status-err { color: var(--red); font-weight: 700; }
+  .file-status-run { color: #f0a500; font-weight: 700; }
 
   /* ── Preview card ── */
   #preview { display: none; }
@@ -171,10 +201,30 @@
   }
   .edit-btn:hover { border-color: var(--red); color: var(--red); }
 
-  /* ── File path input ── */
+  /* ── Cover paste zone ── */
+  #coverPasteZone {
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    padding: 10px 13px;
+    font-size: 13px;
+    color: var(--muted);
+    background: #fafafa;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color .2s, background .2s;
+    margin-bottom: 6px;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  #coverPasteZone:focus { outline: none; border-color: var(--red); background: #fff; }
+  #coverPasteZone.has-img { border-style: solid; border-color: var(--success); color: var(--success); background: var(--success-bg); }
+  #coverPasteZone.paste-flash { border-color: var(--red); background: var(--red-light); }
+
   #filePathWrap { margin-top: 12px; }
 
-  /* ── Buttons ── */
   .btn-upload {
     width: 100%;
     padding: 14px;
@@ -194,7 +244,26 @@
   .btn-upload:active { transform: scale(0.98); }
   .btn-upload:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
-  /* ── Progress / log ── */
+  /* ── Batch upload button ── */
+  #batchUploadBtn {
+    display: none;
+    width: 100%;
+    padding: 14px;
+    background: #222;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 900;
+    font-family: "Lato", sans-serif;
+    cursor: pointer;
+    letter-spacing: .3px;
+    transition: background .2s, transform .1s;
+    margin-top: 8px;
+  }
+  #batchUploadBtn:hover { background: #000; }
+  #batchUploadBtn:disabled { background: #ccc; cursor: not-allowed; }
+
   #logBox { display: none; margin-top: 16px; }
   .log-line {
     display: flex;
@@ -219,7 +288,6 @@
 
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  /* ── Alert ── */
   .alert {
     border-radius: 10px;
     padding: 12px 14px;
@@ -232,7 +300,6 @@
   .alert-error   { background: var(--error-bg);   color: var(--error);   border: 1px solid #f5c0c0; }
   .alert-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid #f5dfa0; }
 
-  /* ── Already exists badge ── */
   #existsBadge {
     display: none;
     background: var(--warning-bg);
@@ -246,6 +313,22 @@
   }
 
   hr.divider { border: none; border-top: 1px solid var(--border); margin: 6px 0 14px; }
+
+  /* nav tabs for multi-file */
+  .file-nav {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .file-nav-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: #fafafa;
+    font-size: 12px; font-weight: 700; font-family: "Lato", sans-serif;
+    cursor: pointer; transition: all .15s; color: #555;
+    max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .file-nav-btn.active { border-color: var(--red); background: var(--red-light); color: var(--red); }
+  .file-nav-btn.done { border-color: var(--success); color: var(--success); background: var(--success-bg); }
 </style>
 </head>
 <body>
@@ -260,7 +343,7 @@
 
 <div class="container">
 
-  <!-- ── GitHub Config ── -->
+  <!-- GitHub Config -->
   <div class="card">
     <div class="card-title">⚙️ GitHub Config</div>
 
@@ -275,7 +358,7 @@
 
     <div class="field">
       <label>Repository (owner/repo)</label>
-      <input type="text" id="ghRepo" placeholder="animestuff85370/animestuff.me" value="animestuff85370/animestuff.me">
+      <input type="text" id="ghRepo" placeholder="Karma845/Karma845.github.io" value="Karma845/Karma845.github.io">
     </div>
 
     <div class="field">
@@ -285,12 +368,12 @@
 
     <div class="field">
       <label>novels.json path in repo</label>
-      <input type="text" id="jsonPath" placeholder="nav/novels.json" value="nav/novels.json">
+      <input type="text" id="jsonPath" placeholder="novels.json" value="novels.json">
     </div>
 
     <div class="field">
       <label>HTML files folder in repo</label>
-      <input type="text" id="htmlFolder" placeholder="nav/html" value="nav/html">
+      <input type="text" id="htmlFolder" placeholder="docs/assets/html/" value="docs/assets/html/">
     </div>
 
     <button class="btn-upload" style="margin-top:4px;font-size:14px;padding:10px" onclick="testConnection()">🔌 Test Connection</button>
@@ -298,24 +381,34 @@
     <div class="alert alert-error" id="connErr"></div>
   </div>
 
-  <!-- ── File Upload ── -->
+  <!-- File Upload -->
   <div class="card">
-    <div class="card-title">📄 Novel HTML File</div>
+    <div class="card-title">📄 Novel HTML Files</div>
 
     <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()"
          ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
       <span class="dz-icon">🗂</span>
-      <div class="dz-label">Tap to pick file or drag & drop</div>
-      <div class="dz-sub">Accepts .html files only</div>
-      <input type="file" id="fileInput" accept=".html" onchange="handleFile(this.files[0])">
+      <div class="dz-label">Tap to pick files or drag & drop</div>
+      <div class="dz-sub">Accepts multiple .html files</div>
+      <input type="file" id="fileInput" accept=".html" multiple onchange="handleFiles(this.files)">
     </div>
 
     <div id="existsBadge">⚠️ This novel already exists in novels.json</div>
+
+    <!-- Multi-file queue -->
+    <div id="fileQueue">
+      <div class="file-queue-title" id="fileQueueTitle">Files (0)</div>
+      <div id="fileQueueList"></div>
+    </div>
   </div>
 
-  <!-- ── Preview & Edit ── -->
+  <!-- Preview & Edit (per-file) -->
   <div class="card" id="preview">
     <div class="card-title">🔍 Parsed Data — Review Before Upload</div>
+
+    <!-- File nav tabs -->
+    <div class="file-nav" id="fileNavTabs"></div>
+
     <div class="preview-inner">
       <div id="coverPreview"></div>
       <div class="preview-info">
@@ -329,33 +422,40 @@
 
     <div class="field">
       <label>Title (editable)</label>
-      <input type="text" id="editTitle">
+      <input type="text" id="editTitle" oninput="syncCurrentFile('title')">
     </div>
 
     <div class="field">
       <label>Genres (comma separated, editable)</label>
-      <input type="text" id="editGenres">
+      <input type="text" id="editGenres" oninput="syncCurrentFile('genres')">
     </div>
 
     <div class="field">
-      <label>Cover URL (editable)</label>
-      <div class="field-inline">
-        <input type="text" id="editCover" placeholder="https://... or leave blank">
-        <button class="edit-btn" onclick="previewCover()">Preview</button>
+      <label>Cover Image — Paste image or enter URL</label>
+      <!-- Paste zone -->
+      <div id="coverPasteZone" tabindex="0"
+           title="Click here then paste (Ctrl+V) a copied image to auto-upload its URL">
+        📋 Click here then paste an image (Ctrl+V / ⌘V)
       </div>
+      <div class="field-inline">
+        <input type="text" id="editCover" placeholder="https://... (auto-filled on paste)" oninput="syncCurrentFile('cover'); refreshCoverPreview()">
+        <button class="edit-btn" onclick="refreshCoverPreview()">Preview</button>
+      </div>
+      <div class="hint">Paste a copied image → it uploads to GitHub and the URL fills automatically into this novel's entry in novels.json.</div>
     </div>
 
     <div id="filePathWrap" class="field">
       <label>File path in repo (auto-set)</label>
-      <input type="text" id="editFilePath">
+      <input type="text" id="editFilePath" oninput="syncCurrentFile('filePath')">
       <div class="hint">Where this HTML file will be saved in the repo.</div>
     </div>
   </div>
 
-  <!-- ── Upload ── -->
+  <!-- Upload -->
   <div class="card">
     <div class="card-title">🚀 Upload to GitHub</div>
-    <button class="btn-upload" id="uploadBtn" onclick="doUpload()" disabled>Upload Novel</button>
+    <button class="btn-upload" id="uploadBtn" onclick="doUploadCurrent()" disabled>Upload Selected Novel</button>
+    <button id="batchUploadBtn" onclick="doBatchUpload()">⚡ Upload All Files</button>
     <div id="logBox">
       <div id="logLines"></div>
     </div>
@@ -366,311 +466,596 @@
 </div>
 
 <script>
-  // ── State ──
-  let parsedNovel = null;
-  let fileContent = null;
-  let fileName = null;
+// ── State ──
+let fileList = []; // Array of { file, name, content, parsed, status: 'pending'|'done'|'error' }
+let currentIdx = 0;
 
-  // ── Toggle password visibility ──
-  function togglePw() {
-    const inp = document.getElementById('ghToken');
-    inp.type = inp.type === 'password' ? 'text' : 'password';
-  }
+// ── Toggle password visibility ──
+function togglePw() {
+  const inp = document.getElementById('ghToken');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
 
-  // ── Drag & drop ──
-  function handleDragOver(e) {
-    e.preventDefault();
-    document.getElementById('dropzone').classList.add('drag-over');
-  }
-  function handleDragLeave() {
-    document.getElementById('dropzone').classList.remove('drag-over');
-  }
-  function handleDrop(e) {
-    e.preventDefault();
-    document.getElementById('dropzone').classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (file && file.name.endsWith('.html')) handleFile(file);
-  }
+// ── Drag & drop ──
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.add('drag-over');
+}
+function handleDragLeave() {
+  document.getElementById('dropzone').classList.remove('drag-over');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag-over');
+  const files = [...e.dataTransfer.files].filter(f => f.name.endsWith('.html'));
+  if (files.length) handleFiles(files);
+}
 
-  // ── Parse HTML file ──
-  function handleFile(file) {
-    if (!file) return;
-    fileName = file.name;
+// ── Handle multiple files ──
+function handleFiles(files) {
+  const arr = Array.isArray(files) ? files : [...files];
+  const htmlFiles = arr.filter(f => f.name.endsWith('.html'));
+  if (!htmlFiles.length) return;
+
+  let pending = htmlFiles.length;
+  htmlFiles.forEach(file => {
     const reader = new FileReader();
     reader.onload = e => {
-      fileContent = e.target.result;
-      parsedNovel = parseNovel(fileContent, fileName);
-      showPreview(parsedNovel);
-      document.getElementById('uploadBtn').disabled = false;
+      const content = e.target.result;
+      const parsed = parseNovel(content, file.name);
+      fileList.push({ file, name: file.name, content, parsed, status: 'pending' });
+      pending--;
+      if (pending === 0) {
+        renderFileQueue();
+        selectFile(fileList.length - htmlFiles.length); // select first newly added
+      }
     };
     reader.readAsText(file);
+  });
+}
+
+function renderFileQueue() {
+  const queue = document.getElementById('fileQueue');
+  const list = document.getElementById('fileQueueList');
+  const title = document.getElementById('fileQueueTitle');
+
+  if (fileList.length === 0) {
+    queue.style.display = 'none';
+    return;
+  }
+  queue.style.display = 'block';
+  title.textContent = `Files (${fileList.length})`;
+
+  list.innerHTML = fileList.map((f, i) => {
+    let statusLabel = '⏳ Pending';
+    let statusClass = '';
+    if (f.status === 'done') { statusLabel = '✅ Done'; statusClass = 'file-status-ok'; }
+    if (f.status === 'error') { statusLabel = '❌ Error'; statusClass = 'file-status-err'; }
+    if (f.status === 'uploading') { statusLabel = '⬆️ Uploading…'; statusClass = 'file-status-run'; }
+    return `
+      <div class="file-item ${i === currentIdx ? 'active' : ''}" onclick="selectFile(${i})">
+        <span class="file-item-icon">📄</span>
+        <span class="file-item-name" title="${escHtml(f.name)}">${escHtml(f.name)}</span>
+        <span class="file-item-status ${statusClass}">${statusLabel}</span>
+        <button class="file-item-remove" onclick="removeFile(event,${i})" title="Remove">✕</button>
+      </div>`;
+  }).join('');
+
+  // Nav tabs in preview
+  renderNavTabs();
+
+  // Show/hide batch button
+  document.getElementById('batchUploadBtn').style.display = fileList.length > 1 ? 'block' : 'none';
+}
+
+function renderNavTabs() {
+  const tabs = document.getElementById('fileNavTabs');
+  if (fileList.length <= 1) { tabs.innerHTML = ''; return; }
+  tabs.innerHTML = fileList.map((f, i) => {
+    let cls = i === currentIdx ? 'active' : '';
+    if (f.status === 'done') cls = 'done';
+    const short = f.name.replace('.html','').substring(0,18);
+    return `<button class="file-nav-btn ${cls}" onclick="selectFile(${i})">${escHtml(short)}</button>`;
+  }).join('');
+}
+
+function removeFile(e, idx) {
+  e.stopPropagation();
+  fileList.splice(idx, 1);
+  if (currentIdx >= fileList.length) currentIdx = Math.max(0, fileList.length - 1);
+  if (fileList.length === 0) {
+    document.getElementById('preview').style.display = 'none';
+    document.getElementById('uploadBtn').disabled = true;
+  }
+  renderFileQueue();
+  if (fileList.length > 0) showPreview(fileList[currentIdx].parsed, currentIdx);
+}
+
+function selectFile(idx) {
+  // Save edits from current before switching
+  if (fileList.length > 0 && fileList[currentIdx]) saveEdits(currentIdx);
+  currentIdx = idx;
+  renderFileQueue();
+  if (fileList[idx]) showPreview(fileList[idx].parsed, idx);
+}
+
+function saveEdits(idx) {
+  if (!fileList[idx]) return;
+  fileList[idx].parsed.title    = document.getElementById('editTitle').value.trim();
+  fileList[idx].parsed.genres   = document.getElementById('editGenres').value.split(',').map(g=>g.trim()).filter(Boolean);
+  fileList[idx].parsed.cover    = document.getElementById('editCover').value.trim();
+  fileList[idx].parsed.filePath = document.getElementById('editFilePath').value.trim();
+}
+
+function syncCurrentFile(field) {
+  if (!fileList[currentIdx]) return;
+  const p = fileList[currentIdx].parsed;
+  if (field === 'title')    p.title    = document.getElementById('editTitle').value.trim();
+  if (field === 'genres')   p.genres   = document.getElementById('editGenres').value.split(',').map(g=>g.trim()).filter(Boolean);
+  if (field === 'cover')    p.cover    = document.getElementById('editCover').value.trim();
+  if (field === 'filePath') p.filePath = document.getElementById('editFilePath').value.trim();
+}
+
+// ── Parse HTML file ──
+function parseNovel(html, fname) {
+  const SKIP = ['slime','V3_7','elaina','icon','apple','chrome'];
+  const baseUrl = 'https://karma845.github.io/';
+  const htmlFolder = document.getElementById('htmlFolder').value.trim() || 'docs/assets/html/';
+
+  // Title from <h2>
+  const titleMatch = html.match(/<h2[^>]*>\s*(?:\(EPUB\)\s*|\(WN\)\s*|\(LN\)\s*)?([^<\n]+)/i);
+  let title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g,'').trim().replace(/\.$/, '') : fname.replace('.html','');
+
+  // Cover: all img srcs
+  const imgMatches = [...html.matchAll(/<img[^>]+src=["'\s]?([^\s"'><]+)/gi)];
+  let cover = '';
+  for (const m of imgMatches) {
+    const src = m[1];
+    if (SKIP.some(s => src.includes(s))) continue;
+    cover = src.startsWith('http') ? src : baseUrl + src;
+    break;
   }
 
-  function parseNovel(html, fname) {
-    const SKIP = ['slime', 'V3_7', 'elaina', 'icon', 'apple', 'chrome'];
-    const baseUrl = 'https://animestuff.me/nav/';
-    const htmlFolder = document.getElementById('htmlFolder').value.trim() || 'nav/html';
-
-    // Title from <h2>
-    const titleMatch = html.match(/<h2[^>]*>\s*(?:\(EPUB\)\s*|\(WN\)\s*|\(LN\)\s*)?([^<\n]+)/i);
-    let title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '').trim().replace(/\.$/, '') : fname.replace('.html', '');
-
-    // Cover: all img srcs
-    const imgMatches = [...html.matchAll(/<img[^>]+src=["'\s]?([^\s"'><]+)/gi)];
-    let cover = '';
-    for (const m of imgMatches) {
-      const src = m[1];
-      if (SKIP.some(s => src.includes(s))) continue;
-      cover = src.startsWith('http') ? src : baseUrl + src;
-      break;
-    }
-
-    // Proxy novelupdates covers
-    if (cover.includes('novelupdates.com')) {
-      cover = 'https://images.weserv.nl/?url=' + encodeURIComponent(cover) + '&w=200&output=webp';
-    }
-
-    // Genres
-    const genreMatch = html.match(/Genre:\s*<\/h3>\s*<p>([\s\S]*?)<\/p>/i);
-    let genres = [];
-    if (genreMatch) {
-      genres = genreMatch[1]
-        .replace(/<[^>]+>/g, '')
-        .split(',')
-        .map(g => g.trim().replace(/\.$/, ''))
-        .filter(Boolean);
-    }
-
-    const url = baseUrl + fname;
-    const filePath = htmlFolder.replace(/\/$/, '') + '/' + fname;
-
-    return { title, cover, genres, url, filePath };
+  // Proxy novelupdates covers
+  if (cover.includes('novelupdates.com')) {
+    cover = 'https://images.weserv.nl/?url=' + encodeURIComponent(cover) + '&w=200&output=webp';
   }
 
-  function showPreview(n) {
-    document.getElementById('preview').style.display = 'block';
-    document.getElementById('previewTitle').textContent = n.title;
-    document.getElementById('previewUrl').textContent = n.url;
-
-    // Cover preview
-    const coverBox = document.getElementById('coverPreview');
-    if (n.cover) {
-      coverBox.innerHTML = `<img class="preview-cover" src="${escHtml(n.cover)}" onerror="this.outerHTML='<div class=preview-cover-placeholder>📖</div>'">`;
-    } else {
-      coverBox.innerHTML = `<div class="preview-cover-placeholder">📖</div>`;
-    }
-
-    // Genre tags
-    const gContainer = document.getElementById('previewGenres');
-    gContainer.innerHTML = n.genres.map(g => `<span class="genre-tag">${escHtml(g)}</span>`).join('');
-
-    // Editable fields
-    document.getElementById('editTitle').value = n.title;
-    document.getElementById('editGenres').value = n.genres.join(', ');
-    document.getElementById('editCover').value = n.cover;
-    document.getElementById('editFilePath').value = n.filePath;
-
-    // Check if exists in JSON
-    checkIfExists(n.title);
+  // Genres
+  const genreMatch = html.match(/Genre:\s*<\/h3>\s*<p>([\s\S]*?)<\/p>/i);
+  let genres = [];
+  if (genreMatch) {
+    genres = genreMatch[1]
+      .replace(/<[^>]+>/g,'')
+      .split(',')
+      .map(g => g.trim().replace(/\.$/, ''))
+      .filter(Boolean);
   }
 
-  function previewCover() {
-    const url = document.getElementById('editCover').value.trim();
-    const coverBox = document.getElementById('coverPreview');
-    if (url) {
-      coverBox.innerHTML = `<img class="preview-cover" src="${escHtml(url)}" onerror="this.outerHTML='<div class=preview-cover-placeholder>📖</div>'">`;
-    } else {
-      coverBox.innerHTML = `<div class="preview-cover-placeholder">📖</div>`;
-    }
-  }
+  const htmlFolderClean = htmlFolder.replace(/\/$/, '');
+  const url = baseUrl + htmlFolderClean.replace(/^docs\//,'') + '/' + fname;
+  const filePath = htmlFolderClean + '/' + fname;
 
-  // ── GitHub API helpers ──
-  function ghHeaders() {
-    return {
-      'Authorization': 'token ' + document.getElementById('ghToken').value.trim(),
+  return { title, cover, genres, url, filePath };
+}
+
+function showPreview(n, idx) {
+  document.getElementById('preview').style.display = 'block';
+  document.getElementById('previewTitle').textContent = n.title;
+  document.getElementById('previewUrl').textContent = n.url;
+
+  refreshCoverPreviewWithUrl(n.cover);
+
+  const gContainer = document.getElementById('previewGenres');
+  gContainer.innerHTML = n.genres.map(g => `<span class="genre-tag">${escHtml(g)}</span>`).join('');
+
+  document.getElementById('editTitle').value    = n.title;
+  document.getElementById('editGenres').value   = n.genres.join(', ');
+  document.getElementById('editCover').value    = n.cover;
+  document.getElementById('editFilePath').value = n.filePath;
+
+  document.getElementById('uploadBtn').disabled = false;
+
+  checkIfExists(n.title);
+  setupPasteZone();
+}
+
+function refreshCoverPreview() {
+  const url = document.getElementById('editCover').value.trim();
+  refreshCoverPreviewWithUrl(url);
+}
+
+function refreshCoverPreviewWithUrl(url) {
+  const coverBox = document.getElementById('coverPreview');
+  if (url) {
+    coverBox.innerHTML = `<img class="preview-cover" src="${escHtml(url)}" onerror="this.outerHTML='<div class=preview-cover-placeholder>📖</div>'">`;
+  } else {
+    coverBox.innerHTML = `<div class="preview-cover-placeholder">📖</div>`;
+  }
+}
+
+// ── Paste Image → upload to GitHub → fill cover URL ──
+let pasteZoneReady = false;
+function setupPasteZone() {
+  if (pasteZoneReady) return;
+  pasteZoneReady = true;
+  const zone = document.getElementById('coverPasteZone');
+
+  zone.addEventListener('paste', async (e) => {
+    e.preventDefault();
+    const items = e.clipboardData?.items || [];
+    let imageFile = null;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        imageFile = item.getAsFile();
+        break;
+      }
+    }
+    if (!imageFile) return;
+
+    zone.textContent = '⬆️ Uploading image to GitHub…';
+    zone.classList.remove('has-img');
+
+    try {
+      const imgUrl = await uploadCoverImage(imageFile);
+      document.getElementById('editCover').value = imgUrl;
+      syncCurrentFile('cover');
+      refreshCoverPreviewWithUrl(imgUrl);
+      zone.textContent = '✅ Image uploaded! URL filled in cover field.';
+      zone.classList.add('has-img');
+    } catch(err) {
+      zone.textContent = '❌ Image upload failed: ' + err.message;
+      zone.classList.remove('has-img');
+    }
+  });
+
+  // Also listen globally for paste when not focused on another input
+  document.addEventListener('paste', async (e) => {
+    if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+    const items = e.clipboardData?.items || [];
+    let imageFile = null;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        imageFile = item.getAsFile();
+        break;
+      }
+    }
+    if (!imageFile) return;
+    zone.classList.add('paste-flash');
+    setTimeout(() => zone.classList.remove('paste-flash'), 400);
+    zone.textContent = '⬆️ Uploading pasted image to GitHub…';
+    zone.classList.remove('has-img');
+    try {
+      const imgUrl = await uploadCoverImage(imageFile);
+      document.getElementById('editCover').value = imgUrl;
+      syncCurrentFile('cover');
+      refreshCoverPreviewWithUrl(imgUrl);
+      zone.textContent = '✅ Image uploaded! URL filled automatically.';
+      zone.classList.add('has-img');
+    } catch(err) {
+      zone.textContent = '❌ ' + err.message;
+    }
+  }, { passive: true });
+}
+
+async function uploadCoverImage(imageFile) {
+  const token = document.getElementById('ghToken').value.trim();
+  if (!token) throw new Error('Enter your GitHub token first.');
+
+  const ext = imageFile.type.split('/')[1] || 'png';
+  const fname = 'cover_' + Date.now() + '.' + ext;
+  const imgFolder = 'docs/assets/covers';
+  const imgPath = imgFolder + '/' + fname;
+
+  // Read as base64
+  const base64 = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(imageFile);
+  });
+
+  const repo = document.getElementById('ghRepo').value.trim();
+  const br   = document.getElementById('ghBranch').value.trim() || 'main';
+
+  const apiUrl = `https://api.github.com/repos/${repo}/contents/${imgPath}`;
+  const resp = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'token ' + token,
       'Accept': 'application/vnd.github.v3+json',
       'Content-Type': 'application/json'
-    };
-  }
-  function repoBase() {
-    return 'https://api.github.com/repos/' + document.getElementById('ghRepo').value.trim();
-  }
-  function branch() {
-    return document.getElementById('ghBranch').value.trim() || 'main';
-  }
+    },
+    body: JSON.stringify({
+      message: 'Add cover image: ' + fname,
+      content: base64,
+      branch: br
+    })
+  });
 
-  async function testConnection() {
-    hideAlerts();
-    try {
-      const r = await fetch(repoBase(), { headers: ghHeaders() });
-      if (r.ok) {
-        show('connOk');
-      } else {
-        const d = await r.json();
-        showErr('connErr', '❌ ' + (d.message || 'Connection failed'));
-      }
-    } catch(e) {
-      showErr('connErr', '❌ Network error: ' + e.message);
-    }
+  if (!resp.ok) {
+    const d = await resp.json();
+    throw new Error(d.message || 'Image upload failed');
   }
 
-  async function getFileSHA(path) {
-    const r = await fetch(`${repoBase()}/contents/${path}?ref=${branch()}`, { headers: ghHeaders() });
-    if (r.status === 404) return { sha: null, content: null };
-    if (!r.ok) throw new Error('Failed to fetch ' + path);
-    const d = await r.json();
-    return { sha: d.sha, content: atob(d.content.replace(/\n/g, '')) };
-  }
+  // Return the public GitHub Pages URL
+  const rawUrl = `https://raw.githubusercontent.com/${repo}/${br}/${imgPath}`;
+  return rawUrl;
+}
 
-  async function putFile(path, content, message, sha) {
-    const body = {
-      message,
-      content: btoa(unescape(encodeURIComponent(content))),
-      branch: branch()
-    };
-    if (sha) body.sha = sha;
-    const r = await fetch(`${repoBase()}/contents/${path}`, {
-      method: 'PUT',
-      headers: ghHeaders(),
-      body: JSON.stringify(body)
-    });
-    if (!r.ok) {
-      const d = await r.json();
-      throw new Error(d.message || 'Upload failed for ' + path);
-    }
-    return r.json();
-  }
+// ── GitHub API helpers ──
+function ghHeaders() {
+  return {
+    'Authorization': 'token ' + document.getElementById('ghToken').value.trim(),
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+}
+function repoBase() {
+  return 'https://api.github.com/repos/' + document.getElementById('ghRepo').value.trim();
+}
+function branch() {
+  return document.getElementById('ghBranch').value.trim() || 'main';
+}
 
-  async function checkIfExists(title) {
-    const badge = document.getElementById('existsBadge');
-    badge.style.display = 'none';
-    try {
-      const jsonPath = document.getElementById('jsonPath').value.trim();
-      const { content } = await getFileSHA(jsonPath);
-      if (!content) return;
-      const novels = JSON.parse(content);
-      const exists = novels.some(n => n.title.toLowerCase() === title.toLowerCase());
-      if (exists) badge.style.display = 'block';
-    } catch(e) { /* silent */ }
-  }
-
-  // ── Log helpers ──
-  function addLog(text, status='wait') {
-    const box = document.getElementById('logLines');
-    const id = 'log_' + Date.now() + Math.random();
-    box.insertAdjacentHTML('beforeend', `
-      <div class="log-line" id="${id}">
-        <div class="log-dot dot-${status}"></div>
-        <div>${text}</div>
-      </div>`);
-    return id;
-  }
-  function updateLog(id, text, status) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.querySelector('.log-dot').className = 'log-dot dot-' + status;
-    el.querySelector('div:last-child').textContent = text;
-  }
-
-  // ── Main upload ──
-  async function doUpload() {
-    hideAlerts();
-    if (!fileContent || !parsedNovel) return;
-
-    const token = document.getElementById('ghToken').value.trim();
-    if (!token) { showErr('errorAlert', '❌ Please enter your GitHub token first.'); return; }
-
-    // Gather edited values
-    const title    = document.getElementById('editTitle').value.trim();
-    const genres   = document.getElementById('editGenres').value.split(',').map(g => g.trim()).filter(Boolean);
-    const cover    = document.getElementById('editCover').value.trim();
-    const filePath = document.getElementById('editFilePath').value.trim();
-    const jsonPath = document.getElementById('jsonPath').value.trim();
-    const novelUrl = 'https://animestuff.me/' + jsonPath.replace('novels.json', '').replace(/\/$/, '') + '/../' + fileName;
-    const cleanUrl = parsedNovel.url;
-
-    document.getElementById('logBox').style.display = 'block';
-    document.getElementById('uploadBtn').disabled = true;
-
-    // Step 1: Upload HTML file
-    const l1 = addLog('Uploading HTML file to GitHub...', 'run');
-    let htmlSHA = null;
-    try {
-      const existing = await getFileSHA(filePath);
-      htmlSHA = existing.sha;
-    } catch(e) {}
-    try {
-      await putFile(filePath, fileContent, `Add novel: ${title}`, htmlSHA);
-      updateLog(l1, '✅ HTML file uploaded → ' + filePath, 'ok');
-    } catch(e) {
-      updateLog(l1, '❌ HTML upload failed: ' + e.message, 'err');
-      showErr('errorAlert', '❌ ' + e.message);
-      document.getElementById('uploadBtn').disabled = false;
-      return;
-    }
-
-    // Step 2: Fetch current novels.json
-    const l2 = addLog('Fetching novels.json...', 'run');
-    let novels = [], jsonSHA = null;
-    try {
-      const { sha, content } = await getFileSHA(jsonPath);
-      jsonSHA = sha;
-      novels = content ? JSON.parse(content) : [];
-      updateLog(l2, `✅ novels.json loaded (${novels.length} novels)`, 'ok');
-    } catch(e) {
-      updateLog(l2, '❌ Could not load novels.json: ' + e.message, 'err');
-      showErr('errorAlert', '❌ ' + e.message);
-      document.getElementById('uploadBtn').disabled = false;
-      return;
-    }
-
-    // Step 3: Add or update entry
-    const l3 = addLog('Updating novels.json...', 'run');
-    const entry = { title, url: cleanUrl, cover, genres };
-    const idx = novels.findIndex(n => n.url === cleanUrl);
-    if (idx >= 0) {
-      novels[idx] = entry;
-      updateLog(l3, '✅ Updated existing entry in novels.json', 'ok');
+async function testConnection() {
+  hideAlerts();
+  try {
+    const r = await fetch(repoBase(), { headers: ghHeaders() });
+    if (r.ok) {
+      show('connOk');
     } else {
-      novels.unshift(entry); // add to top
-      updateLog(l3, `✅ Added new entry (total: ${novels.length} novels)`, 'ok');
+      const d = await r.json();
+      showErr('connErr', '❌ ' + (d.message || 'Connection failed'));
     }
+  } catch(e) {
+    showErr('connErr', '❌ Network error: ' + e.message);
+  }
+}
 
-    // Step 4: Push novels.json
-    const l4 = addLog('Saving novels.json to GitHub...', 'run');
-    try {
-      await putFile(jsonPath, JSON.stringify(novels, null, 2), `Update novels.json: add ${title}`, jsonSHA);
-      updateLog(l4, '✅ novels.json saved successfully', 'ok');
-    } catch(e) {
-      updateLog(l4, '❌ Failed to save novels.json: ' + e.message, 'err');
-      showErr('errorAlert', '❌ ' + e.message);
-      document.getElementById('uploadBtn').disabled = false;
-      return;
-    }
+async function getFileSHA(path) {
+  const r = await fetch(`${repoBase()}/contents/${path}?ref=${branch()}`, { headers: ghHeaders() });
+  if (r.status === 404) return { sha: null, content: null };
+  if (!r.ok) throw new Error('Failed to fetch ' + path);
+  const d = await r.json();
+  return { sha: d.sha, content: atob(d.content.replace(/\n/g,'')) };
+}
 
-    // Done!
-    const l5 = addLog('Deploying via GitHub Pages...', 'run');
-    setTimeout(() => updateLog(l5, '✅ Deployed! Your site will update in ~30 seconds.', 'ok'), 1200);
+async function putFile(path, content, message, sha) {
+  const body = {
+    message,
+    content: btoa(unescape(encodeURIComponent(content))),
+    branch: branch()
+  };
+  if (sha) body.sha = sha;
+  const r = await fetch(`${repoBase()}/contents/${path}`, {
+    method: 'PUT',
+    headers: ghHeaders(),
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) {
+    const d = await r.json();
+    throw new Error(d.message || 'Upload failed for ' + path);
+  }
+  return r.json();
+}
 
-    document.getElementById('successAlert').style.display = 'block';
-    document.getElementById('successAlert').innerHTML =
-      `🎉 <strong>${escHtml(title)}</strong> uploaded successfully! ` +
-      `<a href="${escHtml(cleanUrl)}" target="_blank" style="color:var(--success)">View page →</a>`;
+async function checkIfExists(title) {
+  const badge = document.getElementById('existsBadge');
+  badge.style.display = 'none';
+  try {
+    const jsonPath = document.getElementById('jsonPath').value.trim();
+    const { content } = await getFileSHA(jsonPath);
+    if (!content) return;
+    const novels = JSON.parse(content);
+    const exists = novels.some(n => n.title.toLowerCase() === title.toLowerCase());
+    if (exists) badge.style.display = 'block';
+  } catch(e) { /* silent */ }
+}
 
+// ── Log helpers ──
+function addLog(text, status='wait') {
+  const box = document.getElementById('logLines');
+  const id = 'log_' + Date.now() + Math.random().toString(36).slice(2);
+  box.insertAdjacentHTML('beforeend', `
+    <div class="log-line" id="${id}">
+      <div class="log-dot dot-${status}"></div>
+      <div>${escHtml(text)}</div>
+    </div>`);
+  return id;
+}
+function updateLog(id, text, status) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.querySelector('.log-dot').className = 'log-dot dot-' + status;
+  el.querySelector('div:last-child').textContent = text;
+}
+
+// ── Upload single novel ──
+async function uploadNovel(idx, novels, jsonSHA) {
+  const entry = fileList[idx];
+  if (!entry) throw new Error('No file at index ' + idx);
+  saveEdits(idx);
+  const p = entry.parsed;
+
+  const title    = p.title;
+  const genres   = p.genres;
+  const cover    = p.cover;
+  const filePath = p.filePath;
+  const cleanUrl = p.url;
+
+  // Step 1: Upload HTML
+  const l1 = addLog('Uploading HTML: ' + entry.name, 'run');
+  let htmlSHA = null;
+  try { const ex = await getFileSHA(filePath); htmlSHA = ex.sha; } catch(e) {}
+  await putFile(filePath, entry.content, `Add novel: ${title}`, htmlSHA);
+  updateLog(l1, '✅ HTML uploaded → ' + filePath, 'ok');
+
+  // Step 2: Update novels.json entry
+  const novelEntry = { title, url: cleanUrl, cover, genres };
+  const existIdx = novels.findIndex(n => n.url === cleanUrl);
+  if (existIdx >= 0) {
+    novels[existIdx] = novelEntry;
+  } else {
+    novels.unshift(novelEntry);
+  }
+
+  return novelEntry;
+}
+
+async function doUploadCurrent() {
+  hideAlerts();
+  saveEdits(currentIdx);
+
+  const token = document.getElementById('ghToken').value.trim();
+  if (!token) { showErr('errorAlert', '❌ Please enter your GitHub token first.'); return; }
+  if (!fileList[currentIdx]) return;
+
+  document.getElementById('logBox').style.display = 'block';
+  document.getElementById('uploadBtn').disabled = true;
+  fileList[currentIdx].status = 'uploading';
+  renderFileQueue();
+
+  const jsonPath = document.getElementById('jsonPath').value.trim();
+
+  // Fetch novels.json
+  const l2 = addLog('Fetching novels.json…', 'run');
+  let novels = [], jsonSHA = null;
+  try {
+    const { sha, content } = await getFileSHA(jsonPath);
+    jsonSHA = sha;
+    novels = content ? JSON.parse(content) : [];
+    updateLog(l2, `✅ novels.json loaded (${novels.length} novels)`, 'ok');
+  } catch(e) {
+    updateLog(l2, '❌ Could not load novels.json: ' + e.message, 'err');
+    showErr('errorAlert', '❌ ' + e.message);
     document.getElementById('uploadBtn').disabled = false;
+    fileList[currentIdx].status = 'error';
+    renderFileQueue();
+    return;
   }
 
-  // ── Utils ──
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  try {
+    await uploadNovel(currentIdx, novels, jsonSHA);
+  } catch(e) {
+    addLog('❌ Upload failed: ' + e.message, 'err');
+    showErr('errorAlert', '❌ ' + e.message);
+    document.getElementById('uploadBtn').disabled = false;
+    fileList[currentIdx].status = 'error';
+    renderFileQueue();
+    return;
   }
-  function show(id) { document.getElementById(id).style.display = 'block'; }
-  function showErr(id, msg) { const el = document.getElementById(id); el.style.display='block'; el.innerHTML=msg; }
-  function hideAlerts() {
-    ['connOk','connErr','successAlert','errorAlert'].forEach(id => {
-      document.getElementById(id).style.display = 'none';
-    });
+
+  // Save novels.json
+  const l4 = addLog('Saving novels.json…', 'run');
+  try {
+    await putFile(jsonPath, JSON.stringify(novels, null, 2), `Update novels.json: add ${fileList[currentIdx].parsed.title}`, jsonSHA);
+    updateLog(l4, '✅ novels.json saved', 'ok');
+  } catch(e) {
+    updateLog(l4, '❌ Failed to save novels.json: ' + e.message, 'err');
+    showErr('errorAlert', '❌ ' + e.message);
+    document.getElementById('uploadBtn').disabled = false;
+    fileList[currentIdx].status = 'error';
+    renderFileQueue();
+    return;
   }
+
+  fileList[currentIdx].status = 'done';
+  renderFileQueue();
+
+  const l5 = addLog('Deploying via GitHub Pages…', 'run');
+  setTimeout(() => updateLog(l5, '✅ Deployed! Site updates in ~30s.', 'ok'), 1200);
+
+  const title = fileList[currentIdx].parsed.title;
+  const cleanUrl = fileList[currentIdx].parsed.url;
+  document.getElementById('successAlert').style.display = 'block';
+  document.getElementById('successAlert').innerHTML =
+    `🎉 <strong>${escHtml(title)}</strong> uploaded! <a href="${escHtml(cleanUrl)}" target="_blank" style="color:var(--success)">View →</a>`;
+
+  document.getElementById('uploadBtn').disabled = false;
+}
+
+// ── Batch upload all files ──
+async function doBatchUpload() {
+  hideAlerts();
+
+  const token = document.getElementById('ghToken').value.trim();
+  if (!token) { showErr('errorAlert', '❌ Please enter your GitHub token first.'); return; }
+  if (!fileList.length) return;
+
+  document.getElementById('logBox').style.display = 'block';
+  document.getElementById('batchUploadBtn').disabled = true;
+  document.getElementById('uploadBtn').disabled = true;
+
+  const jsonPath = document.getElementById('jsonPath').value.trim();
+
+  // Fetch novels.json ONCE
+  const lj = addLog('Fetching novels.json…', 'run');
+  let novels = [], jsonSHA = null;
+  try {
+    const { sha, content } = await getFileSHA(jsonPath);
+    jsonSHA = sha;
+    novels = content ? JSON.parse(content) : [];
+    updateLog(lj, `✅ novels.json loaded (${novels.length} novels)`, 'ok');
+  } catch(e) {
+    updateLog(lj, '❌ Could not load novels.json: ' + e.message, 'err');
+    showErr('errorAlert', '❌ ' + e.message);
+    document.getElementById('batchUploadBtn').disabled = false;
+    document.getElementById('uploadBtn').disabled = false;
+    return;
+  }
+
+  let successCount = 0;
+  for (let i = 0; i < fileList.length; i++) {
+    if (fileList[i].status === 'done') continue;
+    fileList[i].status = 'uploading';
+    renderFileQueue();
+    try {
+      await uploadNovel(i, novels, jsonSHA);
+      fileList[i].status = 'done';
+      successCount++;
+    } catch(e) {
+      fileList[i].status = 'error';
+      addLog(`❌ ${fileList[i].name}: ${e.message}`, 'err');
+    }
+    renderFileQueue();
+  }
+
+  // Save novels.json once at the end
+  const ls = addLog('Saving novels.json with all entries…', 'run');
+  try {
+    await putFile(jsonPath, JSON.stringify(novels, null, 2), `Batch update novels.json: +${successCount} novels`, jsonSHA);
+    updateLog(ls, `✅ novels.json saved (${novels.length} total novels)`, 'ok');
+  } catch(e) {
+    updateLog(ls, '❌ Failed to save novels.json: ' + e.message, 'err');
+    showErr('errorAlert', '❌ ' + e.message);
+    document.getElementById('batchUploadBtn').disabled = false;
+    document.getElementById('uploadBtn').disabled = false;
+    return;
+  }
+
+  const ld = addLog('Deploying via GitHub Pages…', 'run');
+  setTimeout(() => updateLog(ld, '✅ Deployed! Site updates in ~30s.', 'ok'), 1200);
+
+  document.getElementById('successAlert').style.display = 'block';
+  document.getElementById('successAlert').innerHTML =
+    `🎉 <strong>${successCount} novel${successCount!==1?'s':''}</strong> uploaded and novels.json updated!`;
+
+  document.getElementById('batchUploadBtn').disabled = false;
+  document.getElementById('uploadBtn').disabled = false;
+}
+
+// ── Utils ──
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function show(id) { document.getElementById(id).style.display = 'block'; }
+function showErr(id, msg) { const el = document.getElementById(id); el.style.display='block'; el.innerHTML=msg; }
+function hideAlerts() {
+  ['connOk','connErr','successAlert','errorAlert'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+}
 </script>
 </body>
 </html>
