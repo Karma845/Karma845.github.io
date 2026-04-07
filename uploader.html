@@ -572,8 +572,16 @@ function syncCurrentFile(field) {
 // ── Parse HTML file ──
 function parseNovel(html, fname) {
   const SKIP = ['slime','V3_7','elaina','icon','apple','chrome'];
-  const baseUrl = 'https://karma845.github.io/';
-  const htmlFolder = document.getElementById('htmlFolder').value.trim() || 'docs/assets/html/';
+  const repo  = document.getElementById('ghRepo').value.trim();
+  const htmlFolder = document.getElementById('htmlFolder').value.trim().replace(/\/$/, '') || 'docs/assets/html';
+  // Derive GitHub Pages base URL:
+  // "Owner/Owner.github.io" → https://Owner.github.io/
+  // "Owner/repo"            → https://Owner.github.io/repo/
+  const [owner, repoName] = repo.split('/');
+  const ghPagesBase = repoName.toLowerCase() === (owner.toLowerCase() + '.github.io')
+    ? 'https://' + repoName + '/'
+    : 'https://' + owner + '.github.io/' + repoName + '/';
+  const baseUrl = ghPagesBase; // keep alias for relative-src fallback below
 
   // Title from <h2>
   const titleMatch = html.match(/<h2[^>]*>\s*(?:\(EPUB\)\s*|\(WN\)\s*|\(LN\)\s*)?([^<\n]+)/i);
@@ -589,11 +597,6 @@ function parseNovel(html, fname) {
     break;
   }
 
-  // Proxy novelupdates covers
-  if (cover.includes('novelupdates.com')) {
-    cover = 'https://images.weserv.nl/?url=' + encodeURIComponent(cover) + '&w=200&output=webp';
-  }
-
   // Genres
   const genreMatch = html.match(/Genre:\s*<\/h3>\s*<p>([\s\S]*?)<\/p>/i);
   let genres = [];
@@ -605,9 +608,8 @@ function parseNovel(html, fname) {
       .filter(Boolean);
   }
 
-  const htmlFolderClean = htmlFolder.replace(/\/$/, '');
-  const url = baseUrl + htmlFolderClean.replace(/^docs\//,'') + '/' + fname;
-  const filePath = htmlFolderClean + '/' + fname;
+  const url      = ghPagesBase + htmlFolder.replace(/^docs\//, '') + '/' + fname;
+  const filePath = htmlFolder + '/' + fname;
 
   return { title, cover, genres, url, filePath };
 }
