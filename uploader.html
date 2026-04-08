@@ -449,8 +449,7 @@
   function parseNovel(html, fname) {
     const SKIP = ['slime', 'V3_7', 'elaina', 'icon', 'apple', 'chrome'];
     const htmlFolder = document.getElementById('htmlFolder').value.trim().replace(/\/$/, '') || 'docs/assets/html';
-    const repoOwner = document.getElementById('ghRepo').value.trim().split('/')[0] || 'Karma845';
-    const baseUrl = 'https://' + repoOwner + '.github.io/';
+    const baseUrl = 'https://animestuff.me/docs/assets/html/';
 
     const titleMatch = html.match(/<h2[^>]*>\s*(?:\(EPUB\)\s*|\(WN\)\s*|\(LN\)\s*)?([^<\n]+)/i);
     let title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '').trim().replace(/\.$/, '') : fname.replace('.html', '');
