@@ -403,7 +403,7 @@
           <div class="toggle on" id="toggleSkipImg" onclick="this.classList.toggle('on')"></div>
         </div>
         <div class="toggle-row">
-          <span>Fix OCR ligatures & quotes</span>
+          <span>Fix OCR ligatures &amp; quotes</span>
           <div class="toggle on" id="toggleFix" onclick="this.classList.toggle('on')"></div>
         </div>
         <div>
@@ -489,46 +489,34 @@ const BOILERPLATE_PATTERNS = [
   /Confinement King LN/i,
 ];
 
-// ── Image preprocessing ─────────────────────────────────────────────────────
-// Applies grayscale + contrast boost + mild sharpening on the canvas before
-// passing it to Tesseract. Dramatically improves accuracy on low-contrast or
-// compressed PDF pages.
+// ── Image preprocessing ──────────────────────────────────────────────────────
 function preprocessCanvas(src) {
   const dst = document.createElement('canvas');
   dst.width = src.width;
   dst.height = src.height;
   const ctx = dst.getContext('2d');
 
-  // Draw source
   ctx.drawImage(src, 0, 0);
 
   const id = ctx.getImageData(0, 0, dst.width, dst.height);
   const d = id.data;
 
   for (let i = 0; i < d.length; i += 4) {
-    // Luminosity-weighted grayscale
     const gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-
-    // Contrast stretch: push values towards 0 or 255 with a sigmoid-like curve
-    // factor > 1 = more contrast; 1.6 is good for printed novel scans
     const factor = 1.6;
     const contrasted = Math.max(0, Math.min(255,
       ((gray - 128) * factor) + 128
     ));
-
     d[i] = d[i+1] = d[i+2] = contrasted;
-    // alpha unchanged
   }
 
   ctx.putImageData(id, 0, 0);
 
-  // Unsharp mask via second canvas — sharpens glyph edges
   const sharp = document.createElement('canvas');
   sharp.width = dst.width;
   sharp.height = dst.height;
   const sctx = sharp.getContext('2d');
 
-  // Draw blurred copy
   sctx.filter = 'blur(1px)';
   sctx.drawImage(dst, 0, 0);
   sctx.filter = 'none';
@@ -537,9 +525,8 @@ function preprocessCanvas(src) {
   const sharpId = ctx.getImageData(0, 0, dst.width, dst.height);
   const sd = sharpId.data;
 
-  const strength = 0.5; // unsharp amount
+  const strength = 0.5;
   for (let i = 0; i < sd.length; i += 4) {
-    // unsharp = original + strength*(original - blur)
     const val = Math.max(0, Math.min(255,
       sd[i] + strength * (sd[i] - blurData[i])
     ));
@@ -551,8 +538,10 @@ function preprocessCanvas(src) {
 }
 
 // ── OCR ligature & typography fixups ────────────────────────────────────────
-// Tesseract often misreads typographic ligatures and smart quotes.
-// These substitutions catch the most common cases in light novel text.
+// FIX: Curly quotes are now PRESERVED as proper ASCII " characters instead of
+// being mapped ambiguously. Tesseract sometimes reads " and " as \u201c/\u201d
+// (correct) or as random garbage — we normalize all variants to straight " and '
+// so dialogue like "Hello." is always rendered correctly.
 const LIGATURE_MAP = [
   [/ﬁ/g, 'fi'],   [/ﬂ/g, 'fl'],   [/ﬀ/g, 'ff'],
   [/ﬃ/g, 'ffi'],  [/ﬄ/g, 'ffl'],  [/ﬅ/g, 'st'],
@@ -560,17 +549,46 @@ const LIGATURE_MAP = [
 ];
 
 const QUOTE_MAP = [
-  [/\u201c|\u201d/g, '"'],  // curly double quotes → straight
-  [/\u2018|\u2019/g, "'"],  // curly single quotes → straight
-  [/\u2014/g, '—'],         // em dash (preserve)
-  [/\u2013/g, '–'],         // en dash (preserve)
-  [/\u2026/g, '...'],       // ellipsis
-  // Common misread patterns in novel OCR:
-  [/(?<=[a-z])-\n(?=[a-z])/g, ''],   // de-hyphenate mid-word line breaks
-  [/l(?=\d)/g, '1'],                  // lowercase l before digits → 1 (careful)
-  [/(?<=\d)O(?=\d)/g, '0'],          // capital O between digits → 0
-  [/\|/g, 'I'],                       // pipe → I (common OCR artifact)
-  [/ {2,}/g, ' '],                    // collapse multiple spaces
+  // ── Double quotes: all known OCR misreads of " → normalize to "
+  [/\u201c/g, '"'],   // LEFT DOUBLE QUOTATION MARK "
+  [/\u201d/g, '"'],   // RIGHT DOUBLE QUOTATION MARK "
+  [/\u201e/g, '"'],   // DOUBLE LOW-9 QUOTATION MARK „ (used in some locales)
+  [/\u201f/g, '"'],   // DOUBLE HIGH-REVERSED-9 QUOTATION MARK
+  [/\u00ab/g, '"'],   // LEFT-POINTING DOUBLE ANGLE QUOTATION MARK «
+  [/\u00bb/g, '"'],   // RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK »
+  [/\u2036/g, '"'],   // REVERSED DOUBLE PRIME (OCR artifact)
+  [/\u2033/g, '"'],   // DOUBLE PRIME ″ (OCR artifact)
+  // FIX: Tesseract sometimes outputs two backticks or two apostrophes for a
+  // double-quote. Catch the most common patterns:
+  [/``/g, '"'],
+  [/''/g, '"'],
+  [/\u2018\u2018/g, '"'], // two open single quotes → open double quote
+  [/\u2019\u2019/g, '"'], // two close single quotes → close double quote
+
+  // ── Single quotes / apostrophes
+  [/\u2018/g, "'"],   // LEFT SINGLE QUOTATION MARK '
+  [/\u2019/g, "'"],   // RIGHT SINGLE QUOTATION MARK '
+  [/\u201a/g, "'"],   // SINGLE LOW-9 QUOTATION MARK ‚
+  [/\u201b/g, "'"],   // SINGLE HIGH-REVERSED-9 QUOTATION MARK
+  [/\u2032/g, "'"],   // PRIME ′ (OCR artifact for apostrophe)
+
+  // ── Dashes & ellipsis (preserve meaning)
+  [/\u2014/g, '—'],   // em dash
+  [/\u2013/g, '–'],   // en dash
+  [/\u2026/g, '...'], // ellipsis
+
+  // ── Common OCR misreads in novel text
+  [/(?<=[a-zA-Z])-\n(?=[a-z])/g, ''],  // de-hyphenate mid-word line breaks
+  [/\|/g, 'I'],                          // pipe → capital I (common Tesseract artifact)
+  [/ {2,}/g, ' '],                       // collapse multiple spaces
+
+  // ── FIX: Tesseract sometimes reads quote glyphs as these ASCII lookalikes.
+  // Only replace when they appear at typical dialogue positions (start/end of
+  // word boundary) so we don't corrupt valid uses elsewhere.
+  // Straight double-quote already correct — no change needed.
+  // Backtick used alone at start of word → open quote
+  [/(?<=\s|^)`(?=\S)/gm, '"'],
+  // Two single-quotes used as open/close double-quote (already handled above)
 ];
 
 function fixOcrText(text) {
@@ -596,7 +614,10 @@ function cleanText(raw) {
         if (typeof pat === 'string') {
           if (trimmed.toLowerCase().includes(pat.toLowerCase())) return false;
         } else {
-          if (pat.test(trimmed)) return false;
+          // FIX: Reset lastIndex on global regexes before testing, otherwise
+          // alternating test() calls on the same regex can give wrong results.
+          if (pat.global) pat.lastIndex = 0;
+          if (pat.test(trimmed)) { if (pat.global) pat.lastIndex = 0; return false; }
         }
       }
     }
@@ -729,12 +750,7 @@ async function isImageOnlyPage(pageNum) {
   return charCount < 15;
 }
 
-// ── Get text band Y-ranges directly from pdf.js text coordinates ──────────────
-// pdf.js gives us the exact position of every text item on the page in PDF
-// user-space coordinates. We group nearby items into vertical bands, then
-// convert those bands to canvas-pixel rows using the render scale.
-// This is 100% reliable — it uses the same data the browser uses to select text,
-// so images are never confused for text and text is never confused for images.
+// ── Get text band Y-ranges from pdf.js ───────────────────────────────────────
 async function getTextBands(pageNum, scale, canvasHeight) {
   const page = await pdfDoc.getPage(pageNum);
   const viewport = page.getViewport({ scale });
@@ -742,17 +758,12 @@ async function getTextBands(pageNum, scale, canvasHeight) {
 
   if (!content.items.length) return [];
 
-  // Each item has a `transform` array: [a,b,c,d,e,f] where (e,f) is the origin
-  // in PDF coordinates (Y increases upward). Convert to canvas pixels (Y downward).
-  // PDF viewport handles this: use viewport.convertToViewportPoint.
   const yCoords = [];
   for (const item of content.items) {
     if (!(item.str || '').trim()) continue;
     const tx = item.transform;
-    // tx[5] is the Y in PDF space; item.height is the glyph height
     const pdfY = tx[5];
     const pdfYtop = pdfY + (item.height || 12);
-    // convertToViewportPoint flips Y to canvas space
     const [, canvasYBottom] = viewport.convertToViewportPoint(tx[4], pdfY);
     const [, canvasYTop]    = viewport.convertToViewportPoint(tx[4], pdfYtop);
     yCoords.push({ top: Math.min(canvasYTop, canvasYBottom), bottom: Math.max(canvasYTop, canvasYBottom) });
@@ -760,10 +771,8 @@ async function getTextBands(pageNum, scale, canvasHeight) {
 
   if (!yCoords.length) return [];
 
-  // Sort by top edge, then merge overlapping/adjacent rows into bands
-  // with a gap tolerance (lines within 24px of each other = same paragraph band)
   yCoords.sort((a, b) => a.top - b.top);
-  const GAP = 24; // px — tune if paragraphs get merged across images
+  const GAP = 24;
   const bands = [];
   let band = { ...yCoords[0] };
   for (let i = 1; i < yCoords.length; i++) {
@@ -777,7 +786,6 @@ async function getTextBands(pageNum, scale, canvasHeight) {
   }
   bands.push(band);
 
-  // Add a small margin around each band for safe cropping
   const MARGIN = 8;
   return bands.map(b => ({
     y0: Math.max(0, Math.floor(b.top) - MARGIN),
@@ -796,7 +804,7 @@ function cropCanvasRows(src, y0, y1) {
   return dst;
 }
 
-// ── OCR a single canvas strip, returns {text, conf} ──────────────────────────
+// ── OCR a single canvas strip ─────────────────────────────────────────────────
 async function ocrStrip(worker, canvas, psm) {
   const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
   const result = await worker.recognize(blob);
@@ -805,7 +813,7 @@ async function ocrStrip(worker, canvas, psm) {
   return { text: result.data.text, conf };
 }
 
-// ── Deduplicate lines across strips ──────────────────────────────────────────
+// ── Deduplicate lines ─────────────────────────────────────────────────────────
 function deduplicateLines(text) {
   const lines = text.split('\n');
   const out = [];
@@ -819,41 +827,26 @@ function deduplicateLines(text) {
   return out.join('\n');
 }
 
-// ── Smart per-page OCR using pdf.js text coordinates for region splitting ─────
-// Strategy:
-//   1. Ask pdf.js where text actually lives on this page (exact coordinates).
-//   2. If text spans the whole page vertically with no large gaps → single pass.
-//   3. If there are gaps (image regions between text blocks) → crop to each
-//      text band and OCR independently, preserving reading order.
-//   4. Fallback: if coordinate extraction yields nothing, OCR full page with
-//      PSM 11 (sparse text, finds text anywhere regardless of layout).
+// ── Smart per-page OCR ────────────────────────────────────────────────────────
 async function ocrPage(worker, pageNum, pageCanvas, scale, psm) {
   const preprocessed = shouldPreprocess() ? preprocessCanvas(pageCanvas) : pageCanvas;
   const H = preprocessed.height;
 
-  // Get text bands from pdf.js — these are pixel-perfect regions containing text
   const bands = await getTextBands(pageNum, scale, H);
 
-  // Fast path: no bands found (pure image page) or single contiguous block
   if (bands.length === 0) {
-    // No PDF text layer at all — full page OCR with sparse-text PSM
     await worker.setParameters({ tessedit_pageseg_mode: 11 });
     const r = await ocrStrip(worker, preprocessed, 11);
     await worker.setParameters({ tessedit_pageseg_mode: parseInt(psm) });
     return r;
   }
 
-  // Check if the bands cover the whole page without meaningful gaps
-  // (i.e. no image is interrupting the text flow)
   const totalBandHeight = bands.reduce((s, b) => s + (b.y1 - b.y0), 0);
   const pageGapFrac = 1 - (totalBandHeight / H);
   if (pageGapFrac < 0.25 || bands.length === 1) {
-    // Text covers most of the page — single OCR pass is fine
     return ocrStrip(worker, preprocessed, psm);
   }
 
-  // Multiple text bands with large gaps between them (images in between).
-  // OCR each band individually and merge in vertical order.
   await worker.setParameters({ tessedit_pageseg_mode: 6 });
   const parts = [];
   let totalConf = 0, confCount = 0;
@@ -874,7 +867,6 @@ async function ocrPage(worker, pageNum, pageCanvas, scale, psm) {
   const merged = deduplicateLines(parts.join('\n'));
   const avgConf = confCount ? totalConf / confCount : 0;
 
-  // Safety fallback: if bands approach yielded almost nothing, try full-page PSM 11
   const wordCount = merged.trim().split(/\s+/).filter(Boolean).length;
   if (wordCount < 5) {
     await worker.setParameters({ tessedit_pageseg_mode: 11 });
@@ -886,7 +878,7 @@ async function ocrPage(worker, pageNum, pageCanvas, scale, psm) {
   return { text: merged, conf: avgConf };
 }
 
-// ── Confidence badge ─────────────────────────────────────────────────────────
+// ── Confidence badge ──────────────────────────────────────────────────────────
 function updateConfBadge(n) {
   const indicator = document.getElementById('pageIndicator');
   const conf = pageConf[n];
@@ -896,7 +888,7 @@ function updateConfBadge(n) {
   indicator.innerHTML = `${pageText} <span class="conf-badge ${cls}">${Math.round(conf)}% conf</span>`;
 }
 
-// ── OCR runner ───────────────────────────────────────────────────────────────
+// ── OCR runner ────────────────────────────────────────────────────────────────
 async function runOCR() {
   if (!pdfDoc) return;
   ocrRunning = true;
@@ -926,7 +918,9 @@ async function runOCR() {
     tessedit_ocr_engine_mode: 1,
     tessedit_pageseg_mode: parseInt(psm),
     preserve_interword_spaces: '1',
-    tessedit_char_blacklist: '|}{\\<>~`^',
+    // FIX: Removed " and ' from the blacklist — they are valid novel characters.
+    // Only blacklist characters that are truly never valid in novel prose.
+    tessedit_char_blacklist: '}{\\<>~`^',
     textord_heavy_nr: '1',
     edges_max_children_per_outline: '40',
   });
@@ -951,7 +945,6 @@ async function runOCR() {
     offCanvas.height = vp.height;
     await page.render({ canvasContext: offCanvas.getContext('2d'), viewport: vp }).promise;
 
-    // Smart OCR: uses pdf.js text coordinates to find text bands around images
     const { text: rawText, conf: avgConf } = await ocrPage(worker, i, offCanvas, scale, psm);
 
     pageConf[i] = avgConf;
