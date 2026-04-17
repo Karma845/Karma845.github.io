@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LN OCR Scanner</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222;
+    --border: #2e2e2e;
+    --accent: #c9a96e;
+    --accent2: #8b6f47;
+    --text: #e8e0d0;
+    --muted: #888;
+    --danger: #e05555;
+    --success: #5ab87a;
+    --mono: 'Courier New', monospace;
+    --serif: Georgia, 'Times New Roman', serif;
+    --sans: 'Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+  }
+  .logo {
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .logo span { color: var(--muted); font-size: 13px; font-family: var(--sans); font-style: italic; }
+  .main { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 57px); }
+  .sidebar {
+    width: 300px;
+    min-width: 300px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    overflow-y: auto;
+  }
+  .panel { padding: 16px; border-bottom: 1px solid var(--border); }
+  .panel-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .drop-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: 8px;
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(201,169,110,0.06);
+  }
+  .drop-zone input { display: none; }
+  .drop-icon { font-size: 28px; margin-bottom: 8px; opacity: 0.6; }
+  .drop-label { font-size: 13px; color: var(--muted); }
+  .drop-label strong { color: var(--accent); }
+  .page-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 12px;
+  }
+  .thumb {
+    aspect-ratio: 3/4;
+    background: var(--surface2);
+    border-radius: 4px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    transition: border-color 0.15s;
+  }
+  .thumb:hover { border-color: var(--accent2); }
+  .thumb.selected { border-color: var(--accent); }
+  .thumb.done::after {
+    content: '✓';
+    position: absolute;
+    top: 2px; right: 4px;
+    color: var(--success);
+    font-size: 11px;
+    font-weight: bold;
+  }
+  .thumb canvas { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb .pg-num {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.7);
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    padding: 2px;
+  }
+  .controls { display: flex; flex-direction: column; gap: 10px; }
+  label { font-size: 12px; color: var(--muted); margin-bottom: 4px; display: block; }
+  select, input[type="text"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    padding: 7px 10px;
+    font-size: 13px;
+    font-family: var(--sans);
+    outline: none;
+  }
+  select:focus, input[type="text"]:focus { border-color: var(--accent); }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text);
+  }
+  .toggle {
+    width: 34px; height: 18px;
+    background: var(--border);
+    border-radius: 9px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle.on { background: var(--accent); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: white;
+    top: 2px; left: 2px;
+    transition: left 0.2s;
+  }
+  .toggle.on::after { left: 18px; }
+  .btn {
+    width: 100%;
+    padding: 9px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    font-weight: 500;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #1a1208; }
+  .btn-primary:hover:not(:disabled) { background: #d4b07a; }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--accent); }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+  .btn-danger:hover:not(:disabled) { background: rgba(224,85,85,0.1); }
+  .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .toolbar {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--surface);
+    flex-wrap: wrap;
+  }
+  .toolbar .btn { width: auto; padding: 6px 14px; font-size: 12px; }
+  .page-indicator { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .editor-area { flex: 1; display: flex; overflow: hidden; }
+  .preview-pane {
+    width: 340px;
+    min-width: 220px;
+    border-right: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 16px;
+  }
+  .preview-pane canvas { max-width: 100%; border-radius: 4px; border: 1px solid var(--border); }
+  .text-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .text-pane-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .tab {
+    padding: 8px 16px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  textarea {
+    flex: 1;
+    width: 100%;
+    background: var(--bg);
+    border: none;
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.8;
+    padding: 20px 24px;
+    resize: none;
+    outline: none;
+  }
+  textarea::placeholder { color: var(--border); }
+  .combined-view {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.85;
+    background: var(--bg);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .combined-view .page-sep {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 24px 0 16px;
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .combined-view .page-sep::before, .combined-view .page-sep::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s;
+    width: 0%;
+  }
+  .status {
+    font-size: 11px;
+    color: var(--muted);
+    padding: 6px 16px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    min-height: 28px;
+  }
+  .status.running { color: var(--accent); }
+  .status.ok { color: var(--success); }
+  .status.err { color: var(--danger); }
+  #empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--muted);
+    font-family: var(--serif);
+    font-size: 14px;
+    padding: 40px;
+    text-align: center;
+  }
+  .big-icon { font-size: 48px; opacity: 0.3; }
+  .range-row { display: flex; gap: 6px; align-items: center; }
+  .range-row input[type="number"] {
+    width: 60px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    padding: 6px 8px;
+    font-size: 12px;
+    text-align: center;
+    outline: none;
+  }
+  .range-row span { color: var(--muted); font-size: 12px; }
+  .copy-flash { animation: flash 0.5s ease; }
+  @keyframes flash {
+    0% { background: rgba(201,169,110,0.3); }
+    100% { background: transparent; }
+  }
+  .word-count { font-size: 11px; color: var(--muted); padding: 4px 24px; background: var(--surface); border-top: 1px solid var(--border); text-align: right; }
+  .conf-badge {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    margin-left: 6px;
+    font-family: var(--mono);
+  }
+  .conf-high { background: rgba(90,184,122,0.2); color: var(--success); }
+  .conf-mid  { background: rgba(201,169,110,0.2); color: var(--accent); }
+  .conf-low  { background: rgba(224,85,85,0.2); color: var(--danger); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">LN OCR Scanner <span>· light novel text extractor</span></div>
+</header>
+
+<div class="main">
+  <div class="sidebar">
+    <div class="panel">
+      <div class="panel-title">Source PDF</div>
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept=".pdf">
+        <div class="drop-icon">📄</div>
+        <div class="drop-label"><strong>Click or drop</strong> a PDF here</div>
+      </div>
+    </div>
+
+    <div class="panel" id="pagesPanel" style="display:none">
+      <div class="panel-title">Pages <span id="pageCount" style="color:var(--text)"></span></div>
+      <div class="page-grid" id="pageGrid"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">OCR Options</div>
+      <div class="controls">
+        <div>
+          <label>Language</label>
+          <select id="langSelect">
+            <option value="eng">English</option>
+            <option value="jpn">Japanese</option>
+            <option value="chi_sim">Chinese (Simplified)</option>
+            <option value="chi_tra">Chinese (Traditional)</option>
+            <option value="kor">Korean</option>
+          </select>
+        </div>
+        <div>
+          <label>Page range (leave blank = all)</label>
+          <div class="range-row">
+            <input type="number" id="rangeFrom" placeholder="1" min="1">
+            <span>–</span>
+            <input type="number" id="rangeTo" placeholder="end" min="1">
+          </div>
+        </div>
+        <div>
+          <label>Render DPI</label>
+          <select id="dpiSelect">
+            <option value="2">Medium (fast)</option>
+            <option value="3" selected>High (recommended)</option>
+            <option value="4">Ultra (slow, best accuracy)</option>
+          </select>
+        </div>
+        <div>
+          <label>Page layout</label>
+          <select id="psmSelect">
+            <option value="6" selected>Single column (novels)</option>
+            <option value="3">Auto-detect layout</option>
+            <option value="4">Single column, variable sizes</option>
+            <option value="1">Orientation + script detect</option>
+          </select>
+        </div>
+        <div class="toggle-row">
+          <span>Preprocess image (boost accuracy)</span>
+          <div class="toggle on" id="togglePreprocess" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Auto-clean boilerplate</span>
+          <div class="toggle on" id="toggleClean" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Remove page numbers</span>
+          <div class="toggle on" id="togglePageNums" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Remove URLs</span>
+          <div class="toggle on" id="toggleUrls" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Skip image-only pages</span>
+          <div class="toggle on" id="toggleSkipImg" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="toggle-row">
+          <span>Fix OCR ligatures & quotes</span>
+          <div class="toggle on" id="toggleFix" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div>
+          <label>Custom skip phrases (one per line)</label>
+          <textarea id="skipPhrases" rows="3" style="font-family:var(--mono);font-size:11px;padding:8px;resize:vertical;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);width:100%;outline:none;">Story Seedling
+storyseedling.com
+https://storyseedling
+Log in to comment</textarea>
+        </div>
+        <button class="btn btn-primary" id="runBtn" disabled onclick="runOCR()">▶ Run OCR</button>
+        <button class="btn btn-ghost" id="stopBtn" disabled onclick="stopOCR()" style="display:none">■ Stop</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="toolbar" id="toolbar" style="display:none">
+      <button class="btn btn-ghost" onclick="copyAll()">⎘ Copy all</button>
+      <button class="btn btn-ghost" onclick="downloadTxt()">↓ Download .txt</button>
+      <button class="btn btn-danger" onclick="clearAll()">✕ Clear</button>
+      <div class="page-indicator" id="pageIndicator"></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div id="empty-state">
+      <div class="big-icon">📖</div>
+      <div>Load a PDF and run OCR to extract<br>light novel text — even from sites<br>with copy-protection.</div>
+    </div>
+
+    <div class="editor-area" id="editorArea" style="display:none">
+      <div class="preview-pane" id="previewPane">
+        <canvas id="previewCanvas"></canvas>
+      </div>
+      <div class="text-pane">
+        <div class="text-pane-tabs">
+          <div class="tab active" id="tabCurrent" onclick="switchTab('current')">Current page</div>
+          <div class="tab" id="tabAll" onclick="switchTab('all')">All pages</div>
+        </div>
+        <textarea id="currentText" placeholder="OCR text will appear here…" oninput="onTextEdit()"></textarea>
+        <div class="combined-view" id="combinedView" style="display:none"></div>
+        <div class="word-count" id="wordCount"></div>
+      </div>
+    </div>
+
+    <div class="status" id="status">Ready. Load a PDF to begin.</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+let pdfDoc = null;
+let totalPages = 0;
+let pageTexts = {};
+let pageConf = {};
+let currentPage = 1;
+let ocrRunning = false;
+let stopFlag = false;
+let activeTab = 'current';
+let pageCanvases = {};
+
+const BOILERPLATE_PATTERNS = [
+  /^\s*\d{1,3}\s*\/\s*\d{1,3}\s*$/,
+  /^\s*\d{1,4}\s*$/,
+  /https?:\/\/[^\s]+/g,
+  /^\s*AM\s*$|^\s*PM\s*$/i,
+  /^\s*[–—-]+\s*$/,
+  /^\s*\*+\s*$/,
+  /^.{0,2}$/,
+  /4\/\d+\/\d+,?\s+\d+:\d+\s+(AM|PM)/i,
+  /Vol\.\s*\d+\s+Chapter/i,
+  /TL:\s*PLS READ/i,
+  /First Voting Results/i,
+  /Discussion\s*\(\d+\)/i,
+  /Related Series/i,
+  /Log in to comment/i,
+  /No comments yet/i,
+  /Privacy Policy/i,
+  /Reading List/i,
+  /© 20\d\d/i,
+  /Confinement King LN/i,
+];
+
+// ── Image preprocessing ─────────────────────────────────────────────────────
+// Applies grayscale + contrast boost + mild sharpening on the canvas before
+// passing it to Tesseract. Dramatically improves accuracy on low-contrast or
+// compressed PDF pages.
+function preprocessCanvas(src) {
+  const dst = document.createElement('canvas');
+  dst.width = src.width;
+  dst.height = src.height;
+  const ctx = dst.getContext('2d');
+
+  // Draw source
+  ctx.drawImage(src, 0, 0);
+
+  const id = ctx.getImageData(0, 0, dst.width, dst.height);
+  const d = id.data;
+
+  for (let i = 0; i < d.length; i += 4) {
+    // Luminosity-weighted grayscale
+    const gray = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+
+    // Contrast stretch: push values towards 0 or 255 with a sigmoid-like curve
+    // factor > 1 = more contrast; 1.6 is good for printed novel scans
+    const factor = 1.6;
+    const contrasted = Math.max(0, Math.min(255,
+      ((gray - 128) * factor) + 128
+    ));
+
+    d[i] = d[i+1] = d[i+2] = contrasted;
+    // alpha unchanged
+  }
+
+  ctx.putImageData(id, 0, 0);
+
+  // Unsharp mask via second canvas — sharpens glyph edges
+  const sharp = document.createElement('canvas');
+  sharp.width = dst.width;
+  sharp.height = dst.height;
+  const sctx = sharp.getContext('2d');
+
+  // Draw blurred copy
+  sctx.filter = 'blur(1px)';
+  sctx.drawImage(dst, 0, 0);
+  sctx.filter = 'none';
+
+  const blurData = sctx.getImageData(0, 0, sharp.width, sharp.height).data;
+  const sharpId = ctx.getImageData(0, 0, dst.width, dst.height);
+  const sd = sharpId.data;
+
+  const strength = 0.5; // unsharp amount
+  for (let i = 0; i < sd.length; i += 4) {
+    // unsharp = original + strength*(original - blur)
+    const val = Math.max(0, Math.min(255,
+      sd[i] + strength * (sd[i] - blurData[i])
+    ));
+    sd[i] = sd[i+1] = sd[i+2] = val;
+  }
+
+  ctx.putImageData(sharpId, 0, 0);
+  return dst;
+}
+
+// ── OCR ligature & typography fixups ────────────────────────────────────────
+// Tesseract often misreads typographic ligatures and smart quotes.
+// These substitutions catch the most common cases in light novel text.
+const LIGATURE_MAP = [
+  [/ﬁ/g, 'fi'],   [/ﬂ/g, 'fl'],   [/ﬀ/g, 'ff'],
+  [/ﬃ/g, 'ffi'],  [/ﬄ/g, 'ffl'],  [/ﬅ/g, 'st'],
+  [/ﬆ/g, 'st'],   [/Ĳ/g, 'IJ'],   [/ĳ/g, 'ij'],
+];
+
+const QUOTE_MAP = [
+  [/\u201c|\u201d/g, '"'],  // curly double quotes → straight
+  [/\u2018|\u2019/g, "'"],  // curly single quotes → straight
+  [/\u2014/g, '—'],         // em dash (preserve)
+  [/\u2013/g, '–'],         // en dash (preserve)
+  [/\u2026/g, '...'],       // ellipsis
+  // Common misread patterns in novel OCR:
+  [/(?<=[a-z])-\n(?=[a-z])/g, ''],   // de-hyphenate mid-word line breaks
+  [/l(?=\d)/g, '1'],                  // lowercase l before digits → 1 (careful)
+  [/(?<=\d)O(?=\d)/g, '0'],          // capital O between digits → 0
+  [/\|/g, 'I'],                       // pipe → I (common OCR artifact)
+  [/ {2,}/g, ' '],                    // collapse multiple spaces
+];
+
+function fixOcrText(text) {
+  if (!text) return '';
+  let t = text;
+  for (const [pat, rep] of LIGATURE_MAP) t = t.replace(pat, rep);
+  for (const [pat, rep] of QUOTE_MAP) t = t.replace(pat, rep);
+  return t;
+}
+
+// ── Text cleaning ────────────────────────────────────────────────────────────
+function cleanText(raw) {
+  if (!raw) return '';
+  let lines = raw.split('\n');
+  const customSkips = getCustomSkipPhrases();
+
+  lines = lines.filter(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+
+    if (shouldClean()) {
+      for (const pat of BOILERPLATE_PATTERNS) {
+        if (typeof pat === 'string') {
+          if (trimmed.toLowerCase().includes(pat.toLowerCase())) return false;
+        } else {
+          if (pat.test(trimmed)) return false;
+        }
+      }
+    }
+
+    if (shouldRemovePageNums() && /^\s*\d{1,4}\s*$/.test(trimmed)) return false;
+
+    for (const phrase of customSkips) {
+      if (trimmed.toLowerCase().includes(phrase.toLowerCase())) return false;
+    }
+
+    return true;
+  });
+
+  if (shouldRemoveUrls()) {
+    lines = lines.map(l => l.replace(/https?:\/\/[^\s]+/g, '').trim()).filter(Boolean);
+  }
+
+  let text = lines.join('\n');
+  text = text.replace(/\n{3,}/g, '\n\n');
+  return text.trim();
+}
+
+// ── DOM helpers ──────────────────────────────────────────────────────────────
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type === 'application/pdf') loadPDF(f);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadPDF(fileInput.files[0]); });
+
+// ── PDF loading ──────────────────────────────────────────────────────────────
+async function loadPDF(file) {
+  setStatus('Loading PDF…', 'running');
+  const ab = await file.arrayBuffer();
+  pdfDoc = await pdfjsLib.getDocument({ data: ab }).promise;
+  totalPages = pdfDoc.numPages;
+  document.getElementById('pageCount').textContent = `(${totalPages})`;
+  document.getElementById('pagesPanel').style.display = '';
+  document.getElementById('runBtn').disabled = false;
+  pageTexts = {};
+  pageConf = {};
+  pageCanvases = {};
+  await buildThumbnails();
+  setStatus(`Loaded ${totalPages} pages. Configure options and click Run OCR.`, 'ok');
+}
+
+async function buildThumbnails() {
+  const grid = document.getElementById('pageGrid');
+  grid.innerHTML = '';
+  for (let i = 1; i <= totalPages; i++) {
+    const div = document.createElement('div');
+    div.className = 'thumb';
+    div.id = `thumb-${i}`;
+    div.onclick = () => selectPage(i);
+    const canvas = document.createElement('canvas');
+    const pg = document.createElement('div');
+    pg.className = 'pg-num';
+    pg.textContent = i;
+    div.appendChild(canvas);
+    div.appendChild(pg);
+    grid.appendChild(div);
+    const page = await pdfDoc.getPage(i);
+    const vp = page.getViewport({ scale: 0.3 });
+    canvas.width = vp.width;
+    canvas.height = vp.height;
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+  }
+}
+
+async function selectPage(n) {
+  currentPage = n;
+  document.querySelectorAll('.thumb').forEach(t => t.classList.remove('selected'));
+  const th = document.getElementById(`thumb-${n}`);
+  if (th) th.classList.add('selected');
+  await renderPreview(n);
+  document.getElementById('currentText').value = pageTexts[n] || '';
+  updateWordCount();
+  updateConfBadge(n);
+  document.getElementById('pageIndicator').textContent = `Page ${n} of ${totalPages}`;
+  if (!document.getElementById('editorArea').style.display || document.getElementById('editorArea').style.display === 'none') {
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('editorArea').style.display = 'flex';
+    document.getElementById('toolbar').style.display = 'flex';
+  }
+}
+
+async function renderPreview(n) {
+  const page = await pdfDoc.getPage(n);
+  const scale = parseFloat(document.getElementById('dpiSelect').value);
+  const vp = page.getViewport({ scale });
+  const canvas = document.getElementById('previewCanvas');
+  canvas.width = vp.width;
+  canvas.height = vp.height;
+  await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+  pageCanvases[n] = canvas.toDataURL('image/jpeg', 0.92);
+  return canvas;
+}
+
+// ── Options ──────────────────────────────────────────────────────────────────
+function getPageRange() {
+  const from = parseInt(document.getElementById('rangeFrom').value) || 1;
+  const to   = parseInt(document.getElementById('rangeTo').value)   || totalPages;
+  return [Math.max(1, from), Math.min(totalPages, to)];
+}
+
+function shouldPreprocess()    { return document.getElementById('togglePreprocess').classList.contains('on'); }
+function shouldClean()         { return document.getElementById('toggleClean').classList.contains('on'); }
+function shouldRemovePageNums(){ return document.getElementById('togglePageNums').classList.contains('on'); }
+function shouldRemoveUrls()    { return document.getElementById('toggleUrls').classList.contains('on'); }
+function shouldSkipImgPages()  { return document.getElementById('toggleSkipImg').classList.contains('on'); }
+function shouldFixLigatures()  { return document.getElementById('toggleFix').classList.contains('on'); }
+
+function getCustomSkipPhrases() {
+  return document.getElementById('skipPhrases').value
+    .split('\n').map(s => s.trim()).filter(Boolean);
+}
+
+// ── Image-only detection ──────────────────────────────────────────────────────
+async function isImageOnlyPage(pageNum) {
+  const page = await pdfDoc.getPage(pageNum);
+  const content = await page.getTextContent();
+  const charCount = content.items.reduce((n, item) => n + (item.str || '').trim().length, 0);
+  return charCount < 15;
+}
+
+// ── Get text band Y-ranges directly from pdf.js text coordinates ──────────────
+// pdf.js gives us the exact position of every text item on the page in PDF
+// user-space coordinates. We group nearby items into vertical bands, then
+// convert those bands to canvas-pixel rows using the render scale.
+// This is 100% reliable — it uses the same data the browser uses to select text,
+// so images are never confused for text and text is never confused for images.
+async function getTextBands(pageNum, scale, canvasHeight) {
+  const page = await pdfDoc.getPage(pageNum);
+  const viewport = page.getViewport({ scale });
+  const content = await page.getTextContent();
+
+  if (!content.items.length) return [];
+
+  // Each item has a `transform` array: [a,b,c,d,e,f] where (e,f) is the origin
+  // in PDF coordinates (Y increases upward). Convert to canvas pixels (Y downward).
+  // PDF viewport handles this: use viewport.convertToViewportPoint.
+  const yCoords = [];
+  for (const item of content.items) {
+    if (!(item.str || '').trim()) continue;
+    const tx = item.transform;
+    // tx[5] is the Y in PDF space; item.height is the glyph height
+    const pdfY = tx[5];
+    const pdfYtop = pdfY + (item.height || 12);
+    // convertToViewportPoint flips Y to canvas space
+    const [, canvasYBottom] = viewport.convertToViewportPoint(tx[4], pdfY);
+    const [, canvasYTop]    = viewport.convertToViewportPoint(tx[4], pdfYtop);
+    yCoords.push({ top: Math.min(canvasYTop, canvasYBottom), bottom: Math.max(canvasYTop, canvasYBottom) });
+  }
+
+  if (!yCoords.length) return [];
+
+  // Sort by top edge, then merge overlapping/adjacent rows into bands
+  // with a gap tolerance (lines within 24px of each other = same paragraph band)
+  yCoords.sort((a, b) => a.top - b.top);
+  const GAP = 24; // px — tune if paragraphs get merged across images
+  const bands = [];
+  let band = { ...yCoords[0] };
+  for (let i = 1; i < yCoords.length; i++) {
+    const cur = yCoords[i];
+    if (cur.top - band.bottom <= GAP) {
+      band.bottom = Math.max(band.bottom, cur.bottom);
+    } else {
+      bands.push(band);
+      band = { ...cur };
+    }
+  }
+  bands.push(band);
+
+  // Add a small margin around each band for safe cropping
+  const MARGIN = 8;
+  return bands.map(b => ({
+    y0: Math.max(0, Math.floor(b.top) - MARGIN),
+    y1: Math.min(canvasHeight, Math.ceil(b.bottom) + MARGIN),
+  }));
+}
+
+// ── Crop a canvas to a vertical slice ────────────────────────────────────────
+function cropCanvasRows(src, y0, y1) {
+  const h = y1 - y0;
+  if (h <= 0) return null;
+  const dst = document.createElement('canvas');
+  dst.width = src.width;
+  dst.height = h;
+  dst.getContext('2d').drawImage(src, 0, y0, src.width, h, 0, 0, src.width, h);
+  return dst;
+}
+
+// ── OCR a single canvas strip, returns {text, conf} ──────────────────────────
+async function ocrStrip(worker, canvas, psm) {
+  const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+  const result = await worker.recognize(blob);
+  const words = result.data.words || [];
+  const conf = words.length ? words.reduce((s, w) => s + w.confidence, 0) / words.length : 0;
+  return { text: result.data.text, conf };
+}
+
+// ── Deduplicate lines across strips ──────────────────────────────────────────
+function deduplicateLines(text) {
+  const lines = text.split('\n');
+  const out = [];
+  let prevNorm = null;
+  for (const line of lines) {
+    const norm = line.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (norm && norm === prevNorm) continue;
+    out.push(line);
+    if (norm) prevNorm = norm;
+  }
+  return out.join('\n');
+}
+
+// ── Smart per-page OCR using pdf.js text coordinates for region splitting ─────
+// Strategy:
+//   1. Ask pdf.js where text actually lives on this page (exact coordinates).
+//   2. If text spans the whole page vertically with no large gaps → single pass.
+//   3. If there are gaps (image regions between text blocks) → crop to each
+//      text band and OCR independently, preserving reading order.
+//   4. Fallback: if coordinate extraction yields nothing, OCR full page with
+//      PSM 11 (sparse text, finds text anywhere regardless of layout).
+async function ocrPage(worker, pageNum, pageCanvas, scale, psm) {
+  const preprocessed = shouldPreprocess() ? preprocessCanvas(pageCanvas) : pageCanvas;
+  const H = preprocessed.height;
+
+  // Get text bands from pdf.js — these are pixel-perfect regions containing text
+  const bands = await getTextBands(pageNum, scale, H);
+
+  // Fast path: no bands found (pure image page) or single contiguous block
+  if (bands.length === 0) {
+    // No PDF text layer at all — full page OCR with sparse-text PSM
+    await worker.setParameters({ tessedit_pageseg_mode: 11 });
+    const r = await ocrStrip(worker, preprocessed, 11);
+    await worker.setParameters({ tessedit_pageseg_mode: parseInt(psm) });
+    return r;
+  }
+
+  // Check if the bands cover the whole page without meaningful gaps
+  // (i.e. no image is interrupting the text flow)
+  const totalBandHeight = bands.reduce((s, b) => s + (b.y1 - b.y0), 0);
+  const pageGapFrac = 1 - (totalBandHeight / H);
+  if (pageGapFrac < 0.25 || bands.length === 1) {
+    // Text covers most of the page — single OCR pass is fine
+    return ocrStrip(worker, preprocessed, psm);
+  }
+
+  // Multiple text bands with large gaps between them (images in between).
+  // OCR each band individually and merge in vertical order.
+  await worker.setParameters({ tessedit_pageseg_mode: 6 });
+  const parts = [];
+  let totalConf = 0, confCount = 0;
+
+  for (const { y0, y1 } of bands) {
+    const strip = cropCanvasRows(preprocessed, y0, y1);
+    if (!strip) continue;
+    const { text, conf } = await ocrStrip(worker, strip, 6);
+    if (text.trim()) {
+      parts.push(text.trimEnd());
+      totalConf += conf;
+      confCount++;
+    }
+  }
+
+  await worker.setParameters({ tessedit_pageseg_mode: parseInt(psm) });
+
+  const merged = deduplicateLines(parts.join('\n'));
+  const avgConf = confCount ? totalConf / confCount : 0;
+
+  // Safety fallback: if bands approach yielded almost nothing, try full-page PSM 11
+  const wordCount = merged.trim().split(/\s+/).filter(Boolean).length;
+  if (wordCount < 5) {
+    await worker.setParameters({ tessedit_pageseg_mode: 11 });
+    const fallback = await ocrStrip(worker, preprocessed, 11);
+    await worker.setParameters({ tessedit_pageseg_mode: parseInt(psm) });
+    if ((fallback.text.trim().split(/\s+/).filter(Boolean).length) > wordCount) return fallback;
+  }
+
+  return { text: merged, conf: avgConf };
+}
+
+// ── Confidence badge ─────────────────────────────────────────────────────────
+function updateConfBadge(n) {
+  const indicator = document.getElementById('pageIndicator');
+  const conf = pageConf[n];
+  const pageText = `Page ${n} of ${totalPages}`;
+  if (conf == null) { indicator.textContent = pageText; return; }
+  const cls = conf >= 80 ? 'conf-high' : conf >= 55 ? 'conf-mid' : 'conf-low';
+  indicator.innerHTML = `${pageText} <span class="conf-badge ${cls}">${Math.round(conf)}% conf</span>`;
+}
+
+// ── OCR runner ───────────────────────────────────────────────────────────────
+async function runOCR() {
+  if (!pdfDoc) return;
+  ocrRunning = true;
+  stopFlag = false;
+  document.getElementById('runBtn').style.display = 'none';
+  document.getElementById('stopBtn').style.display = '';
+  document.getElementById('stopBtn').disabled = false;
+
+  const [from, to] = getPageRange();
+  const lang  = document.getElementById('langSelect').value;
+  const scale = parseFloat(document.getElementById('dpiSelect').value);
+  const psm   = document.getElementById('psmSelect').value;
+  const total = to - from + 1;
+  let done = 0;
+
+  setStatus(`Starting OCR (pages ${from}–${to}, lang: ${lang})…`, 'running');
+
+  const worker = await Tesseract.createWorker(lang, 1, {
+    logger: m => {
+      if (m.status === 'recognizing text') {
+        setStatus(`Page ${currentPage}: recognizing… ${Math.round(m.progress * 100)}%`, 'running');
+      }
+    }
+  });
+
+  await worker.setParameters({
+    tessedit_ocr_engine_mode: 1,
+    tessedit_pageseg_mode: parseInt(psm),
+    preserve_interword_spaces: '1',
+    tessedit_char_blacklist: '|}{\\<>~`^',
+    textord_heavy_nr: '1',
+    edges_max_children_per_outline: '40',
+  });
+
+  for (let i = from; i <= to; i++) {
+    if (stopFlag) break;
+    currentPage = i;
+
+    if (shouldSkipImgPages() && await isImageOnlyPage(i)) {
+      setStatus(`Page ${i}: skipped (image-only)`, 'running');
+      done++;
+      document.getElementById('progressFill').style.width = (done / total * 100) + '%';
+      continue;
+    }
+
+    setStatus(`Page ${i} of ${to}: rendering…`, 'running');
+    const page = await pdfDoc.getPage(i);
+    const vp   = page.getViewport({ scale });
+
+    const offCanvas = document.createElement('canvas');
+    offCanvas.width  = vp.width;
+    offCanvas.height = vp.height;
+    await page.render({ canvasContext: offCanvas.getContext('2d'), viewport: vp }).promise;
+
+    // Smart OCR: uses pdf.js text coordinates to find text bands around images
+    const { text: rawText, conf: avgConf } = await ocrPage(worker, i, offCanvas, scale, psm);
+
+    pageConf[i] = avgConf;
+
+    let text = rawText;
+    if (shouldFixLigatures()) text = fixOcrText(text);
+    pageTexts[i] = cleanText(text);
+
+    const thumb = document.getElementById(`thumb-${i}`);
+    if (thumb) thumb.classList.add('done');
+
+    done++;
+    document.getElementById('progressFill').style.width = (done / total * 100) + '%';
+
+    if (i === currentPage || done === 1) {
+      pageCanvases[i] = offCanvas.toDataURL('image/jpeg', 0.92);
+      document.getElementById('empty-state').style.display = 'none';
+      document.getElementById('editorArea').style.display = 'flex';
+      document.getElementById('toolbar').style.display = 'flex';
+      selectPageDisplay(i);
+    }
+  }
+
+  await worker.terminate();
+  ocrRunning = false;
+  document.getElementById('runBtn').style.display = '';
+  document.getElementById('stopBtn').style.display = 'none';
+  document.getElementById('runBtn').disabled = false;
+  updateCombinedView();
+  setStatus(`OCR complete — ${done} pages processed.`, 'ok');
+}
+
+function stopOCR() {
+  stopFlag = true;
+  document.getElementById('stopBtn').disabled = true;
+  setStatus('Stopping after current page…', 'running');
+}
+
+function selectPageDisplay(n) {
+  currentPage = n;
+  document.querySelectorAll('.thumb').forEach(t => t.classList.remove('selected'));
+  const th = document.getElementById(`thumb-${n}`);
+  if (th) th.classList.add('selected');
+
+  if (pageCanvases[n]) {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.getElementById('previewCanvas');
+      c.width = img.width;
+      c.height = img.height;
+      c.getContext('2d').drawImage(img, 0, 0);
+    };
+    img.src = pageCanvases[n];
+  }
+
+  document.getElementById('currentText').value = pageTexts[n] || '';
+  document.getElementById('pageIndicator').textContent = `Page ${n} of ${totalPages}`;
+  updateWordCount();
+  updateConfBadge(n);
+}
+
+function updateCombinedView() {
+  const cv = document.getElementById('combinedView');
+  const pages = Object.keys(pageTexts).map(Number).sort((a,b) => a-b);
+  if (!pages.length) { cv.innerHTML = '<em style="color:var(--muted)">No text extracted yet.</em>'; return; }
+  cv.innerHTML = pages.map(p => {
+    const conf = pageConf[p];
+    const badge = conf != null
+      ? ` <span class="conf-badge ${conf >= 80 ? 'conf-high' : conf >= 55 ? 'conf-mid' : 'conf-low'}">${Math.round(conf)}%</span>`
+      : '';
+    const sep = `<div class="page-sep">Page ${p}${badge}</div>`;
+    const text = document.createElement('div');
+    text.textContent = pageTexts[p];
+    return sep + text.outerHTML;
+  }).join('');
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tabCurrent').classList.toggle('active', tab === 'current');
+  document.getElementById('tabAll').classList.toggle('active', tab === 'all');
+  document.getElementById('currentText').style.display   = tab === 'current' ? '' : 'none';
+  document.getElementById('combinedView').style.display  = tab === 'all'     ? '' : 'none';
+  if (tab === 'all') updateCombinedView();
+  updateWordCount();
+}
+
+function onTextEdit() {
+  pageTexts[currentPage] = document.getElementById('currentText').value;
+  updateWordCount();
+}
+
+function updateWordCount() {
+  let text = '';
+  if (activeTab === 'current') {
+    text = document.getElementById('currentText').value;
+  } else {
+    text = Object.values(pageTexts).join(' ');
+  }
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const chars  = text.length;
+  document.getElementById('wordCount').textContent = `${words.toLocaleString()} words · ${chars.toLocaleString()} chars`;
+}
+
+function getAllText() {
+  return Object.keys(pageTexts).map(Number).sort((a,b) => a-b)
+    .map(p => pageTexts[p]).filter(Boolean).join('\n\n');
+}
+
+async function copyAll() {
+  const text = getAllText();
+  await navigator.clipboard.writeText(text);
+  const btn = event.target;
+  const orig = btn.textContent;
+  btn.textContent = '✓ Copied!';
+  btn.classList.add('copy-flash');
+  setTimeout(() => { btn.textContent = orig; btn.classList.remove('copy-flash'); }, 1500);
+}
+
+function downloadTxt() {
+  const text = getAllText();
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ocr-output.txt';
+  a.click();
+}
+
+function clearAll() {
+  if (!confirm('Clear all extracted text?')) return;
+  pageTexts = {};
+  pageConf  = {};
+  document.getElementById('currentText').value = '';
+  document.getElementById('progressFill').style.width = '0%';
+  document.querySelectorAll('.thumb').forEach(t => t.classList.remove('done'));
+  updateCombinedView();
+  updateWordCount();
+  setStatus('Cleared.', '');
+}
+
+function setStatus(msg, type) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + (type || '');
+}
+</script>
+</body>
+</html>
