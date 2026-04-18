@@ -526,25 +526,10 @@
 
     buildChips();
 
-    fetch('./novels.json')
-  .then(r => {
-    if (!r.ok) throw new Error('Not found');
-    return r.json();
-  })
-  .then(data => {
-    novels = data;
-    console.log(`Loaded ${novels.length} novels.`);
-  })
-  .catch(err => {
-    console.warn('novels.json fetch failed:', err);
-    // Show a helpful message on the page
-    document.getElementById('resultsSection').style.display = 'block';
-    document.getElementById('resultsHeader').innerHTML =
-      '⚠️ novels.json could not be loaded. ' +
-      (location.protocol === 'file:'
-        ? 'Open this page via a local server (e.g. VS Code Live Server) — browsers block file:// fetches.'
-        : 'Make sure novels.json is in the same folder as search.html on your server.');
-  });
+    fetch('https://animestuff.me/novels.json')
+      .then(r => r.json())
+      .then(data => { novels = data; })
+      .catch(() => console.warn('novels.json not found — place it in the same folder as this file'));
 
     /* ── Sort ── */
     function setSort(dir) {
