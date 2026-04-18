@@ -147,6 +147,8 @@ async function loadNovels() {
   }
 }
 
+if (window.syncNovelDropdown) window.syncNovelDropdown();
+
 function populateDropdown(list) {
   elNovelSelect.innerHTML = `<option value="">— Select a novel —</option>`;
   list.forEach((n, i) => {
