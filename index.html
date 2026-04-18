@@ -463,6 +463,48 @@
       padding: 0 2px;
     }
 
+    /* ── Pagination ── */
+    .pagination-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .page-btn {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 10px;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      background: #fff;
+      color: #444;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: "Lato", sans-serif;
+      cursor: pointer;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .page-btn:hover:not(:disabled) { border-color: #b00; color: #b00; background: #fff8f8; }
+    .page-btn.active { background: #b00; border-color: #b00; color: #fff; }
+    .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .page-ellipsis {
+      font-size: 13px;
+      color: #aaa;
+      padding: 0 2px;
+      line-height: 36px;
+    }
+    .page-info {
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+      margin-top: 8px;
+    }
+
     /* ── Footer ── */
     footer {
       background: lightgrey;
@@ -539,9 +581,7 @@ function closeNav() {
 
 <hr>
 
-<!-- ═══════════════════════════════════════
-     🔥 RECENTLY UPDATED
-════════════════════════════════════════ -->
+<!-- Recently Updated -->
 <div class="section-head">
   <h3>🔥 Recently Updated</h3>
   <div class="sh-line"></div>
@@ -558,9 +598,7 @@ function closeNav() {
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     ✨ NEWLY ADDED
-════════════════════════════════════════ -->
+<!-- Newly Added -->
 <div class="section-head">
   <h3>✨ Newly Added</h3>
   <div class="sh-line"></div>
@@ -579,9 +617,7 @@ function closeNav() {
 
 <hr>
 
-<!-- ═══════════════════════════════════════
-     🔍 SEARCH & FILTER
-════════════════════════════════════════ -->
+<!-- Search & Filter -->
 <div class="section-head">
   <h3>🔍 Search &amp; Filter Novels</h3>
   <div class="sh-line"></div>
@@ -589,22 +625,14 @@ function closeNav() {
 
 <div class="filter-section">
   <div class="filter-box">
-
-    <!-- Search bar -->
     <div class="search-row">
       <div class="search-input-wrap">
         <span class="search-icon-inner">&#128269;</span>
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Search light novels..."
-          autocomplete="off"
-        >
+        <input type="text" id="searchInput" placeholder="Search light novels..." autocomplete="off">
       </div>
       <button class="go-btn" onclick="doSearch()">Go</button>
     </div>
 
-    <!-- Genre filter toggle -->
     <div class="genre-toggle-row">
       <span class="genre-label">Filter by Genre</span>
       <button class="genre-toggle-btn open" id="genreToggleBtn" onclick="toggleGenrePanel()">
@@ -612,7 +640,6 @@ function closeNav() {
       </button>
     </div>
 
-    <!-- Collapsible genre panel -->
     <div class="genre-panel open" id="genrePanel">
       <div class="genre-chips" id="genreChips"></div>
       <div class="filter-footer">
@@ -632,6 +659,10 @@ function closeNav() {
       </div>
     </div>
     <div class="novel-grid" id="novelGrid"></div>
+
+    <!-- Pagination -->
+    <div class="pagination-wrap" id="paginationWrap"></div>
+    <div class="page-info" id="pageInfo"></div>
   </div>
 </div>
 
@@ -650,9 +681,7 @@ function closeNav() {
   });
 </script>
 
-<!-- ═══════════════════════════════════════
-     FEED LOGIC
-════════════════════════════════════════ -->
+<!-- Feed Logic -->
 <script>
   function esc(s) {
     return String(s)
@@ -733,14 +762,14 @@ function closeNav() {
   loadNewFeed();
 </script>
 
-<!-- ═══════════════════════════════════════
-     SEARCH + FILTER + SORT LOGIC
-════════════════════════════════════════ -->
+<!-- Search + Filter + Sort + Pagination Logic -->
 <script>
   let novels = [];
   let selectedGenres = new Set();
   let currentSort = 'asc';
   let lastResults  = [];
+  let currentPage  = 1;
+  const PAGE_SIZE  = 24;
 
   const ALL_GENRES = [
     "Action","Adult","Adventure","Age Gap","Antihero Protagonist","Apocalypse",
@@ -766,7 +795,10 @@ function closeNav() {
     currentSort = dir;
     document.getElementById('sortAZ').classList.toggle('active', dir === 'asc');
     document.getElementById('sortZA').classList.toggle('active', dir === 'desc');
-    if (lastResults.length > 0) renderGrid(lastResults);
+    if (lastResults.length > 0) {
+      currentPage = 1;
+      renderGrid(lastResults);
+    }
   }
 
   function sortedResults(arr) {
@@ -840,6 +872,7 @@ function closeNav() {
       results = results.filter(n => n.title.toLowerCase().includes(low));
     }
     lastResults = results;
+    currentPage = 1;
 
     const sec    = document.getElementById('resultsSection');
     const header = document.getElementById('resultsHeader');
@@ -861,10 +894,20 @@ function closeNav() {
 
     if (sorted.length === 0) {
       grid.innerHTML = '<div class="no-results">No novels matched. Try different filters.</div>';
+      document.getElementById('paginationWrap').innerHTML = '';
+      document.getElementById('pageInfo').textContent = '';
       return;
     }
 
-    grid.innerHTML = sorted.map(n => {
+    const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
+    // Clamp currentPage in case results shrank
+    currentPage = Math.min(currentPage, totalPages);
+
+    const start  = (currentPage - 1) * PAGE_SIZE;
+    const end    = Math.min(start + PAGE_SIZE, sorted.length);
+    const page   = sorted.slice(start, end);
+
+    grid.innerHTML = page.map(n => {
       const tags = (n.genres || []).slice(0, 4).map(g =>
         `<span class="card-genre${selectedGenres.has(g) ? ' matched' : ''}">${escHtml(g)}</span>`
       ).join('');
@@ -879,6 +922,60 @@ function closeNav() {
         </div>
       </div>`;
     }).join('');
+
+    renderPagination(totalPages);
+
+    document.getElementById('pageInfo').textContent =
+      `Showing ${start + 1}–${end} of ${sorted.length} novels`;
+  }
+
+  function renderPagination(totalPages) {
+    const wrap = document.getElementById('paginationWrap');
+    if (totalPages <= 1) { wrap.innerHTML = ''; return; }
+
+    const pages = [];
+
+    // Always show first
+    pages.push(1);
+
+    // Left ellipsis zone
+    if (currentPage > 4) pages.push('...');
+
+    // Window around current page
+    for (let i = Math.max(2, currentPage - 2); i <= Math.min(totalPages - 1, currentPage + 2); i++) {
+      pages.push(i);
+    }
+
+    // Right ellipsis zone
+    if (currentPage < totalPages - 3) pages.push('...');
+
+    // Always show last
+    if (totalPages > 1) pages.push(totalPages);
+
+    let html = '';
+
+    // Prev button
+    html += `<button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&#8592;</button>`;
+
+    pages.forEach(p => {
+      if (p === '...') {
+        html += `<span class="page-ellipsis">…</span>`;
+      } else {
+        html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+      }
+    });
+
+    // Next button
+    html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>&#8594;</button>`;
+
+    wrap.innerHTML = html;
+  }
+
+  function goToPage(page) {
+    currentPage = page;
+    renderGrid(lastResults);
+    // Scroll back up to results section smoothly
+    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   document.getElementById('searchInput').addEventListener('keydown', e => {
