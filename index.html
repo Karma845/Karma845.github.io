@@ -522,12 +522,11 @@ function closeNav() {
 <hr>
 
 <!-- Welcome Banner -->
-<a class="welcome-banner" href="index85.html">
+<a class="welcome-banner" href="">
   <img src="img/elaina.jpg" alt="Icon">
   <div class="welcome-text">
     <div class="wt-title">Welcome to AnimeStuff</div>
     <div class="wt-sub">Free Light Novels — EPUB &amp; PDF</div>
-    <span class="wt-cta">Latest Novels Here »</span>
   </div>
 </a>
 
@@ -643,20 +642,20 @@ function closeNav() {
 <footer>Copyright 2022 — AnimeStuff</footer>
 
 <!-- Ko-fi -->
-<script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js">
-
+<script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
+<script>
   kofiWidgetOverlay.draw('animestuff85370', {
     'type': 'floating-chat',
     'floating-chat.donateButton.text': 'Support me',
     'floating-chat.donateButton.background-color': '#00b9fe',
     'floating-chat.donateButton.text-color': '#fff'
   });
-
+</script>
 
 <!-- ═══════════════════════════════════════
      FEED LOGIC
 ════════════════════════════════════════ -->
-
+<script>
   function esc(s) {
     return String(s)
       .replace(/&/g,"&amp;").replace(/</g,"&lt;")
@@ -734,12 +733,12 @@ function closeNav() {
 
   loadUpdatedFeed();
   loadNewFeed();
-
+</script>
 
 <!-- ═══════════════════════════════════════
      SEARCH + FILTER + SORT LOGIC
 ════════════════════════════════════════ -->
-
+<script>
   let novels = [];
   let selectedGenres = new Set();
   let currentSort = 'asc';
@@ -887,8 +886,8 @@ function closeNav() {
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') doSearch();
   });
+</script>
 
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
