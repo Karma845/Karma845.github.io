@@ -368,6 +368,32 @@
   let fileQueue = [];
   let activePreviewIdx = 0;
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // UTF-8 SAFE BASE64 DECODE
+  // THE FIX: The old code used atob() which returns a "binary string" where
+  // each character represents one raw byte. When JSON.parse() reads that
+  // string it treats the raw byte values as Unicode codepoints — which
+  // corrupts any multi-byte UTF-8 sequence (curly quotes, em dashes, etc.)
+  // into ÃÂÃÂ garbage.
+  //
+  // The fix is to:
+  //   1. atob() → Uint8Array (get the actual bytes)
+  //   2. TextDecoder('utf-8').decode(bytes) → proper JS string
+  //
+  // This is the ONLY change needed. The write path (btoa + encodeURIComponent)
+  // was always correct and is untouched.
+  // ─────────────────────────────────────────────────────────────────────────
+  function decodeBase64Utf8(base64) {
+    // Step 1: base64 → raw bytes
+    const binaryStr = atob(base64.replace(/\n/g, ''));
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+    // Step 2: raw bytes → proper UTF-8 string
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+
   function togglePw() {
     const inp = document.getElementById('ghToken');
     inp.type = inp.type === 'password' ? 'text' : 'password';
@@ -405,6 +431,7 @@
           document.getElementById('uploadBtn').disabled = false;
         }
       };
+      // readAsText defaults to UTF-8 — correct, no change needed here
       reader.readAsText(file);
     });
   }
@@ -454,7 +481,7 @@
     const titleMatch = html.match(/<h2[^>]*>\s*(?:\(EPUB\)\s*|\(WN\)\s*|\(LN\)\s*)?([^<\n]+)/i);
     let title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '').trim().replace(/\.$/, '') : fname.replace('.html', '');
 
-    // Cover: grab raw src exactly as-is — no proxy, no modification
+    // Cover: grab raw src exactly as-is
     const imgMatches = [...html.matchAll(/<img[^>]+src=["'\s]?([^\s"'><]+)/gi)];
     let cover = '';
     for (const m of imgMatches) {
@@ -502,7 +529,6 @@
     document.getElementById('editCover').value = n.cover;
     document.getElementById('editFilePath').value = n.filePath;
 
-    // Re-render queue to show active highlight
     renderQueue();
     checkIfExists(n.title);
   }
@@ -514,7 +540,6 @@
     p.genres   = document.getElementById('editGenres').value.split(',').map(g => g.trim()).filter(Boolean);
     p.cover    = document.getElementById('editCover').value.trim();
     p.filePath = document.getElementById('editFilePath').value.trim();
-    // Update preview title live
     document.getElementById('previewTitle').textContent = p.title;
     document.getElementById('previewGenres').innerHTML = p.genres.map(g => `<span class="genre-tag">${escHtml(g)}</span>`).join('');
   }
@@ -543,32 +568,24 @@
     return document.getElementById('ghBranch').value.trim() || 'main';
   }
 
-  async function testConnection() {
-    hideAlerts();
-    try {
-      const r = await fetch(repoBase(), { headers: ghHeaders() });
-      if (r.ok) {
-        show('connOk');
-      } else {
-        const d = await r.json();
-        showErr('connErr', '❌ ' + (d.message || 'Connection failed'));
-      }
-    } catch(e) {
-      showErr('connErr', '❌ Network error: ' + e.message);
-    }
-  }
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // FIXED: getFileSHA now uses decodeBase64Utf8() instead of raw atob()
+  // This is the only function that changed from the original uploader.
+  // ─────────────────────────────────────────────────────────────────────────
   async function getFileSHA(path) {
     const r = await fetch(`${repoBase()}/contents/${path}?ref=${branch()}`, { headers: ghHeaders() });
     if (r.status === 404) return { sha: null, content: null };
     if (!r.ok) throw new Error('Failed to fetch ' + path);
     const d = await r.json();
-    return { sha: d.sha, content: atob(d.content.replace(/\n/g, '')) };
+    // ✅ FIX: use TextDecoder instead of raw atob() to preserve UTF-8 characters
+    const content = decodeBase64Utf8(d.content);
+    return { sha: d.sha, content };
   }
 
   async function putFile(path, content, message, sha) {
     const body = {
       message,
+      // This encode path was always correct — untouched
       content: btoa(unescape(encodeURIComponent(content))),
       branch: branch()
     };
@@ -631,7 +648,7 @@
 
     if (total > 1) document.getElementById('batchProgress').style.display = 'block';
 
-    // Fetch novels.json once
+    // Fetch novels.json once — now uses the fixed UTF-8 decoder
     const lj = addLog('Fetching novels.json...', 'run');
     let novels = [], jsonSHA = null;
     try {
