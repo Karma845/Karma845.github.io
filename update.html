@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AnimeStuff — Update Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ─── Reset & Variables ───────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --red:        #c00;
+  --red-dark:   #900;
+  --red-glow:   rgba(200,0,0,0.18);
+  --red-faint:  rgba(200,0,0,0.07);
+  --bg:         #0e0e12;
+  --surface:    #16161e;
+  --surface2:   #1e1e28;
+  --border:     rgba(255,255,255,0.08);
+  --border2:    rgba(255,255,255,0.14);
+  --text:       #f0f0f0;
+  --muted:      #888;
+  --muted2:     #555;
+  --success:    #2ecc71;
+  --success-bg: rgba(46,204,113,0.1);
+  --error:      #e74c3c;
+  --error-bg:   rgba(231,76,60,0.1);
+  --info:       #3498db;
+  --info-bg:    rgba(52,152,219,0.1);
+  --radius:     14px;
+  --radius-sm:  9px;
+  --font-head:  "Syne", sans-serif;
+  --font-body:  "DM Sans", sans-serif;
+  --transition: 0.2s ease;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 60px;
+  /* subtle noise texture */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ─── Top Bar ─────────────────────────────────────────── */
+.topbar {
+  background: linear-gradient(135deg, #1a0000 0%, #1a0a0a 100%);
+  border-bottom: 1px solid rgba(200,0,0,0.25);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 58px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+.topbar-icon {
+  font-size: 22px;
+  background: var(--red);
+  border-radius: 8px;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 14px var(--red-glow);
+}
+.topbar-title {
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  color: #fff;
+  line-height: 1.1;
+}
+.topbar-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  font-weight: 400;
+  margin-top: 1px;
+}
+.topbar-links {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+.topbar-link {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  transition: var(--transition);
+  font-weight: 500;
+}
+.topbar-link:hover {
+  background: var(--red-faint);
+  border-color: var(--red);
+  color: #fff;
+}
+
+/* ─── Container ───────────────────────────────────────── */
+.container {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 20px 14px 0;
+}
+
+/* ─── Section label ───────────────────────────────────── */
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin: 24px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ─── Card ────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+/* ─── Fields ──────────────────────────────────────────── */
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  appearance: none;
+  -webkit-appearance: none;
+}
+.field input:focus,
+.field select:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-glow);
+}
+.field input::placeholder { color: var(--muted2); }
+
+/* Select arrow */
+.select-wrap { position: relative; }
+.select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+  font-size: 13px;
+}
+.field select { padding-right: 34px; }
+.field select option { background: #1e1e28; color: var(--text); }
+
+.field .hint {
+  font-size: 11px;
+  color: var(--muted2);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+/* Password wrap */
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 44px; }
+.pw-eye {
+  position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  font-size: 16px; color: var(--muted); padding: 0; line-height: 1;
+}
+
+/* ─── Connection status ───────────────────────────────── */
+.conn-status {
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 8px;
+  min-height: 18px;
+}
+.conn-status.ok  { color: var(--success); }
+.conn-status.err { color: var(--error); }
+
+/* ─── Reason preview badge ────────────────────────────── */
+.reason-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-top: 6px;
+}
+.reason-preview .rp-label {
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+.reason-preview .rp-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--red);
+}
+
+/* ─── Inline row ──────────────────────────────────────── */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ─── Buttons ─────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 18px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition);
+  text-decoration: none;
+  line-height: 1;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--red);
+  color: #fff;
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 16px rgba(200,0,0,0.3);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--red-dark);
+  box-shadow: 0 6px 20px rgba(200,0,0,0.45);
+  transform: translateY(-1px);
+}
+.btn-primary:active:not(:disabled) { transform: scale(0.98); }
+
+.btn-ghost {
+  background: var(--surface2);
+  color: var(--muted);
+  border: 1.5px solid var(--border2);
+  width: 100%;
+}
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--border2);
+  color: var(--text);
+  background: rgba(255,255,255,0.05);
+}
+
+.btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ─── Recent updates list ─────────────────────────────── */
+#recentWrap { display: none; }
+
+.recent-item {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.recent-item:last-child { border-bottom: none; padding-bottom: 0; }
+.recent-item:first-child { padding-top: 0; }
+
+.recent-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.recent-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.recent-reason {
+  font-size: 11px;
+  background: var(--red-faint);
+  color: var(--red);
+  border: 1px solid rgba(200,0,0,0.2);
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-weight: 700;
+}
+.recent-ts {
+  font-size: 11px;
+  color: var(--muted2);
+}
+
+/* ─── Toast ───────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 40px;
+  padding: 11px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+  z-index: 9999;
+  opacity: 0;
+  max-width: calc(100vw - 32px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+.toast-success { border-color: rgba(46,204,113,0.3); }
+.toast-error   { border-color: rgba(231,76,60,0.3);  }
+.toast-info    { border-color: rgba(52,152,219,0.3);  }
+
+/* ─── Loading overlay ─────────────────────────────────── */
+#loadingOverlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(14,14,18,0.82);
+  backdrop-filter: blur(6px);
+  z-index: 9000;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border2);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#loadingMsg {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ─── Divider ─────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0;
+}
+
+/* ─── Animated entrance ───────────────────────────────── */
+.card {
+  animation: fadeUp 0.4s ease both;
+}
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.10s; }
+.card:nth-child(3) { animation-delay: 0.15s; }
+.card:nth-child(4) { animation-delay: 0.20s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Mobile tweaks ───────────────────────────────────── */
+@media (max-width: 420px) {
+  .field-row { grid-template-columns: 1fr; }
+  .btn-row   { grid-template-columns: 1fr; }
+  .topbar-links { display: none; }
+  .topbar-title { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <div id="loadingMsg">Working…</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toastIcon">✅</span>
+  <span id="toastMsg"></span>
+</div>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-icon">📝</div>
+  <div>
+    <div class="topbar-title">Update Panel</div>
+    <div class="topbar-sub">AnimeStuff — log novel updates</div>
+  </div>
+  <div class="topbar-links">
+    <a class="topbar-link" href="index.html">← Home</a>
+    <a class="topbar-link" href="uploader.html">Uploader</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ── Section: GitHub Config ── -->
+  <div class="section-label">⚙️ GitHub Config</div>
+
+  <div class="card">
+    <div class="field">
+      <label>Personal Access Token</label>
+      <div class="pw-wrap">
+        <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+        <button class="pw-eye" id="pwEye" title="Show/hide">👁</button>
+      </div>
+      <div class="hint">Needs <strong>repo</strong> scope. Token is saved for this session only.</div>
+    </div>
+
+    <div class="field-row">
+      <div class="field" style="margin-bottom:0">
+        <label>Repository</label>
+        <input type="text" id="ghRepo" placeholder="owner/repo">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Branch</label>
+        <input type="text" id="ghBranch" placeholder="main">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" id="testBtn" onclick="testConnection()">🔌 Test &amp; Load</button>
+      <button class="btn btn-ghost" onclick="loadNovels()">🔄 Reload Novels</button>
+    </div>
+
+    <div class="conn-status" id="connStatus"></div>
+  </div>
+
+  <!-- ── Section: Log Update ── -->
+  <div class="section-label">📢 Log an Update</div>
+
+  <div class="card">
+    <div class="field">
+      <label>Novel</label>
+      <div class="select-wrap">
+        <select id="novelSelect">
+          <option value="">— Load novels first —</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field" style="margin-bottom:0">
+        <label>Update Type</label>
+        <div class="select-wrap">
+          <select id="updateType">
+            <option value="volume">Volume Added</option>
+            <option value="chapter">Chapter Added</option>
+            <option value="fix">Fix / Correction</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Volume / Chapter #</label>
+        <input type="text" id="volumeNum" placeholder="e.g. 5" inputmode="decimal">
+      </div>
+    </div>
+
+    <div class="field" id="customReasonWrap" style="display:none; margin-top:10px;">
+      <label>Custom Reason</label>
+      <input type="text" id="customReason" placeholder="Describe the update…">
+    </div>
+
+    <!-- Live reason preview -->
+    <div class="reason-preview" style="margin-top:12px;">
+      <span class="rp-label">Will log as</span>
+      <span class="rp-value" id="reasonPreview">Volume added</span>
+    </div>
+  </div>
+
+  <!-- ── Submit ── -->
+  <div class="card">
+    <button class="btn btn-primary" id="submitBtn" onclick="submitUpdate()" disabled>
+      🚀 Submit Update
+    </button>
+    <div class="hint" style="text-align:center; margin-top:10px;">
+      This will prepend a new entry to <code style="color:var(--red)">updates.json</code> in your repo.
+    </div>
+  </div>
+
+  <!-- ── Section: Recent Updates ── -->
+  <div class="section-label">🕐 Recent Updates</div>
+
+  <div class="card" id="recentWrap">
+    <div id="recentList"></div>
+  </div>
+
+  <div style="text-align:center; margin-bottom: 20px;">
+    <button class="btn btn-ghost" style="width:auto; padding: 10px 20px;" onclick="loadRecentUpdates()">
+      Load Recent Updates
+    </button>
+  </div>
+
+</div>
+
+<!-- Scripts (order matters) -->
+<script src="config.js"></script>
+<script src="github.js"></script>
+<script src="update.js"></script>
+
+</body>
+</html>
