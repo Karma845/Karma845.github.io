@@ -42,7 +42,6 @@ body {
   color: var(--text);
   min-height: 100vh;
   padding-bottom: 60px;
-  /* subtle noise texture */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
@@ -138,7 +137,7 @@ body {
   padding: 18px;
   margin-bottom: 14px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 .card::before {
   content: '';
@@ -433,6 +432,122 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ─── Searchable Novel Dropdown ───────────────────────── */
+.search-select { position: relative; }
+
+.search-input-wrap { position: relative; }
+
+.search-input {
+  width: 100%;
+  padding: 11px 36px 11px 14px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font-body);
+  outline: none;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.search-input:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-glow);
+}
+.search-input::placeholder { color: var(--muted2); }
+
+.input-icon {
+  position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted); pointer-events: none;
+  font-size: 13px;
+  transition: transform 0.2s;
+}
+.input-icon.open { transform: translateY(-50%) rotate(180deg); }
+
+.ss-dropdown {
+  position: absolute; top: calc(100% + 5px); left: 0; right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  z-index: 9999;
+  overflow: hidden;
+  display: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.ss-dropdown.open { display: block; }
+
+.dd-search {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.dd-search-icon {
+  position: absolute; left: 20px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px; color: var(--muted); pointer-events: none;
+}
+.dd-search input {
+  width: 100%;
+  padding: 8px 12px 8px 32px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font-body);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--transition);
+  appearance: none;
+}
+.dd-search input:focus { border-color: var(--red); }
+.dd-search input::placeholder { color: var(--muted2); }
+
+.dd-list { max-height: 220px; overflow-y: auto; }
+.dd-list::-webkit-scrollbar { width: 4px; }
+.dd-list::-webkit-scrollbar-track { background: transparent; }
+.dd-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+.dd-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: background 0.1s;
+  font-family: var(--font-body);
+}
+.dd-item:last-child { border-bottom: none; }
+.dd-item:hover, .dd-item.active { background: var(--surface2); }
+.dd-item.selected { color: var(--red); font-weight: 600; }
+.dd-item em {
+  font-style: normal;
+  background: var(--red-faint);
+  color: var(--red);
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.dd-empty {
+  padding: 14px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  font-family: var(--font-body);
+}
+
+.dd-count {
+  padding: 6px 14px;
+  font-size: 11px;
+  color: var(--muted2);
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+  font-family: var(--font-body);
+}
+
 /* ─── Mobile tweaks ───────────────────────────────────── */
 @media (max-width: 420px) {
   .field-row { grid-template-columns: 1fr; }
@@ -509,13 +624,26 @@ body {
   <div class="section-label">📢 Log an Update</div>
 
   <div class="card">
+
+    <!-- Novel field — searchable dropdown -->
     <div class="field">
       <label>Novel</label>
-      <div class="select-wrap">
-        <select id="novelSelect">
-          <option value="">— Load novels first —</option>
-        </select>
+      <div class="search-select" id="searchSelect">
+        <div class="search-input-wrap">
+          <input class="search-input" id="triggerInput" readonly placeholder="— Load novels first —">
+          <span class="input-icon" id="inputIcon">▾</span>
+        </div>
+        <div class="ss-dropdown" id="ssDropdown">
+          <div class="dd-search">
+            <span class="dd-search-icon">⌕</span>
+            <input type="text" id="ssSearchBox" placeholder="Search novels…" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="dd-list" id="ssDdList"></div>
+          <div class="dd-count" id="ssDdCount"></div>
+        </div>
       </div>
+      <!-- Hidden select kept for compatibility with existing update.js logic -->
+      <select id="novelSelect" style="display:none"></select>
     </div>
 
     <div class="field-row">
@@ -577,6 +705,131 @@ body {
 <script src="config.js"></script>
 <script src="github.js"></script>
 <script src="update.js"></script>
+
+<!-- ── Searchable Novel Dropdown ── -->
+<script>
+(function () {
+  const trigger   = document.getElementById('triggerInput');
+  const dropdown  = document.getElementById('ssDropdown');
+  const searchBox = document.getElementById('ssSearchBox');
+  const ddList    = document.getElementById('ssDdList');
+  const ddCount   = document.getElementById('ssDdCount');
+  const icon      = document.getElementById('inputIcon');
+  const hidden    = document.getElementById('novelSelect');
+
+  let novels    = [];
+  let selected  = null;
+  let filtered  = [];
+  let activeIdx = -1;
+
+  /* Called from your existing loadNovels() after populating the hidden <select> */
+  window.syncNovelDropdown = function () {
+    novels = Array.from(hidden.options)
+      .filter(o => o.value)
+      .map(o => ({ value: o.value, label: o.text }));
+    trigger.placeholder = novels.length ? '— Select a novel —' : '— Load novels first —';
+    selected = null;
+    trigger.value = '';
+  };
+
+  function highlight(text, query) {
+    if (!query) return text;
+    const i = text.toLowerCase().indexOf(query.toLowerCase());
+    if (i < 0) return text;
+    return text.slice(0, i)
+      + '<em>' + text.slice(i, i + query.length) + '</em>'
+      + text.slice(i + query.length);
+  }
+
+  function renderList(query) {
+    const q = query.trim().toLowerCase();
+    filtered = q
+      ? novels.filter(n => n.label.toLowerCase().includes(q))
+      : [...novels];
+    activeIdx = -1;
+    ddList.innerHTML = '';
+
+    if (!filtered.length) {
+      ddList.innerHTML = `<div class="dd-empty">No novels match "${query}"</div>`;
+      ddCount.textContent = '';
+      return;
+    }
+
+    filtered.forEach((n) => {
+      const div = document.createElement('div');
+      div.className = 'dd-item' + (n.value === selected ? ' selected' : '');
+      div.innerHTML = highlight(n.label, q);
+      div.addEventListener('mousedown', e => {
+        e.preventDefault();
+        selectNovel(n);
+      });
+      ddList.appendChild(div);
+    });
+
+    ddCount.textContent = `${filtered.length} of ${novels.length} novels`;
+  }
+
+  function selectNovel(n) {
+    selected = n.value;
+    trigger.value = n.label;
+    hidden.value = n.value;
+    hidden.dispatchEvent(new Event('change'));
+    closeDropdown();
+  }
+
+  function openDropdown() {
+    if (!novels.length) return;
+    dropdown.classList.add('open');
+    icon.classList.add('open');
+    searchBox.value = '';
+    renderList('');
+    searchBox.focus();
+    if (selected) {
+      const idx = filtered.findIndex(n => n.value === selected);
+      if (idx >= 0) ddList.children[idx]?.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function closeDropdown() {
+    dropdown.classList.remove('open');
+    icon.classList.remove('open');
+  }
+
+  trigger.addEventListener('click', () =>
+    dropdown.classList.contains('open') ? closeDropdown() : openDropdown()
+  );
+
+  searchBox.addEventListener('input', () => renderList(searchBox.value));
+
+  searchBox.addEventListener('keydown', e => {
+    const items = ddList.querySelectorAll('.dd-item');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, items.length - 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+    } else if (e.key === 'Enter' && activeIdx >= 0 && filtered[activeIdx]) {
+      selectNovel(filtered[activeIdx]);
+      return;
+    } else if (e.key === 'Escape') {
+      closeDropdown();
+      return;
+    }
+    items.forEach((el, i) => {
+      el.classList.toggle('active', i === activeIdx);
+      if (i === activeIdx) el.scrollIntoView({ block: 'nearest' });
+    });
+  });
+
+  /* Close when clicking outside */
+  document.addEventListener('mousedown', e => {
+    if (!document.getElementById('searchSelect').contains(e.target)) {
+      closeDropdown();
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
