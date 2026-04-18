@@ -1,167 +1,307 @@
 <!DOCTYPE html>
-<html>
-   <head>
-   <meta charset="utf-8">
-   <meta name="viewport" content="width=Device-width, initial-scale=1.0">
-   <meta name="keyword" content="TestUpdate, Free light novel">
-   <meta name="discription" content="Free light in format EPUB and PDF">
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-   <meta name="shrtfly-verification" content="f004505ec0c6007ec6f3e6ad7528e4bd" />
-   </head>
-
-<link rel="icon" type="image/png" size="512x512" href="img/android-chrome-512x512.png">
-<link rel="apple-touch-icon" sizes="76x76" href="img/apple-icon-76x76.png">
-    <style>
-    .slime-icon {
-width:60px;
-height:60px;
-float:right;
-border: 3px solid darkgrey;
-border-radius:50%;
-}
-.wel{
-  padding: 0
-}
-.welcome{
-  text-align: center;
-  width: 100%;
-}
-.welcome p:first-child{
-  padding: 2px;
-  font-size: 17px;
-  font-weight: 800;
-}
-.welcome p, .welcome p a{
-  margin: 0 7px;
-  font-size: 13px;
-  padding: 0 2px;
-}
-.welcome hr{
-  margin: 0;
-  padding: 0;
-}
-.post{
-  border-radius: 10px;
-  background: #fff;
-  box-shadow:  16px 16px 23px #d7d7d7,
-             -16px -16px 23px #e9e9e9;
-  padding: 0;
-  margin: 10px 0;
-}
-    </style>
-    
-    <img class="slime-icon" src="img/slime.jpeg">
-    </head>
-    
+<html lang="en">
 <head>
-    <style>
-        body {
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keyword" content="Free light novel, EPUB, PDF, Anime">
+  <meta name="description" content="Free light novel downloads in EPUB and PDF format">
+  <meta name="shrtfly-verification" content="f004505ec0c6007ec6f3e6ad7528e4bd">
+  <title>AnimeStuff — Free Light Novels</title>
+
+  <link rel="icon" type="image/png" size="512x512" href="img/android-chrome-512x512.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="img/apple-icon-76x76.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --red:       #c00;
+    --red-dark:  #900;
+    --red-faint: rgba(200,0,0,0.07);
+    --red-glow:  rgba(200,0,0,0.2);
+    --bg:        #f4f4f0;
+    --card:      #ffffff;
+    --border:    #d8d8d8;
+    --text:      #1a1a1a;
+    --muted:     #777;
+    --shadow:    3px 3px 4px rgba(0,0,0,0.12);
+    --green:     #1a7a3f;
+  }
+
+  body {
     font-family: "Lato", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
     transition: background-color .5s;
-}
+  }
 
-.sidenav {
-    height: 100%;
-    width: 0;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    background-color: white;
-    overflow-x: hidden;
-    transition: 0.5s;
-    padding-top: 10px;
-}
+  /* ── Sidebar ─────────────────────────────── */
+  .slime-icon {
+    width: 60px; height: 60px; float: right;
+    border: 3px solid darkgrey; border-radius: 50%; margin: 8px;
+  }
+  .sidenav {
+    height: 100%; width: 0; position: fixed;
+    z-index: 1000; top: 0; left: 0;
+    background: white; overflow-x: hidden;
+    transition: 0.5s; padding-top: 10px;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+  }
+  .sidenav a {
+    padding: 10px 10px 10px 28px;
+    text-decoration: none; font-size: 20px;
+    color: #666; display: block; transition: 0.2s;
+  }
+  .sidenav a:hover { background: #f5f5f5; color: #111; }
+  .sidenav .closebtn {
+    position: absolute; top: 6px; right: 18px;
+    font-size: 32px; cursor: pointer;
+    background: none; border: none; color: #888;
+  }
+  .nav-icon {
+    width: 110px; height: 110px; display: block;
+    margin: 24px auto 8px; border-radius: 50%;
+  }
+  #main { padding: 10px 14px 4px; }
+  .menu-btn { font-size: 30px; cursor: pointer; }
 
-.sidenav a {
-    padding: 8px 8px 8px 32px;
+  /* ── Header ──────────────────────────────── */
+  header { text-align: center; margin-bottom: 10px; }
+  .header-icon {
+    width: 312px; max-width: 90%;
+    border-radius: 6px; border: 1px solid darkgrey;
+    box-shadow: var(--shadow);
+  }
+
+  /* ── Welcome Banner ──────────────────────── */
+  .welcome-banner {
+    display: flex; align-items: center;
+    background: white; border-radius: 13px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    margin: 0 10px 12px; overflow: hidden;
+    text-decoration: none; color: inherit;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .welcome-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 3px 5px 14px rgba(0,0,0,0.14);
+  }
+  .welcome-banner img {
+    width: 70px; height: 70px;
+    object-fit: cover; flex-shrink: 0;
+  }
+  .welcome-text { padding: 10px 14px; }
+  .welcome-text .wt-title { font-size: 15px; font-weight: 900; color: #111; }
+  .welcome-text .wt-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .welcome-text .wt-cta   {
+    display: inline-block; margin-top: 5px;
+    font-size: 12px; font-weight: 700; color: var(--red);
+  }
+
+  /* ── Search Button ───────────────────────── */
+  .search-btn-wrap { text-align: center; margin: 10px 0 12px; }
+  .search-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--red); color: white;
+    text-decoration: none; padding: 11px 28px;
+    border-radius: 30px; font-size: 15px; font-weight: 700;
+    box-shadow: 0 4px 14px var(--red-glow);
+    transition: background 0.2s, transform 0.15s, box-shadow 0.15s;
+  }
+  .search-btn:hover {
+    background: var(--red-dark); color: white;
+    transform: translateY(-2px); box-shadow: 0 6px 20px var(--red-glow);
+  }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+  /* ── Section Header ──────────────────────── */
+  .section-head {
+    display: flex; align-items: center; gap: 10px;
+    margin: 16px 10px 10px;
+  }
+  .section-head h3 {
+    font-size: 16px; font-weight: 900; color: #111; margin: 0; white-space: nowrap;
+  }
+  .section-head .sh-line {
+    flex: 1; height: 2px;
+    background: linear-gradient(to right, var(--border), transparent);
+  }
+  .section-head .sh-badge {
+    font-size: 10px; font-weight: 700;
+    padding: 2px 9px; border-radius: 20px; color: white;
+    text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0;
+  }
+  .badge-red   { background: var(--red); }
+  .badge-green { background: var(--green); }
+
+  /* ── Horizontal Scroll Feed ──────────────── */
+  .feed-scroll {
+    overflow-x: auto; padding: 0 10px 12px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .feed-scroll::-webkit-scrollbar { display: none; }
+  .feed-track { display: flex; gap: 10px; width: max-content; }
+
+  /* ── Novel Card ──────────────────────────── */
+  .ncard {
+    width: 138px; flex-shrink: 0;
+    background: white; border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    box-shadow: var(--shadow); text-decoration: none;
+    color: inherit; display: block; position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+    animation: fadeUp 0.4s ease both;
+  }
+  .ncard:hover {
+    transform: translateY(-3px);
+    box-shadow: 3px 7px 18px rgba(0,0,0,0.17);
+    color: inherit;
+  }
+  .ncard-cover {
+    width: 100%; height: 94px;
+    object-fit: cover; display: block;
+    background: #ddd;
+  }
+  .ncard-placeholder {
+    width: 100%; height: 94px;
+    background: linear-gradient(135deg, #c00 0%, #700 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+  }
+  .ncard-body { padding: 8px 9px 10px; }
+  .ncard-title {
+    font-size: 12px; font-weight: 700; color: #111;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden; min-height: 32px;
+  }
+  .ncard-tag {
+    display: inline-block; margin-top: 5px;
+    font-size: 10px; font-weight: 700;
+    border-radius: 20px; padding: 2px 8px;
+  }
+  .ncard-tag-red   { background: var(--red-faint); color: var(--red); border: 1px solid rgba(200,0,0,0.2); }
+  .ncard-tag-green { background: rgba(26,122,63,0.08); color: var(--green); border: 1px solid rgba(26,122,63,0.2); }
+  .ncard-time { display: block; font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+  .ncard-badge {
+    position: absolute; top: 6px; left: 6px;
+    font-size: 9px; font-weight: 900; color: white;
+    padding: 2px 7px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .badge-new { background: var(--green); }
+  .badge-upd { background: var(--red); }
+
+  /* ── Skeleton ────────────────────────────── */
+  .skel {
+    width: 138px; flex-shrink: 0;
+    background: white; border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);
+  }
+  .skel-img  { width: 100%; height: 94px; }
+  .skel-line { height: 10px; border-radius: 5px; margin: 8px 9px 5px; }
+  .skel-line.sh { width: 55%; }
+  .skel-img, .skel-line {
+    background: linear-gradient(90deg, #e8e8e8 25%, #f2f2f2 50%, #e8e8e8 75%);
+    background-size: 400px 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+
+  /* ── Static Novel Listing ────────────────── */
+  .ani {
+    background: white; margin: 10px;
+    border: 1px solid var(--border); padding: 13px;
+    border-radius: 15px; box-shadow: var(--shadow);
+  }
+  .ani h2 { font-size: 17px; font-weight: 900; margin: 8px 0 6px; color: #111; }
+  .ani h4 { font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
+  .ani img {
+    display: block; margin: 8px auto;
+    width: 200px; max-width: 100%;
+    border-radius: 8px; box-shadow: var(--shadow);
+  }
+  .link-a {
+    display: inline-block;
+    background: var(--red); color: white !important;
+    border-radius: 22px; padding: 7px 20px !important;
+    font-size: 13px; font-weight: 700;
     text-decoration: none;
-    font-size: 25px;
-    color: #818181;
-    display: block;
-    transition: 0.3s
-}
+    box-shadow: 0 3px 10px var(--red-glow);
+    transition: background 0.2s, transform 0.1s; margin-top: 4px;
+  }
+  .link-a:hover { background: var(--red-dark) !important; transform: scale(1.03); }
 
-.sidenav a:hover, .offcanvas a:focus{
-    color: #f1f1f1;
-}
+  /* ── Pagination ──────────────────────────── */
+  .pag-nav {
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px; margin: 14px 10px 6px; flex-wrap: wrap;
+  }
+  .pag-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 38px; height: 38px; padding: 0 12px;
+    background: white; border: 1px solid var(--border);
+    border-radius: 10px; text-decoration: none; color: #333;
+    font-size: 13px; font-weight: 700; box-shadow: var(--shadow);
+    transition: all 0.15s;
+  }
+  .pag-btn:hover { background: var(--red); color: white; border-color: var(--red); }
+  .pag-btn.active { background: var(--red); color: white; border-color: var(--red); }
 
-.sidenav .closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px;
-    margin-left: 50px;
-}
+  /* ── Feed empty state ────────────────────── */
+  .feed-empty {
+    padding: 20px 20px; color: var(--muted); font-size: 13px; text-align: center;
+  }
 
-#main {
-    transition: margin-left .5s;
-    padding: 16px;
-}
+  /* ── Footer ──────────────────────────────── */
+  footer {
+    background: lightgrey; border: 1px solid darkgrey;
+    text-align: center; padding: 12px;
+    margin: 18px 10px 10px; border-radius: 8px; font-size: 13px;
+  }
 
-@media screen and (max-height: 450px){
-  .sidenav {padding-top: 10px;}
-  .sidenav a {font-size: 18px;}
-}
-
-.nav-icon {
-width:150px;
-height:150px;
-margin:50px;
-}
-.slime-icon {
-width:60px;
-height:60px;
-float:center;
-border: 3px solid darkgrey;
-border-radius:50px;
-}
-
-/* ── Search button ── */
-.search-btn-wrap {
-  text-align: center;
-  margin: 10px 0 4px;
-}
-.search-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background-color: #b00;
-  color: white;
-  text-decoration: none;
-  padding: 10px 24px;
-  border-radius: 25px;
-  font-size: 15px;
-  font-weight: bold;
-  font-family: "Lato", sans-serif;
-  box-shadow: 3px 3px 6px rgba(0,0,0,0.2);
-  transition: background-color 0.2s, transform 0.1s;
-}
-.search-btn:hover {
-  background-color: #900;
-  color: white;
-  transform: scale(1.03);
-}
-</style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  </style>
+</head>
 <body>
 
+<img class="slime-icon" src="img/slime.jpeg" alt="AnimeStuff">
+
+<!-- Sidebar -->
 <div id="mySidenav" class="sidenav">
-  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-  <img class="nav-icon" src="img/slime.jpeg">
-  <a class="animestuff" style="cursor:default">Animestuff</a>
-  <hr/>  
-  <a href="https://animestuff.me">Home</a>
-  <hr/>
-  <a href="https://animestuff.me/nav/list.html">Light novels</a>
-  <hr/>
-  <a href="https://animestuff.me/raw/">Raw Novels</a>  
-  <hr/>
-  <a href="https://www.facebook.com/AnimeStuff-164188781071265/">Contact</a>
-  <hr/>
+  <button class="closebtn" onclick="closeNav()">&times;</button>
+  <img class="nav-icon" src="img/slime.jpeg" alt="AnimeStuff">
+  <a style="cursor:default; font-weight:900; color:#111; font-size:18px;">Animestuff</a>
+  <hr>
+  <a href="https://animestuff.me">🏠 Home</a>
+  <hr>
+  <a href="https://animestuff.me/nav/list.html">📚 Light Novels</a>
+  <hr>
+  <a href="https://animestuff.me/raw/">📖 Raw Novels</a>
+  <hr>
+  <a href="https://animestuff.me/search">🔍 Search</a>
+  <hr>
+  <a href="https://www.facebook.com/AnimeStuff-164188781071265/">💬 Contact</a>
+  <hr>
 </div>
-    
+
 <div id="main">
-  <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+  <span class="menu-btn" onclick="openNav()">&#9776;</span>
 </div>
 
 <script>
@@ -177,215 +317,137 @@ function closeNav() {
 }
 </script>
 
-<head>    
-<style>
-img {
-  width:300px;
-  border-radius:5px;
-  box-shadow: 3px 3px 4px #888888;  
-}
-.header-icon {
-  width:312px;
-  border-radius:5px;
-  border: 1px solid darkgrey;
-}
-header {
-  color:black;
-  text-align:center;
-  margin: auto;    
-}
-footer {
-  background-color: lightgrey;
-  border: solid darkgrey 1px;
-  color:black;
-  clear:both;
-  text-align:center;
-  padding:10px;   
-  margin: auto;
-  border-radius:5px;
-}
-</style>
-</head>
+<hr>
+
+<!-- Welcome banner -->
+<a class="welcome-banner" href="index85.html">
+  <img src="img/elaina.jpg" alt="Icon">
+  <div class="welcome-text">
+    <div class="wt-title">Welcome to AnimeStuff</div>
+    <div class="wt-sub">Free Light Novels — EPUB &amp; PDF</div>
+    <span class="wt-cta">Latest Novels Here »</span>
+  </div>
+</a>
 
 <hr>
-<div class="container-fluid">
-  <div class="container wel post" id="post1" style="display:flex">
-    <a href="index85.html"><img src="img/elaina.jpg" alt="Icon" style="border-top-left-radius: 7px;border-bottom-left-radius: 7px;width:70px;"/>
-      <div class="welcome">
-        <p class="text-color">Welcome to AnimeStuff</p>
-        <p class="text-color">Download Novels for Free</p>
-        <hr/>
-        <p>«Latest Novels Here»</p>
-      </div>
-    </a>
-  </div>
-</div>
 
-<hr/>
-
-<style>
-  .text-color { color: black; }
-</style>
-
+<!-- Header logo -->
 <header>
-  <div id="top-header">
-    <div id="logo">
-      <a href="https://animestuff.me"><img class="header-icon" src="img/V3_7.jpg"></a>
-    </div>
-  </div>
+  <a href="https://animestuff.me">
+    <img class="header-icon" src="img/V3_7.jpg" alt="AnimeStuff">
+  </a>
 </header>
 
-<!-- ══ SEARCH BUTTON ══ -->
+<!-- Search button -->
 <div class="search-btn-wrap">
   <a class="search-btn" href="https://animestuff.me/search">
-    &#128269; Search Novels
+    <i class="fa-solid fa-magnifying-glass"></i> Search &amp; Filter Novels
   </a>
 </div>
 
-<hr/>
+<hr>
 
-<body style="background-color:white"></body>
+<!-- ═══════════════════════════════════════
+     🔥 RECENTLY UPDATED
+     Source: updates.json (written by Update Panel)
+════════════════════════════════════════ -->
+<div class="section-head">
+  <h3>🔥 Recently Updated</h3>
+  <div class="sh-line"></div>
+  <span class="sh-badge badge-red">Live</span>
+</div>
 
-<head>
-<style>
-.ani {
-  background-color:lightgrey;
-  margin: 10px;
-  border: 1px solid darkgrey;
-  padding: 7px;
-  border-radius: 15px;
-  box-shadow: 3px 3px 4px #888888;  
-}
-a {
-  text-decoration: none;
-  display: inline-block;
-  padding: 8px 16px;
-}
-a:hover {
-  background-color: #ddd;
-  color: black;
-}
-.previous {
-  background-color: lightgrey;
-  color: black;
-  float:left;
-  margin:5px;
-  text-align:center;
-  border-radius: 15px;
-  box-shadow: 3px 3px 4px #888888;  
-}
-.next {
-  background-color: lightgrey;
-  color: black;
-  float:right; 
-  margin:5px;
-  text-align:center;
-  border-radius: 15px;
-  box-shadow: 3px 3px 4px #888888;  
-}
-.round {
-  border-radius: 50%;
-  margin:5px;
-  box-shadow: 3px 3px 4px #888888;  
-}
-.link-a {
-  background-color:white;
-  border: none;
-  border-radius:15px;
-  box-shadow: 3px 3px 4px #888888; 
-}
-.center {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  width: 310px;
-}
-h2 { margin-top: 15px; }
-</style>
-</head>
+<div class="feed-scroll">
+  <div class="feed-track" id="updatedFeed">
+    <div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+    <div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+    <div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+    <div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+    <div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ✨ NEWLY ADDED
+     Source: novels.json (first entries = most recently added)
+════════════════════════════════════════ -->
+<div class="section-head">
+  <h3>✨ Newly Added</h3>
+  <div class="sh-line"></div>
+  <span class="sh-badge badge-green">New</span>
+</div>
+
+<div class="feed-scroll">
+  <div class="feed-track" id="newFeed">
+    <div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+    <div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+    <div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+    <div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+    <div class="skel"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ═══════════════════════════════════════
+     📖 STATIC NOVEL LISTING
+════════════════════════════════════════ -->
+<div class="section-head">
+  <h3>📖 Browse Novels</h3>
+  <div class="sh-line"></div>
+</div>
 
 <div class="ani">
-  <h2>Reincarnated as a Sword</h2> 
-  <img class="center" src="docs/assets/html/img/sword.png">
+  <h2>Reincarnated as a Sword</h2>
+  <img src="docs/assets/html/img/sword.png" alt="Cover">
   <h4>Download Here!~~</h4>
-  <a class="link-a" href="docs/assets/html/reincarnated as a sword.html">Click Here»</a>
+  <a class="link-a" href="docs/assets/html/reincarnated as a sword.html">Click Here »</a>
 </div>
-   
+
 <div class="ani">
   <h2>The Angel Next Door Spoils Me Rotten</h2>
-  <img class="center" src="docs/assets/html/img/angel-1.png">
+  <img src="docs/assets/html/img/angel-1.png" alt="Cover">
   <h4>Download Here!~~</h4>
-  <a class="link-a" href="docs/assets/html/the angel next door spoils me rotten.html">Click Here»</a>
+  <a class="link-a" href="docs/assets/html/the angel next door spoils me rotten.html">Click Here »</a>
 </div>
-   
+
 <div class="ani">
   <h2>My Girlfriend Cheated on Me With a Senior, so I'm Cheating on Her With His Girlfriend</h2>
-  <img class="center" src="docs/assets/html/img/kanojo ntr.jpg">
+  <img src="docs/assets/html/img/kanojo ntr.jpg" alt="Cover">
   <h4>Download Here!~~</h4>
-  <a class="link-a" href="docs/assets/html/kanojo ntr.html">Click Here»</a>
+  <a class="link-a" href="docs/assets/html/kanojo ntr.html">Click Here »</a>
 </div>
 
 <div class="ani">
   <h2>Kibishii Onna Joushi ga Koukousei ni Modottara Ore ni Dere Dere suru Riyuu</h2>
-  <img class="center" src="docs/assets/html/img/Kibishii-Onna-Joushi-ga-Koukousei-ni-Modottara-Ore-ni-Dere-Dere-suru-Riyuu.png">
+  <img src="docs/assets/html/img/Kibishii-Onna-Joushi-ga-Koukousei-ni-Modottara-Ore-ni-Dere-Dere-suru-Riyuu.png" alt="Cover">
   <h4>Download Here~~!</h4>
-  <a class="link-a" href="https://animestuff.me/docs/assets/html/Kibishii-Onna-Joushi-ga-Koukousei-ni-Modottara-Ore-ni-Dere-Dere-suru-Riyuu.html">Click Here»</a>
+  <a class="link-a" href="https://animestuff.me/docs/assets/html/Kibishii-Onna-Joushi-ga-Koukousei-ni-Modottara-Ore-ni-Dere-Dere-suru-Riyuu.html">Click Here »</a>
 </div>
-       
+
 <div class="ani">
   <h2>The Greatest Magician's Ultimate Quest: I Woke from a 300 Year Slumber to a World of Disappointment</h2>
-  <img src="docs/assets/html/img/1128902-cover.jpg">
-  <p></p>    
+  <img src="docs/assets/html/img/1128902-cover.jpg" alt="Cover">
   <h4>Download Here!~~</h4>
-  <a class="link-a" href="https://animestuff.me/docs/assets/html/Majutsu-no-hate-wo-motomeru-dai-majutsu-shi.html">Click Here»</a>
-</div>       
+  <a class="link-a" href="https://animestuff.me/docs/assets/html/Majutsu-no-hate-wo-motomeru-dai-majutsu-shi.html">Click Here »</a>
+</div>
 
-<body>
-  <a href="index.html" class="previous">&laquo; Previous <br>Novels</a>
-  <a href="index2.html" class="next">Newest <br> Novels &raquo;</a>
-  <a href="index.html" class="previous round">&#8249;</a>
-  <a href="#index2.html" class="next round">&#8250;</a>
-</body>
+<!-- Pagination -->
+<div class="pag-nav" style="margin-top:16px;">
+  <a class="pag-btn" href="index.html" title="Previous">‹</a>
+  <a class="pag-btn active" href="index.html">1</a>
+  <a class="pag-btn" href="index2.html">2</a>
+  <a class="pag-btn" href="index3.html">3</a>
+  <a class="pag-btn" href="index4.html">4</a>
+  <a class="pag-btn" href="index5.html">5</a>
+  <a class="pag-btn" href="index6.html">6</a>
+  <a class="pag-btn" href="index7.html">7</a>
+  <a class="pag-btn" href="index2.html" title="Next">›</a>
+</div>
 
-<style>
-.pagination {
-  display: inline-block;
-}
-.pagination a {
-  color: black;
-  float: left;
-  padding: 8px 16px;
-  text-decoration: none;
-  margin:4px;
-}
-.pagination a.active {
-  background-color: lightgrey;
-  color: white;
-  border-radius: 5px;
-}
-.pagination a:hover:not(.active) {
-  background-color: #ddd;
-  border-radius: 5px;
-}
-</style>
+<footer>Copyright 2022 — AnimeStuff</footer>
 
-<body>
-  <div class="pagination">
-    <a href="index.html" class="active">1</a>
-    <a href="index2.html">2</a>
-    <a href="index3.html">3</a>
-    <a href="index4.html">4</a>
-    <a href="index5.html">5</a>
-    <a href="index6.html">6</a>
-    <a href="index7.html">7</a>
-  </div>
-</body>
-
-<footer>Copyright 2022</footer>
-
-<body>
+<!-- Ko-fi -->
 <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
 <script>
   kofiWidgetOverlay.draw('animestuff85370', {
@@ -395,10 +457,118 @@ h2 { margin-top: 15px; }
     'floating-chat.donateButton.text-color': '#fff'
   });
 </script>
-</body>
 
-<hr/>
+<!-- ═══════════════════════════════════════
+     FEED LOGIC
+════════════════════════════════════════ -->
+<script>
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return "";
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60000);
+    const h = Math.floor(m / 60);
+    const d = Math.floor(h / 24);
+    if (d > 30) return new Date(iso).toLocaleDateString("en-US", { month:"short", day:"numeric" });
+    if (d >= 1)  return d + "d ago";
+    if (h >= 1)  return h + "h ago";
+    if (m >= 1)  return m + "m ago";
+    return "Just now";
+  }
+
+  // Build a single card element
+  function makeCard(title, url, cover, tagText, tagClass, badgeText, badgeClass, timestamp) {
+    const coverHtml = cover && cover.trim()
+      ? `<img class="ncard-cover" src="${esc(cover)}" alt="${esc(title)}"
+             loading="lazy"
+             onerror="this.outerHTML='<div class=ncard-placeholder>📖</div>'">`
+      : `<div class="ncard-placeholder">📖</div>`;
+
+    const badge = badgeText
+      ? `<span class="ncard-badge ${esc(badgeClass)}">${esc(badgeText)}</span>` : "";
+
+    const tag = tagText
+      ? `<span class="ncard-tag ${esc(tagClass)}">${esc(tagText)}</span>` : "";
+
+    const time = timestamp
+      ? `<span class="ncard-time">${timeAgo(timestamp)}</span>` : "";
+
+    return `<a class="ncard" href="${esc(url)}">
+      ${badge}
+      ${coverHtml}
+      <div class="ncard-body">
+        <div class="ncard-title">${esc(title)}</div>
+        ${tag}
+        ${time}
+      </div>
+    </a>`;
+  }
+
+  function renderEmpty(id, msg) {
+    document.getElementById(id).innerHTML =
+      `<div class="feed-empty">${msg}</div>`;
+  }
+
+  /* ── Recently Updated — reads updates.json ── */
+  async function loadUpdatedFeed() {
+    try {
+      const r = await fetch("updates.json?t=" + Date.now());
+      if (!r.ok) throw new Error();
+      const list = await r.json();
+
+      if (!list.length) { renderEmpty("updatedFeed", "No updates logged yet."); return; }
+
+      // Dedupe by URL — keep most recent entry per novel
+      const seen = new Set();
+      const items = [];
+      for (const u of list) {
+        if (!seen.has(u.url)) { seen.add(u.url); items.push(u); }
+      }
+
+      document.getElementById("updatedFeed").innerHTML =
+        items.slice(0, 15).map((u, i) =>
+          makeCard(u.title, u.url, u.cover || "",
+            u.reason,        "ncard-tag-red",
+            "Updated",       "badge-upd",
+            u.timestamp)
+        ).join("");
+
+    } catch {
+      renderEmpty("updatedFeed", "Updates will appear here once logged via the Update Panel.");
+    }
+  }
+
+  /* ── Newly Added — reads novels.json (index 0 = most recently uploaded) ── */
+  async function loadNewFeed() {
+    try {
+      const r = await fetch("novels.json?t=" + Date.now());
+      if (!r.ok) throw new Error();
+      const list = await r.json();
+
+      if (!list.length) { renderEmpty("newFeed", "No novels yet."); return; }
+
+      document.getElementById("newFeed").innerHTML =
+        list.slice(0, 15).map((n, i) =>
+          makeCard(n.title, n.url, n.cover || "",
+            (n.genres || []).slice(0, 1).join("") || "Novel", "ncard-tag-green",
+            "New", "badge-new",
+            null)
+        ).join("");
+
+    } catch {
+      renderEmpty("newFeed", "Novel list could not be loaded.");
+    }
+  }
+
+  loadUpdatedFeed();
+  loadNewFeed();
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
-
+</body>
 </html>
