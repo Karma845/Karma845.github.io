@@ -75,7 +75,6 @@ function setLoading(active, msg = "Working…") {
 }
 
 function showToast(msg, type = "success") {
-  // type: "success" | "error" | "info"
   const icons = { success: "✅", error: "❌", info: "ℹ️" };
   elToastIcon.textContent = icons[type] || "ℹ️";
   elToastMsg.textContent  = msg;
@@ -115,7 +114,6 @@ async function testConnection() {
     elConnStatus.textContent = "✅ Connected!";
     elConnStatus.classList.add("ok");
 
-    // Also load novels now
     setLoading(true, "Loading novels.json…");
     await loadNovels();
     showToast("Connected and novels loaded!", "success");
@@ -147,8 +145,6 @@ async function loadNovels() {
   }
 }
 
-if (window.syncNovelDropdown) window.syncNovelDropdown();
-
 function populateDropdown(list) {
   elNovelSelect.innerHTML = `<option value="">— Select a novel —</option>`;
   list.forEach((n, i) => {
@@ -158,6 +154,9 @@ function populateDropdown(list) {
     elNovelSelect.appendChild(opt);
   });
   elSubmitBtn.disabled = list.length === 0;
+
+  // Sync the visual searchable dropdown to match the hidden <select>
+  if (window.syncNovelDropdown) window.syncNovelDropdown();
 }
 
 // ─── Submit Update ────────────────────────────────────────────
@@ -214,12 +213,19 @@ async function submitUpdate() {
     showToast(`✅ "${novel.title}" logged as "${reason}"`, "success");
 
     // Reset form fields (keep token + connection)
-    elNovelSelect.value = "";
-    elVolume.value      = "";
-    elUpdateType.value  = "volume";
+    elNovelSelect.value  = "";
+    elVolume.value       = "";
+    elUpdateType.value   = "volume";
     elCustomReason.value = "";
     id("customReasonWrap").style.display = "none";
     updateReasonPreview();
+
+    // Also reset the visual dropdown display
+    const triggerInput = id("triggerInput");
+    if (triggerInput) {
+      triggerInput.value = "";
+      triggerInput.placeholder = "— Select a novel —";
+    }
 
     // Show recent entries
     renderRecentUpdates(newUpdates.slice(0, 5));
@@ -234,7 +240,7 @@ async function submitUpdate() {
 
 // ─── Recent Updates Preview ───────────────────────────────────
 function renderRecentUpdates(list) {
-  const el = id("recentList");
+  const el   = id("recentList");
   const wrap = id("recentWrap");
   if (!list || list.length === 0) { wrap.style.display = "none"; return; }
 
