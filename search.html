@@ -532,10 +532,12 @@ fetch('https://animestuff.me/novels.json', {
 })
   .then(r => {
     if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
+    return r.text(); // get raw text instead of .json()
   })
-  .then(data => {
-    novels = data;
+  .then(text => {
+    // Remove bad control characters (keep only valid JSON chars)
+    const clean = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+    novels = JSON.parse(clean);
     console.log('Loaded ' + novels.length + ' novels.');
   })
   .catch(err => console.error('novels.json failed:', err));
