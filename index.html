@@ -643,20 +643,20 @@ function closeNav() {
 <footer>Copyright 2022 — AnimeStuff</footer>
 
 <!-- Ko-fi -->
-<script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
-<script>
+<script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js">
+
   kofiWidgetOverlay.draw('animestuff85370', {
     'type': 'floating-chat',
     'floating-chat.donateButton.text': 'Support me',
     'floating-chat.donateButton.background-color': '#00b9fe',
     'floating-chat.donateButton.text-color': '#fff'
   });
-</script>
+
 
 <!-- ═══════════════════════════════════════
      FEED LOGIC
 ════════════════════════════════════════ -->
-<script>
+
   function esc(s) {
     return String(s)
       .replace(/&/g,"&amp;").replace(/</g,"&lt;")
@@ -734,12 +734,12 @@ function closeNav() {
 
   loadUpdatedFeed();
   loadNewFeed();
-</script>
+
 
 <!-- ═══════════════════════════════════════
      SEARCH + FILTER + SORT LOGIC
 ════════════════════════════════════════ -->
-<script>
+
   let novels = [];
   let selectedGenres = new Set();
   let currentSort = 'asc';
@@ -887,8 +887,8 @@ function closeNav() {
   document.getElementById('searchInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') doSearch();
   });
-</script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js">
 </body>
 </html>
