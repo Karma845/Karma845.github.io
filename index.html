@@ -3,279 +3,481 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="keyword" content="Free light novel, EPUB, PDF, Anime">
-  <meta name="description" content="Free light novel downloads in EPUB and PDF format">
-  <meta name="shrtfly-verification" content="f004505ec0c6007ec6f3e6ad7528e4bd">
-  <title>AnimeStuff — Free Light Novels</title>
+  <meta name="keywords" content="AnimeStuff, Free light novel, EPUB, PDF">
+  <meta name="description" content="Free light novels in EPUB and PDF format">
+  <title>AnimeStuff – Free Light Novels</title>
 
-  <link rel="icon" type="image/png" size="512x512" href="img/android-chrome-512x512.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="img/android-chrome-512x512.png">
   <link rel="apple-touch-icon" sizes="76x76" href="img/apple-icon-76x76.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
-  *, *::before, *::after { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; }
 
-  :root {
-    --red:       #c00;
-    --red-dark:  #900;
-    --red-faint: rgba(200,0,0,0.07);
-    --red-glow:  rgba(200,0,0,0.2);
-    --bg:        #f4f4f0;
-    --card:      #ffffff;
-    --border:    #d8d8d8;
-    --text:      #1a1a1a;
-    --muted:     #777;
-    --shadow:    3px 3px 4px rgba(0,0,0,0.12);
-    --green:     #1a7a3f;
-  }
+    :root {
+      --red:       #c00;
+      --red-dark:  #900;
+      --red-faint: rgba(200,0,0,0.07);
+      --red-glow:  rgba(200,0,0,0.2);
+      --bg:        #f4f4f0;
+      --card:      #ffffff;
+      --border:    #d8d8d8;
+      --text:      #1a1a1a;
+      --muted:     #777;
+      --shadow:    3px 3px 4px rgba(0,0,0,0.12);
+      --green:     #1a7a3f;
+    }
 
-  body {
-    font-family: "Lato", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin: 0;
-    transition: background-color .5s;
-  }
+    body {
+      font-family: "Lato", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      transition: background-color .5s;
+    }
 
-  /* ── Sidebar ─────────────────────────────── */
-  .slime-icon {
-    width: 60px; height: 60px; float: right;
-    border: 3px solid darkgrey; border-radius: 50%; margin: 8px;
-  }
-  .sidenav {
-    height: 100%; width: 0; position: fixed;
-    z-index: 1000; top: 0; left: 0;
-    background: white; overflow-x: hidden;
-    transition: 0.5s; padding-top: 10px;
-    box-shadow: 2px 0 12px rgba(0,0,0,0.12);
-  }
-  .sidenav a {
-    padding: 10px 10px 10px 28px;
-    text-decoration: none; font-size: 20px;
-    color: #666; display: block; transition: 0.2s;
-  }
-  .sidenav a:hover { background: #f5f5f5; color: #111; }
-  .sidenav .closebtn {
-    position: absolute; top: 6px; right: 18px;
-    font-size: 32px; cursor: pointer;
-    background: none; border: none; color: #888;
-  }
-  .nav-icon {
-    width: 110px; height: 110px; display: block;
-    margin: 24px auto 8px; border-radius: 50%;
-  }
-  #main { padding: 10px 14px 4px; }
-  .menu-btn { font-size: 30px; cursor: pointer; }
+    /* ── Sidebar ── */
+    .slime-icon {
+      width: 60px; height: 60px; float: right;
+      border: 3px solid darkgrey; border-radius: 50%; margin: 8px;
+    }
+    .sidenav {
+      height: 100%; width: 0; position: fixed;
+      z-index: 1000; top: 0; left: 0;
+      background: white; overflow-x: hidden;
+      transition: 0.5s; padding-top: 10px;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+    }
+    .sidenav a {
+      padding: 10px 10px 10px 28px;
+      text-decoration: none; font-size: 20px;
+      color: #666; display: block; transition: 0.2s;
+    }
+    .sidenav a:hover { background: #f5f5f5; color: #111; }
+    .sidenav .closebtn {
+      position: absolute; top: 6px; right: 18px;
+      font-size: 32px; cursor: pointer;
+      background: none; border: none; color: #888;
+    }
+    .nav-icon {
+      width: 110px; height: 110px; display: block;
+      margin: 24px auto 8px; border-radius: 50%;
+    }
+    #main { padding: 10px 14px 4px; }
+    .menu-btn { font-size: 30px; cursor: pointer; }
 
-  /* ── Header ──────────────────────────────── */
-  header { text-align: center; margin-bottom: 10px; }
-  .header-icon {
-    width: 312px; max-width: 90%;
-    border-radius: 6px; border: 1px solid darkgrey;
-    box-shadow: var(--shadow);
-  }
+    /* ── Header ── */
+    header { text-align: center; margin-bottom: 10px; }
+    .header-icon {
+      width: 312px; max-width: 90%;
+      border-radius: 6px; border: 1px solid darkgrey;
+      box-shadow: var(--shadow);
+    }
 
-  /* ── Welcome Banner ──────────────────────── */
-  .welcome-banner {
-    display: flex; align-items: center;
-    background: white; border-radius: 13px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    margin: 0 10px 12px; overflow: hidden;
-    text-decoration: none; color: inherit;
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  .welcome-banner:hover {
-    transform: translateY(-2px);
-    box-shadow: 3px 5px 14px rgba(0,0,0,0.14);
-  }
-  .welcome-banner img {
-    width: 70px; height: 70px;
-    object-fit: cover; flex-shrink: 0;
-  }
-  .welcome-text { padding: 10px 14px; }
-  .welcome-text .wt-title { font-size: 15px; font-weight: 900; color: #111; }
-  .welcome-text .wt-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .welcome-text .wt-cta   {
-    display: inline-block; margin-top: 5px;
-    font-size: 12px; font-weight: 700; color: var(--red);
-  }
+    /* ── Welcome Banner ── */
+    .welcome-banner {
+      display: flex; align-items: center;
+      background: white; border-radius: 13px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin: 0 10px 12px; overflow: hidden;
+      text-decoration: none; color: inherit;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .welcome-banner:hover {
+      transform: translateY(-2px);
+      box-shadow: 3px 5px 14px rgba(0,0,0,0.14);
+    }
+    .welcome-banner img {
+      width: 70px; height: 70px;
+      object-fit: cover; flex-shrink: 0;
+    }
+    .welcome-text { padding: 10px 14px; }
+    .welcome-text .wt-title { font-size: 15px; font-weight: 900; color: #111; }
+    .welcome-text .wt-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .welcome-text .wt-cta   {
+      display: inline-block; margin-top: 5px;
+      font-size: 12px; font-weight: 700; color: var(--red);
+    }
 
-  /* ── Search Button ───────────────────────── */
-  .search-btn-wrap { text-align: center; margin: 10px 0 12px; }
-  .search-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--red); color: white;
-    text-decoration: none; padding: 11px 28px;
-    border-radius: 30px; font-size: 15px; font-weight: 700;
-    box-shadow: 0 4px 14px var(--red-glow);
-    transition: background 0.2s, transform 0.15s, box-shadow 0.15s;
-  }
-  .search-btn:hover {
-    background: var(--red-dark); color: white;
-    transform: translateY(-2px); box-shadow: 0 6px 20px var(--red-glow);
-  }
+    hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
 
-  hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+    /* ── Section Header ── */
+    .section-head {
+      display: flex; align-items: center; gap: 10px;
+      margin: 16px 10px 10px;
+    }
+    .section-head h3 {
+      font-size: 16px; font-weight: 900; color: #111; margin: 0; white-space: nowrap;
+    }
+    .section-head .sh-line {
+      flex: 1; height: 2px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+    .section-head .sh-badge {
+      font-size: 10px; font-weight: 700;
+      padding: 2px 9px; border-radius: 20px; color: white;
+      text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0;
+    }
+    .badge-red   { background: var(--red); }
+    .badge-green { background: var(--green); }
 
-  /* ── Section Header ──────────────────────── */
-  .section-head {
-    display: flex; align-items: center; gap: 10px;
-    margin: 16px 10px 10px;
-  }
-  .section-head h3 {
-    font-size: 16px; font-weight: 900; color: #111; margin: 0; white-space: nowrap;
-  }
-  .section-head .sh-line {
-    flex: 1; height: 2px;
-    background: linear-gradient(to right, var(--border), transparent);
-  }
-  .section-head .sh-badge {
-    font-size: 10px; font-weight: 700;
-    padding: 2px 9px; border-radius: 20px; color: white;
-    text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0;
-  }
-  .badge-red   { background: var(--red); }
-  .badge-green { background: var(--green); }
+    /* ── Horizontal Scroll Feed ── */
+    .feed-scroll {
+      overflow-x: auto; padding: 0 10px 12px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .feed-scroll::-webkit-scrollbar { display: none; }
+    .feed-track { display: flex; gap: 10px; width: max-content; }
 
-  /* ── Horizontal Scroll Feed ──────────────── */
-  .feed-scroll {
-    overflow-x: auto; padding: 0 10px 12px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .feed-scroll::-webkit-scrollbar { display: none; }
-  .feed-track { display: flex; gap: 10px; width: max-content; }
+    /* ── Novel Card (feed) ── */
+    .ncard {
+      width: 138px; flex-shrink: 0;
+      background: white; border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: var(--shadow); text-decoration: none;
+      color: inherit; display: block; position: relative;
+      transition: transform 0.15s, box-shadow 0.15s;
+      animation: fadeUp 0.4s ease both;
+    }
+    .ncard:hover {
+      transform: translateY(-3px);
+      box-shadow: 3px 7px 18px rgba(0,0,0,0.17);
+      color: inherit;
+    }
+    .ncard-cover {
+      width: 100%; height: 94px;
+      object-fit: cover; display: block; background: #ddd;
+    }
+    .ncard-placeholder {
+      width: 100%; height: 94px;
+      background: linear-gradient(135deg, #c00 0%, #700 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+    }
+    .ncard-body { padding: 8px 9px 10px; }
+    .ncard-title {
+      font-size: 12px; font-weight: 700; color: #111;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; min-height: 32px;
+    }
+    .ncard-tag {
+      display: inline-block; margin-top: 5px;
+      font-size: 10px; font-weight: 700;
+      border-radius: 20px; padding: 2px 8px;
+    }
+    .ncard-tag-red   { background: var(--red-faint); color: var(--red); border: 1px solid rgba(200,0,0,0.2); }
+    .ncard-tag-green { background: rgba(26,122,63,0.08); color: var(--green); border: 1px solid rgba(26,122,63,0.2); }
+    .ncard-time { display: block; font-size: 10px; color: var(--muted); margin-top: 4px; }
+    .ncard-badge {
+      position: absolute; top: 6px; left: 6px;
+      font-size: 9px; font-weight: 900; color: white;
+      padding: 2px 7px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .badge-new { background: var(--green); }
+    .badge-upd { background: var(--red); }
 
-  /* ── Novel Card ──────────────────────────── */
-  .ncard {
-    width: 138px; flex-shrink: 0;
-    background: white; border: 1px solid var(--border);
-    border-radius: 12px; overflow: hidden;
-    box-shadow: var(--shadow); text-decoration: none;
-    color: inherit; display: block; position: relative;
-    transition: transform 0.15s, box-shadow 0.15s;
-    animation: fadeUp 0.4s ease both;
-  }
-  .ncard:hover {
-    transform: translateY(-3px);
-    box-shadow: 3px 7px 18px rgba(0,0,0,0.17);
-    color: inherit;
-  }
-  .ncard-cover {
-    width: 100%; height: 94px;
-    object-fit: cover; display: block;
-    background: #ddd;
-  }
-  .ncard-placeholder {
-    width: 100%; height: 94px;
-    background: linear-gradient(135deg, #c00 0%, #700 100%);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px;
-  }
-  .ncard-body { padding: 8px 9px 10px; }
-  .ncard-title {
-    font-size: 12px; font-weight: 700; color: #111;
-    line-height: 1.35;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-    overflow: hidden; min-height: 32px;
-  }
-  .ncard-tag {
-    display: inline-block; margin-top: 5px;
-    font-size: 10px; font-weight: 700;
-    border-radius: 20px; padding: 2px 8px;
-  }
-  .ncard-tag-red   { background: var(--red-faint); color: var(--red); border: 1px solid rgba(200,0,0,0.2); }
-  .ncard-tag-green { background: rgba(26,122,63,0.08); color: var(--green); border: 1px solid rgba(26,122,63,0.2); }
-  .ncard-time { display: block; font-size: 10px; color: var(--muted); margin-top: 4px; }
+    /* ── Skeleton ── */
+    .skel {
+      width: 138px; flex-shrink: 0;
+      background: white; border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);
+    }
+    .skel-img  { width: 100%; height: 94px; }
+    .skel-line { height: 10px; border-radius: 5px; margin: 8px 9px 5px; }
+    .skel-line.sh { width: 55%; }
+    .skel-img, .skel-line {
+      background: linear-gradient(90deg, #e8e8e8 25%, #f2f2f2 50%, #e8e8e8 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
 
-  .ncard-badge {
-    position: absolute; top: 6px; left: 6px;
-    font-size: 9px; font-weight: 900; color: white;
-    padding: 2px 7px; border-radius: 20px;
-    text-transform: uppercase; letter-spacing: 0.4px;
-  }
-  .badge-new { background: var(--green); }
-  .badge-upd { background: var(--red); }
+    /* ── Feed empty state ── */
+    .feed-empty {
+      padding: 20px; color: var(--muted); font-size: 13px; text-align: center;
+    }
 
-  /* ── Skeleton ────────────────────────────── */
-  .skel {
-    width: 138px; flex-shrink: 0;
-    background: white; border: 1px solid var(--border);
-    border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);
-  }
-  .skel-img  { width: 100%; height: 94px; }
-  .skel-line { height: 10px; border-radius: 5px; margin: 8px 9px 5px; }
-  .skel-line.sh { width: 55%; }
-  .skel-img, .skel-line {
-    background: linear-gradient(90deg, #e8e8e8 25%, #f2f2f2 50%, #e8e8e8 75%);
-    background-size: 400px 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
-  }
-  @keyframes shimmer {
-    0%   { background-position: -400px 0; }
-    100% { background-position: 400px 0; }
-  }
+    /* ── Search & Filter Section ── */
+    .filter-section {
+      max-width: 860px;
+      margin: 16px auto;
+      padding: 0 12px;
+    }
+    .filter-box {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e0e0e0;
+      padding: 18px;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.06);
+    }
+    .search-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+    }
+    .search-icon-inner {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      font-size: 15px;
+      pointer-events: none;
+    }
+    #searchInput {
+      width: 100%;
+      padding: 10px 14px 10px 36px;
+      border: 1.5px solid #ccc;
+      border-radius: 25px;
+      font-size: 15px;
+      font-family: "Lato", sans-serif;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #searchInput:focus { border-color: #b00; box-shadow: 0 0 0 3px rgba(180,0,0,0.1); }
+    .go-btn {
+      height: 42px;
+      padding: 0 22px;
+      background: #b00;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: "Lato", sans-serif;
+      transition: background .2s;
+    }
+    .go-btn:hover { background: #900; }
 
-  /* ── Static Novel Listing ────────────────── */
-  .ani {
-    background: white; margin: 10px;
-    border: 1px solid var(--border); padding: 13px;
-    border-radius: 15px; box-shadow: var(--shadow);
-  }
-  .ani h2 { font-size: 17px; font-weight: 900; margin: 8px 0 6px; color: #111; }
-  .ani h4 { font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
-  .ani img {
-    display: block; margin: 8px auto;
-    width: 200px; max-width: 100%;
-    border-radius: 8px; box-shadow: var(--shadow);
-  }
-  .link-a {
-    display: inline-block;
-    background: var(--red); color: white !important;
-    border-radius: 22px; padding: 7px 20px !important;
-    font-size: 13px; font-weight: 700;
-    text-decoration: none;
-    box-shadow: 0 3px 10px var(--red-glow);
-    transition: background 0.2s, transform 0.1s; margin-top: 4px;
-  }
-  .link-a:hover { background: var(--red-dark) !important; transform: scale(1.03); }
+    /* ── Genre toggle ── */
+    .genre-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+    }
+    .genre-label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .genre-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1.5px solid #ccc;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+      font-family: "Lato", sans-serif;
+      transition: all .2s;
+    }
+    .genre-toggle-btn:hover { border-color: #b00; color: #b00; }
+    .genre-toggle-btn.open { border-color: #b00; color: #b00; background: rgba(180,0,0,0.05); }
+    .toggle-arrow { display: inline-block; transition: transform .25s; font-style: normal; }
+    .genre-toggle-btn.open .toggle-arrow { transform: rotate(180deg); }
 
-  /* ── Pagination ──────────────────────────── */
-  .pag-nav {
-    display: flex; align-items: center; justify-content: center;
-    gap: 6px; margin: 14px 10px 6px; flex-wrap: wrap;
-  }
-  .pag-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 38px; height: 38px; padding: 0 12px;
-    background: white; border: 1px solid var(--border);
-    border-radius: 10px; text-decoration: none; color: #333;
-    font-size: 13px; font-weight: 700; box-shadow: var(--shadow);
-    transition: all 0.15s;
-  }
-  .pag-btn:hover { background: var(--red); color: white; border-color: var(--red); }
-  .pag-btn.active { background: var(--red); color: white; border-color: var(--red); }
+    /* ── Genre panel ── */
+    .genre-panel {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height .35s ease, padding .35s ease;
+      padding: 0;
+    }
+    .genre-panel.open {
+      max-height: 1200px;
+      padding-top: 10px;
+    }
+    .genre-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .genre-chip {
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1.5px solid #ccc;
+      background: white;
+      font-size: 13px;
+      cursor: pointer;
+      color: #444;
+      transition: all .15s;
+      user-select: none;
+      font-family: "Lato", sans-serif;
+    }
+    .genre-chip:hover { border-color: #b00; color: #b00; }
+    .genre-chip.selected {
+      background: #b00;
+      border-color: #b00;
+      color: white;
+      font-weight: bold;
+    }
+    .filter-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+    #selectedInfo { font-size: 13px; color: #888; }
+    .clear-btn {
+      background: none;
+      border: none;
+      font-size: 13px;
+      color: #b00;
+      cursor: pointer;
+      font-family: "Lato", sans-serif;
+      padding: 0;
+    }
+    .clear-btn:hover { text-decoration: underline; }
 
-  /* ── Feed empty state ────────────────────── */
-  .feed-empty {
-    padding: 20px 20px; color: var(--muted); font-size: 13px; text-align: center;
-  }
+    /* ── Results ── */
+    #resultsSection { display: none; margin-top: 6px; }
+    .results-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    #resultsHeader { font-size: 14px; color: #666; margin: 0; }
+    .sort-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1.5px solid #ccc;
+      border-radius: 20px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sort-btn {
+      background: #fff;
+      border: none;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: "Lato", sans-serif;
+      color: #666;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      line-height: 1.4;
+      letter-spacing: .3px;
+    }
+    .sort-btn:first-child { border-right: 1.5px solid #ccc; }
+    .sort-btn:hover { background: #fef0f0; color: #b00; }
+    .sort-btn.active { background: #b00; color: #fff; }
 
-  /* ── Footer ──────────────────────────────── */
-  footer {
-    background: lightgrey; border: 1px solid darkgrey;
-    text-align: center; padding: 12px;
-    margin: 18px 10px 10px; border-radius: 8px; font-size: 13px;
-  }
+    .novel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .novel-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 1px 1px 4px rgba(0,0,0,0.05);
+      transition: border-color .15s;
+      display: flex;
+      flex-direction: column;
+    }
+    .novel-card:hover { border-color: #b00; }
+    .novel-cover-link {
+      display: block;
+      width: 100%;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+    .novel-cover {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      background: #f0f0f0;
+    }
+    .novel-cover-placeholder {
+      width: 100%;
+      height: 180px;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #ccc;
+    }
+    .novel-card-body { padding: 8px; flex: 1; display: flex; flex-direction: column; gap: 5px; }
+    .novel-card-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: #222;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-decoration: none;
+    }
+    .novel-card-title:hover { color: #b00; }
+    .novel-card a { padding: 0; background: none; text-decoration: none; }
+    .novel-card a:hover { background: none; }
+    .card-genres { display: flex; flex-wrap: wrap; gap: 3px; }
+    .card-genre {
+      background: #eee;
+      color: #666;
+      border-radius: 10px;
+      padding: 2px 8px;
+      font-size: 11px;
+    }
+    .card-genre.matched { background: rgba(180,0,0,0.1); color: #b00; }
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 2rem;
+      color: #999;
+      background: #f9f9f9;
+      border-radius: 12px;
+      border: 1px solid #eee;
+    }
+    mark {
+      background: rgba(180,0,0,0.13);
+      color: #b00;
+      border-radius: 3px;
+      padding: 0 2px;
+    }
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+    /* ── Footer ── */
+    footer {
+      background: lightgrey;
+      border: 1px solid darkgrey;
+      text-align: center;
+      padding: 12px;
+      margin: 18px 10px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -319,7 +521,7 @@ function closeNav() {
 
 <hr>
 
-<!-- Welcome banner -->
+<!-- Welcome Banner -->
 <a class="welcome-banner" href="index85.html">
   <img src="img/elaina.jpg" alt="Icon">
   <div class="welcome-text">
@@ -338,18 +540,10 @@ function closeNav() {
   </a>
 </header>
 
-<!-- Search button -->
-<div class="search-btn-wrap">
-  <a class="search-btn" href="https://animestuff.me/search">
-    <i class="fa-solid fa-magnifying-glass"></i> Search &amp; Filter Novels
-  </a>
-</div>
-
 <hr>
 
 <!-- ═══════════════════════════════════════
      🔥 RECENTLY UPDATED
-     Source: updates.json (written by Update Panel)
 ════════════════════════════════════════ -->
 <div class="section-head">
   <h3>🔥 Recently Updated</h3>
@@ -369,7 +563,6 @@ function closeNav() {
 
 <!-- ═══════════════════════════════════════
      ✨ NEWLY ADDED
-     Source: novels.json (first entries = most recently added)
 ════════════════════════════════════════ -->
 <div class="section-head">
   <h3>✨ Newly Added</h3>
@@ -390,65 +583,67 @@ function closeNav() {
 <hr>
 
 <!-- ═══════════════════════════════════════
-     📖 STATIC NOVEL LISTING
+     🔍 SEARCH & FILTER
 ════════════════════════════════════════ -->
 <div class="section-head">
-  <h3>📖 Browse Novels</h3>
+  <h3>🔍 Search &amp; Filter Novels</h3>
   <div class="sh-line"></div>
 </div>
 
-<div class="ani">
-  <h2>Reincarnated as a Sword</h2>
-  <img src="docs/assets/html/img/sword.png" alt="Cover">
-  <h4>Download Here!~~</h4>
-  <a class="link-a" href="docs/assets/html/reincarnated as a sword.html">Click Here »</a>
+<div class="filter-section">
+  <div class="filter-box">
+
+    <!-- Search bar -->
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <span class="search-icon-inner">&#128269;</span>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search light novels..."
+          autocomplete="off"
+        >
+      </div>
+      <button class="go-btn" onclick="doSearch()">Go</button>
+    </div>
+
+    <!-- Genre filter toggle -->
+    <div class="genre-toggle-row">
+      <span class="genre-label">Filter by Genre</span>
+      <button class="genre-toggle-btn open" id="genreToggleBtn" onclick="toggleGenrePanel()">
+        &#9776; Hide Genres <i class="toggle-arrow">&#9660;</i>
+      </button>
+    </div>
+
+    <!-- Collapsible genre panel -->
+    <div class="genre-panel open" id="genrePanel">
+      <div class="genre-chips" id="genreChips"></div>
+      <div class="filter-footer">
+        <span id="selectedInfo"></span>
+        <button class="clear-btn" onclick="clearAllFilters()">Clear all</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="resultsSection">
+    <div class="results-header-row">
+      <p id="resultsHeader"></p>
+      <div class="sort-toggle">
+        <button class="sort-btn active" id="sortAZ" onclick="setSort('asc')">A → Z</button>
+        <button class="sort-btn" id="sortZA" onclick="setSort('desc')">Z → A</button>
+      </div>
+    </div>
+    <div class="novel-grid" id="novelGrid"></div>
+  </div>
 </div>
 
-<div class="ani">
-  <h2>The Angel Next Door Spoils Me Rotten</h2>
-  <img src="docs/assets/html/img/angel-1.png" alt="Cover">
-  <h4>Download Here!~~</h4>
-  <a class="link-a" href="docs/assets/html/the angel next door spoils me rotten.html">Click Here »</a>
-</div>
-
-<div class="ani">
-  <h2>My Girlfriend Cheated on Me With a Senior, so I'm Cheating on Her With His Girlfriend</h2>
-  <img src="docs/assets/html/img/kanojo ntr.jpg" alt="Cover">
-  <h4>Download Here!~~</h4>
-  <a class="link-a" href="docs/assets/html/kanojo ntr.html">Click Here »</a>
-</div>
-
-<div class="ani">
-  <h2>Kibishii Onna Joushi ga Koukousei ni Modottara Ore ni Dere Dere suru Riyuu</h2>
-  <img src="docs/assets/html/img/Kibishii-Onna-Joushi-ga-Koukousei-ni-Modottara-Ore-ni-Dere-Dere-suru-Riyuu.png" alt="Cover">
-  <h4>Download Here~~!</h4>
-  <a class="link-a" href="https://animestuff.me/docs/assets/html/Kibishii-Onna-Joushi-ga-Koukousei-ni-Modottara-Ore-ni-Dere-Dere-suru-Riyuu.html">Click Here »</a>
-</div>
-
-<div class="ani">
-  <h2>The Greatest Magician's Ultimate Quest: I Woke from a 300 Year Slumber to a World of Disappointment</h2>
-  <img src="docs/assets/html/img/1128902-cover.jpg" alt="Cover">
-  <h4>Download Here!~~</h4>
-  <a class="link-a" href="https://animestuff.me/docs/assets/html/Majutsu-no-hate-wo-motomeru-dai-majutsu-shi.html">Click Here »</a>
-</div>
-
-<!-- Pagination -->
-<div class="pag-nav" style="margin-top:16px;">
-  <a class="pag-btn" href="index.html" title="Previous">‹</a>
-  <a class="pag-btn active" href="index.html">1</a>
-  <a class="pag-btn" href="index2.html">2</a>
-  <a class="pag-btn" href="index3.html">3</a>
-  <a class="pag-btn" href="index4.html">4</a>
-  <a class="pag-btn" href="index5.html">5</a>
-  <a class="pag-btn" href="index6.html">6</a>
-  <a class="pag-btn" href="index7.html">7</a>
-  <a class="pag-btn" href="index2.html" title="Next">›</a>
-</div>
+<hr>
 
 <footer>Copyright 2022 — AnimeStuff</footer>
 
 <!-- Ko-fi -->
-<script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
+<script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
 <script>
   kofiWidgetOverlay.draw('animestuff85370', {
     'type': 'floating-chat',
@@ -481,85 +676,57 @@ function closeNav() {
     return "Just now";
   }
 
-  // Build a single card element
   function makeCard(title, url, cover, tagText, tagClass, badgeText, badgeClass, timestamp) {
     const coverHtml = cover && cover.trim()
-      ? `<img class="ncard-cover" src="${esc(cover)}" alt="${esc(title)}"
-             loading="lazy"
-             onerror="this.outerHTML='<div class=ncard-placeholder>📖</div>'">`
+      ? `<img class="ncard-cover" src="${esc(cover)}" alt="${esc(title)}" loading="lazy" onerror="this.outerHTML='<div class=ncard-placeholder>📖</div>'">`
       : `<div class="ncard-placeholder">📖</div>`;
-
-    const badge = badgeText
-      ? `<span class="ncard-badge ${esc(badgeClass)}">${esc(badgeText)}</span>` : "";
-
-    const tag = tagText
-      ? `<span class="ncard-tag ${esc(tagClass)}">${esc(tagText)}</span>` : "";
-
-    const time = timestamp
-      ? `<span class="ncard-time">${timeAgo(timestamp)}</span>` : "";
-
+    const badge = badgeText ? `<span class="ncard-badge ${esc(badgeClass)}">${esc(badgeText)}</span>` : "";
+    const tag   = tagText   ? `<span class="ncard-tag ${esc(tagClass)}">${esc(tagText)}</span>` : "";
+    const time  = timestamp ? `<span class="ncard-time">${timeAgo(timestamp)}</span>` : "";
     return `<a class="ncard" href="${esc(url)}">
-      ${badge}
-      ${coverHtml}
+      ${badge}${coverHtml}
       <div class="ncard-body">
         <div class="ncard-title">${esc(title)}</div>
-        ${tag}
-        ${time}
+        ${tag}${time}
       </div>
     </a>`;
   }
 
   function renderEmpty(id, msg) {
-    document.getElementById(id).innerHTML =
-      `<div class="feed-empty">${msg}</div>`;
+    document.getElementById(id).innerHTML = `<div class="feed-empty">${msg}</div>`;
   }
 
-  /* ── Recently Updated — reads updates.json ── */
   async function loadUpdatedFeed() {
     try {
       const r = await fetch("updates.json?t=" + Date.now());
       if (!r.ok) throw new Error();
       const list = await r.json();
-
       if (!list.length) { renderEmpty("updatedFeed", "No updates logged yet."); return; }
-
-      // Dedupe by URL — keep most recent entry per novel
-      const seen = new Set();
-      const items = [];
+      const seen = new Set(), items = [];
       for (const u of list) {
         if (!seen.has(u.url)) { seen.add(u.url); items.push(u); }
       }
-
       document.getElementById("updatedFeed").innerHTML =
-        items.slice(0, 15).map((u, i) =>
-          makeCard(u.title, u.url, u.cover || "",
-            u.reason,        "ncard-tag-red",
-            "Updated",       "badge-upd",
-            u.timestamp)
+        items.slice(0, 15).map(u =>
+          makeCard(u.title, u.url, u.cover || "", u.reason, "ncard-tag-red", "Updated", "badge-upd", u.timestamp)
         ).join("");
-
     } catch {
       renderEmpty("updatedFeed", "Updates will appear here once logged via the Update Panel.");
     }
   }
 
-  /* ── Newly Added — reads novels.json (index 0 = most recently uploaded) ── */
   async function loadNewFeed() {
     try {
       const r = await fetch("novels.json?t=" + Date.now());
       if (!r.ok) throw new Error();
       const list = await r.json();
-
       if (!list.length) { renderEmpty("newFeed", "No novels yet."); return; }
-
       document.getElementById("newFeed").innerHTML =
-        list.slice(0, 15).map((n, i) =>
+        list.slice(0, 15).map(n =>
           makeCard(n.title, n.url, n.cover || "",
-            (n.genres || []).slice(0, 1).join("") || "Novel", "ncard-tag-green",
-            "New", "badge-new",
-            null)
+            (n.genres || []).slice(0,1).join("") || "Novel", "ncard-tag-green",
+            "New", "badge-new", null)
         ).join("");
-
     } catch {
       renderEmpty("newFeed", "Novel list could not be loaded.");
     }
@@ -567,6 +734,159 @@ function closeNav() {
 
   loadUpdatedFeed();
   loadNewFeed();
+</script>
+
+<!-- ═══════════════════════════════════════
+     SEARCH + FILTER + SORT LOGIC
+════════════════════════════════════════ -->
+<script>
+  let novels = [];
+  let selectedGenres = new Set();
+  let currentSort = 'asc';
+  let lastResults  = [];
+
+  const ALL_GENRES = [
+    "Action","Adult","Adventure","Age Gap","Antihero Protagonist","Apocalypse",
+    "Comedy","Dark Fantasy","Dragon","Drama","Ecchi","Fantasy","Gender Bender",
+    "Harem","Historical","Horror","Isekai","Josei","Magic","Martial Arts",
+    "Mature","Mecha","Mystery","Psychological","R-18","Romance","School Life",
+    "Sci-Fi","Seinen","Shoujo","Shoujo Ai","Shounen","Shounen Ai","Slice of Life",
+    "Smut","Sports","Supernatural","Tragedy","Yuri"
+  ];
+
+  buildChips();
+
+  fetch('https://animestuff.me/novels.json', { mode: 'cors', cache: 'no-cache' })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then(text => {
+      const clean = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+      novels = JSON.parse(clean);
+      console.log('Loaded ' + novels.length + ' novels.');
+    })
+    .catch(err => console.error('novels.json failed:', err));
+
+  function setSort(dir) {
+    currentSort = dir;
+    document.getElementById('sortAZ').classList.toggle('active', dir === 'asc');
+    document.getElementById('sortZA').classList.toggle('active', dir === 'desc');
+    if (lastResults.length > 0) renderGrid(lastResults);
+  }
+
+  function sortedResults(arr) {
+    return [...arr].sort((a, b) =>
+      currentSort === 'asc' ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title)
+    );
+  }
+
+  function toggleGenrePanel() {
+    const panel = document.getElementById('genrePanel');
+    const btn   = document.getElementById('genreToggleBtn');
+    const isOpen = panel.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    btn.innerHTML = isOpen
+      ? '&#9776; Hide Genres <i class="toggle-arrow">&#9660;</i>'
+      : '&#9776; Show Genres <i class="toggle-arrow">&#9660;</i>';
+    if (!isOpen) clearAllFilters();
+  }
+
+  function buildChips() {
+    const container = document.getElementById('genreChips');
+    ALL_GENRES.forEach(genre => {
+      const btn = document.createElement('button');
+      btn.className = 'genre-chip';
+      btn.textContent = genre;
+      btn.dataset.genre = genre;
+      btn.onclick = () => toggleGenre(genre, btn);
+      container.appendChild(btn);
+    });
+  }
+
+  function toggleGenre(genre, btn) {
+    if (selectedGenres.has(genre)) {
+      selectedGenres.delete(genre);
+      btn.classList.remove('selected');
+    } else {
+      selectedGenres.add(genre);
+      btn.classList.add('selected');
+    }
+    const info = document.getElementById('selectedInfo');
+    info.textContent = selectedGenres.size > 0
+      ? `${selectedGenres.size} genre${selectedGenres.size > 1 ? 's' : ''} selected` : '';
+  }
+
+  function clearAllFilters() {
+    selectedGenres.clear();
+    document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('selected'));
+    document.getElementById('selectedInfo').textContent = '';
+  }
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function highlight(text, query) {
+    if (!query) return escHtml(text);
+    const e = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return escHtml(text).replace(new RegExp(`(${e})`, 'gi'), '<mark>$1</mark>');
+  }
+
+  function doSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    let results = novels;
+    if (selectedGenres.size > 0) {
+      results = results.filter(n => [...selectedGenres].every(g => n.genres && n.genres.includes(g)));
+    }
+    if (q) {
+      const low = q.toLowerCase();
+      results = results.filter(n => n.title.toLowerCase().includes(low));
+    }
+    lastResults = results;
+
+    const sec    = document.getElementById('resultsSection');
+    const header = document.getElementById('resultsHeader');
+    sec.style.display = 'block';
+
+    const genreNote = selectedGenres.size > 0
+      ? ` in <strong>${escHtml([...selectedGenres].join(' + '))}</strong>` : '';
+    header.innerHTML =
+      `<strong>${results.length}</strong> novel${results.length !== 1 ? 's' : ''} found` +
+      (q ? ` matching "<strong>${escHtml(q)}</strong>"` : '') + genreNote;
+
+    renderGrid(results);
+  }
+
+  function renderGrid(results) {
+    const q      = document.getElementById('searchInput').value.trim();
+    const grid   = document.getElementById('novelGrid');
+    const sorted = sortedResults(results);
+
+    if (sorted.length === 0) {
+      grid.innerHTML = '<div class="no-results">No novels matched. Try different filters.</div>';
+      return;
+    }
+
+    grid.innerHTML = sorted.map(n => {
+      const tags = (n.genres || []).slice(0, 4).map(g =>
+        `<span class="card-genre${selectedGenres.has(g) ? ' matched' : ''}">${escHtml(g)}</span>`
+      ).join('');
+      const coverImg = n.cover
+        ? `<img class="novel-cover" src="${escHtml(n.cover)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'novel-cover-placeholder\\'>📖</div>'">`
+        : `<div class="novel-cover-placeholder">📖</div>`;
+      return `<div class="novel-card">
+        <a class="novel-cover-link" href="${escHtml(n.url)}">${coverImg}</a>
+        <div class="novel-card-body">
+          <a class="novel-card-title" href="${escHtml(n.url)}">${highlight(n.title, q)}</a>
+          <div class="card-genres">${tags}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
