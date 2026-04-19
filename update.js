@@ -88,8 +88,8 @@ function buildReason() {
   const vol    = elVolume.value.trim();
   const custom = elCustomReason.value.trim();
 
-  if (type === "volume")  return vol ? `Volume ${vol} added`   : "New volume added";
-  if (type === "chapter") return vol ? `Chapter ${vol} added`  : "New chapter added";
+  if (type === "volume")  return vol ? `Volume ${vol} Added`   : "New volume Added";
+  if (type === "chapter") return vol ? `Chapter ${vol} Added`  : "New chapter Added";
   if (type === "fix")     return vol ? `Fix in Volume ${vol}`  : "Fixed";
   if (type === "other")   return custom || "Update";
   return "Update";
