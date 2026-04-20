@@ -736,6 +736,31 @@
       document.getElementById(id).style.display = 'none';
     });
   }
+  
+async function testConnection() {
+  hideAlerts();
+  const token = document.getElementById('ghToken').value.trim();
+  const repo = document.getElementById('ghRepo').value.trim();
+  if (!token) { showErr('connErr', '❌ Please enter your GitHub token.'); return; }
+  if (!repo)  { showErr('connErr', '❌ Please enter your repository.'); return; }
+
+  try {
+    const r = await fetch(`https://api.github.com/repos/${repo}`, {
+      headers: {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (r.ok) {
+      document.getElementById('connOk').style.display = 'block';
+    } else {
+      const d = await r.json();
+      showErr('connErr', '❌ ' + (d.message || 'Connection failed.'));
+    }
+  } catch(e) {
+    showErr('connErr', '❌ Network error: ' + e.message);
+  }
+}
 </script>
 </body>
 </html>
