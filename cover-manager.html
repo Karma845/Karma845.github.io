@@ -1,0 +1,2656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cover Manager — Novel Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   RESET & VARIABLES
+═══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #0a0b0f;
+  --surface:     #111318;
+  --surface2:    #181c24;
+  --surface3:    #1f2430;
+  --border:      rgba(255,255,255,0.07);
+  --border2:     rgba(255,255,255,0.12);
+  --accent:      #6c63ff;
+  --accent-dim:  rgba(108,99,255,0.15);
+  --accent-glow: rgba(108,99,255,0.35);
+  --red:         #ff4757;
+  --red-dim:     rgba(255,71,87,0.15);
+  --green:       #2ed573;
+  --green-dim:   rgba(46,213,115,0.12);
+  --yellow:      #ffa502;
+  --yellow-dim:  rgba(255,165,2,0.15);
+  --blue:        #1e90ff;
+  --text:        #e8eaf0;
+  --text2:       #9ca3af;
+  --text3:       #4b5563;
+  --font-head:   "Outfit", sans-serif;
+  --font-mono:   "Space Mono", monospace;
+  --radius:      12px;
+  --radius-sm:   8px;
+  --shadow:      0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg:   0 8px 48px rgba(0,0,0,0.6);
+  --transition:  0.18s ease;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-head);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Noise texture overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ═══════════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════════ */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════════════════ */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  height: 60px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  backdrop-filter: blur(20px);
+}
+
+.topbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.logo-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--accent), #a78bfa);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px;
+  box-shadow: 0 0 20px var(--accent-glow);
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #fff;
+}
+.logo-text span { color: var(--accent); }
+
+.topbar-divider {
+  width: 1px; height: 24px;
+  background: var(--border2);
+  flex-shrink: 0;
+}
+
+.topbar-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text2);
+}
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--text3);
+  flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.status-dot.connected { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.status-dot.error { background: var(--red); box-shadow: 0 0 8px var(--red); }
+
+.topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+.btn-sm {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 600;
+  font-family: var(--font-head);
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.btn-sm:hover { background: var(--surface3); color: var(--text); border-color: var(--border2); }
+.btn-sm.primary { background: var(--accent); color: white; border-color: transparent; }
+.btn-sm.primary:hover { background: #7c74ff; box-shadow: 0 0 16px var(--accent-glow); }
+.btn-sm.danger { background: var(--red-dim); color: var(--red); border-color: rgba(255,71,87,0.2); }
+.btn-sm.danger:hover { background: var(--red); color: white; }
+
+/* ═══════════════════════════════════════════════════════
+   SETUP PANEL (full-screen when not connected)
+═══════════════════════════════════════════════════════ */
+#setupPanel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.setup-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+.setup-card::before {
+  content: "";
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.setup-heading {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+.setup-sub {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.form-group { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text2);
+  margin-bottom: 7px;
+}
+.form-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--text);
+  outline: none;
+  transition: var(--transition);
+}
+.form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+.form-input::placeholder { color: var(--text3); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.form-hint {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 5px;
+  line-height: 1.4;
+}
+.form-hint a { color: var(--accent); text-decoration: none; }
+.form-hint a:hover { text-decoration: underline; }
+
+.pw-wrap { position: relative; }
+.pw-wrap .form-input { padding-right: 42px; }
+.pw-eye {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--text3); font-size: 15px; padding: 0; line-height: 1;
+  transition: color var(--transition);
+}
+.pw-eye:hover { color: var(--text2); }
+
+.btn-connect {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, var(--accent), #a78bfa);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-head);
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity var(--transition), box-shadow var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-connect:hover { opacity: 0.9; box-shadow: 0 0 24px var(--accent-glow); }
+.btn-connect:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+.setup-alert {
+  margin-top: 14px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  display: none;
+  line-height: 1.5;
+}
+.setup-alert.success { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,213,115,0.2); }
+.setup-alert.error   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(255,71,87,0.2); }
+
+/* ═══════════════════════════════════════════════════════
+   MAIN APP (shown when connected)
+═══════════════════════════════════════════════════════ */
+#mainApp { display: none; flex-direction: column; flex: 1; }
+
+/* ─── Stats Bar ─────────────────────────────────────── */
+.stats-bar {
+  display: flex;
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.stat-item {
+  flex: 1;
+  padding: 16px 20px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background var(--transition);
+  cursor: default;
+}
+.stat-item:hover { background: var(--surface2); }
+.stat-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.stat-icon.total  { background: var(--accent-dim); }
+.stat-icon.broken { background: var(--red-dim); }
+.stat-icon.working{ background: var(--green-dim); }
+.stat-icon.missing{ background: var(--yellow-dim); }
+.stat-value {
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* ─── Tab Navigation ────────────────────────────────── */
+.tab-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.tab-nav::-webkit-scrollbar { height: 0; }
+.tab-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 14px 18px;
+  font-size: 13px; font-weight: 600;
+  font-family: var(--font-head);
+  color: var(--text2);
+  background: none; border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  position: relative;
+  margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-badge {
+  background: var(--red);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+.tab-badge.yellow { background: var(--yellow); color: #000; }
+
+/* ─── Content Area ──────────────────────────────────── */
+.tab-content { display: none; flex: 1; flex-direction: column; }
+.tab-content.active { display: flex; }
+
+/* ─── Toolbar ───────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 8px 13px;
+  flex: 1;
+  min-width: 180px;
+  max-width: 320px;
+  transition: var(--transition);
+}
+.search-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+.search-box input {
+  background: none; border: none; outline: none;
+  font-size: 13px; color: var(--text); font-family: var(--font-head);
+  width: 100%;
+}
+.search-box input::placeholder { color: var(--text3); }
+
+.filter-toggle {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 13px;
+  border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 600;
+  font-family: var(--font-head);
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.filter-toggle:hover { background: var(--surface3); color: var(--text); }
+.filter-toggle.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(108,99,255,0.3); }
+.filter-toggle.active.red-filter { background: var(--red-dim); color: var(--red); border-color: rgba(255,71,87,0.3); }
+.filter-toggle.active.green-filter { background: var(--green-dim); color: var(--green); border-color: rgba(46,213,115,0.3); }
+
+/* A-Z Nav */
+.az-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 20px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.az-nav::-webkit-scrollbar { height: 0; }
+.az-btn {
+  min-width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  font-size: 11px; font-weight: 700; font-family: var(--font-mono);
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.az-btn:hover { background: var(--surface3); color: var(--text2); }
+.az-btn.active { background: var(--accent); color: white; }
+.az-btn.has-items { color: var(--text2); }
+
+/* ─── Grid ──────────────────────────────────────────── */
+.grid-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.novels-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+}
+
+/* Novel Card */
+.novel-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.novel-card:hover { transform: translateY(-2px); border-color: var(--border2); box-shadow: var(--shadow); }
+.novel-card.broken { border-color: rgba(255,71,87,0.3); }
+.novel-card.broken:hover { border-color: var(--red); box-shadow: 0 4px 24px rgba(255,71,87,0.2); }
+.novel-card.missing { border-color: rgba(255,165,2,0.3); }
+
+.card-cover {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  display: block;
+  background: var(--surface2);
+}
+.card-cover-placeholder {
+  width: 100%;
+  aspect-ratio: 2/3;
+  background: linear-gradient(135deg, var(--surface2), var(--surface3));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: var(--text3);
+}
+
+.card-status-badge {
+  position: absolute;
+  top: 8px; right: 8px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  backdrop-filter: blur(8px);
+}
+.badge-working { background: rgba(46,213,115,0.85); color: #0a3d1f; }
+.badge-broken  { background: rgba(255,71,87,0.85);  color: white; }
+.badge-missing { background: rgba(255,165,2,0.85);  color: #3d2000; }
+
+.card-info {
+  padding: 10px 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-slug {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-action-bar {
+  padding: 8px 10px;
+  display: flex;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+}
+.card-btn {
+  flex: 1;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 11px; font-weight: 600;
+  font-family: var(--font-head);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+}
+.card-btn:hover { background: var(--surface3); color: var(--text); }
+.card-btn.replace-btn { background: var(--accent-dim); color: var(--accent); border-color: rgba(108,99,255,0.2); }
+.card-btn.replace-btn:hover { background: var(--accent); color: white; }
+.card-btn.close-inline-btn { background: var(--surface3); color: var(--text3); border-color: transparent; max-width: 32px; padding: 6px 0; }
+.card-btn.close-inline-btn:hover { background: var(--red-dim); color: var(--red); }
+
+/* ─── Inline Replace Panel (inside card) ───────────── */
+.card-inline-panel {
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+  padding: 10px;
+  animation: panelIn 0.18s ease;
+}
+@keyframes panelIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+
+.inline-current-url {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 6px 9px;
+  margin-bottom: 8px;
+}
+.inline-url-text {
+  flex: 1;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--yellow);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.inline-copy-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: 3px 7px;
+  font-size: 10px;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: var(--font-head);
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+.inline-copy-btn:hover { background: var(--accent-dim); color: var(--accent); border-color: rgba(108,99,255,0.3); }
+.inline-copy-btn.copied { background: var(--green-dim); color: var(--green); border-color: rgba(46,213,115,0.3); }
+
+.inline-method-row {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 7px;
+}
+.inline-method-btn {
+  flex: 1;
+  padding: 5px;
+  border-radius: 6px;
+  font-size: 10px; font-weight: 700;
+  font-family: var(--font-head);
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text2);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+}
+.inline-method-btn:hover { background: var(--surface3); color: var(--text); }
+.inline-method-btn.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(108,99,255,0.3); }
+
+.inline-dropzone {
+  border: 1.5px dashed var(--border2);
+  border-radius: 7px;
+  padding: 10px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--surface);
+  font-size: 11px;
+  color: var(--text2);
+  margin-bottom: 7px;
+}
+.inline-dropzone:hover, .inline-dropzone.drag-over { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+.inline-dropzone input { display: none; }
+
+.inline-url-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text);
+  outline: none;
+  transition: var(--transition);
+  margin-bottom: 7px;
+}
+.inline-url-input:focus { border-color: var(--accent); }
+.inline-url-input::placeholder { color: var(--text3); }
+
+.inline-preview-img {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: 7px;
+  border: 1px solid var(--accent);
+  margin-bottom: 7px;
+  display: none;
+}
+
+.inline-status-msg {
+  font-size: 10px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  margin-bottom: 7px;
+  display: none;
+  line-height: 1.4;
+}
+.inline-status-msg.success { background: var(--green-dim); color: var(--green); }
+.inline-status-msg.error   { background: var(--red-dim);   color: var(--red); }
+.inline-status-msg.info    { background: var(--accent-dim); color: var(--accent); }
+
+.inline-log {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.9;
+  max-height: 110px;
+  overflow-y: auto;
+  display: none;
+  margin-bottom: 7px;
+}
+
+.inline-commit-btn {
+  width: 100%;
+  padding: 8px;
+  background: linear-gradient(135deg, var(--accent), #a78bfa);
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-head);
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+.inline-commit-btn:hover { opacity: 0.88; }
+.inline-commit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── Pagination ────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.page-btn {
+  min-width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600;
+  font-family: var(--font-head);
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 0 10px;
+}
+.page-btn:hover { background: var(--surface3); color: var(--text); }
+.page-btn.active { background: var(--accent); color: white; border-color: transparent; }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.page-info { font-size: 12px; color: var(--text2); padding: 0 8px; }
+
+/* ═══════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(20px) scale(0.97);
+  transition: transform 0.25s ease;
+}
+.modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px 24px 0;
+}
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+.modal-subtitle {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 3px;
+  font-family: var(--font-mono);
+}
+.modal-close {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--text2);
+  transition: var(--transition);
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+.modal-close:hover { background: var(--surface3); color: var(--text); }
+
+.modal-body { padding: 20px 24px; }
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* Modal cover comparison */
+.cover-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.cover-slot { display: flex; flex-direction: column; gap: 8px; }
+.cover-slot-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text2);
+}
+.cover-slot img, .cover-slot .cover-placeholder {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+}
+.cover-slot .cover-placeholder {
+  background: var(--surface2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: var(--text3);
+}
+.cover-slot-status {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.dropzone-modal {
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--surface2);
+  position: relative;
+  margin-bottom: 16px;
+}
+.dropzone-modal:hover, .dropzone-modal.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.dropzone-modal input { display: none; }
+.dz-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+.dz-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.dz-sub { font-size: 11px; color: var(--text2); }
+
+/* URL input row */
+.url-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.url-row .form-input { flex: 1; }
+
+/* Commit log */
+.commit-log {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.8;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+}
+.log-line { display: flex; align-items: flex-start; gap: 10px; }
+.log-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.dot-wait  { background: var(--text3); }
+.dot-run   { background: var(--yellow); animation: pulse 1s infinite; }
+.dot-ok    { background: var(--green); }
+.dot-err   { background: var(--red); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.modal-alert {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  margin-top: 10px;
+  display: none;
+  line-height: 1.5;
+}
+.modal-alert.success { background: var(--green-dim); color: var(--green); border: 1px solid rgba(46,213,115,0.2); }
+.modal-alert.error   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(255,71,87,0.2); }
+
+/* Rollback info */
+.rollback-info {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 11px;
+  color: var(--text2);
+  display: none;
+  margin-top: 10px;
+}
+.rollback-info strong { color: var(--text); display: block; margin-bottom: 4px; }
+.rollback-info code { font-family: var(--font-mono); font-size: 10px; word-break: break-all; color: var(--yellow); }
+
+/* Confirm Modal */
+.confirm-modal .modal { max-width: 420px; }
+.confirm-body { padding: 20px 24px 0; }
+.confirm-icon { font-size: 36px; margin-bottom: 12px; display: block; text-align: center; }
+.confirm-title { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+.confirm-text { font-size: 13px; color: var(--text2); text-align: center; line-height: 1.5; }
+.commit-summary {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-top: 14px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text2);
+  line-height: 1.8;
+}
+.commit-summary .s-row { display: flex; justify-content: space-between; }
+.commit-summary .s-val { color: var(--text); font-weight: 700; }
+
+/* ═══════════════════════════════════════════════════════
+   TOAST NOTIFICATIONS
+═══════════════════════════════════════════════════════ */
+#toastContainer {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  box-shadow: var(--shadow-lg);
+  font-size: 13px;
+  font-weight: 500;
+  max-width: 340px;
+  pointer-events: all;
+  animation: toastIn 0.3s ease;
+  backdrop-filter: blur(12px);
+}
+.toast.out { animation: toastOut 0.3s ease forwards; }
+.toast-icon { font-size: 16px; flex-shrink: 0; }
+.toast.success { border-color: rgba(46,213,115,0.3); }
+.toast.error   { border-color: rgba(255,71,87,0.3); background: rgba(255,71,87,0.1); }
+.toast.info    { border-color: rgba(108,99,255,0.3); }
+@keyframes toastIn  { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity: 1; transform: translateX(0); }    to { opacity: 0; transform: translateX(30px); } }
+
+/* ═══════════════════════════════════════════════════════
+   LOADING SPINNER
+═══════════════════════════════════════════════════════ */
+.spinner-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,11,15,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+}
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 400;
+  display: none;
+}
+.loading-overlay.show { display: flex; }
+.loading-text { font-size: 14px; color: var(--text2); font-weight: 500; }
+.loading-progress {
+  width: 200px;
+  height: 3px;
+  background: var(--surface3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.loading-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #a78bfa);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+/* ═══════════════════════════════════════════════════════
+   QUEUE / MAINTENANCE TAB
+═══════════════════════════════════════════════════════ */
+.queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+}
+.queue-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: var(--transition);
+}
+.queue-item:hover { border-color: var(--border2); }
+.queue-item.broken { border-color: rgba(255,71,87,0.2); }
+.queue-item.missing { border-color: rgba(255,165,2,0.2); }
+
+.queue-cover {
+  width: 44px; height: 62px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface2);
+}
+.queue-cover-ph {
+  width: 44px; height: 62px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.queue-info { flex: 1; min-width: 0; }
+.queue-title {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.queue-meta {
+  font-size: 11px;
+  color: var(--text2);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.queue-status { flex-shrink: 0; }
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  color: var(--text2);
+  gap: 12px;
+  flex: 1;
+}
+.empty-icon { font-size: 48px; opacity: 0.5; }
+.empty-title { font-size: 16px; font-weight: 700; color: var(--text); }
+.empty-sub { font-size: 13px; line-height: 1.5; max-width: 300px; }
+
+/* ═══════════════════════════════════════════════════════
+   UTILITY
+═══════════════════════════════════════════════════════ */
+.d-none { display: none !important; }
+.text-accent { color: var(--accent); }
+.text-red    { color: var(--red); }
+.text-green  { color: var(--green); }
+.text-yellow { color: var(--yellow); }
+.text-muted  { color: var(--text2); }
+
+.section-header {
+  padding: 16px 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .stats-bar { flex-wrap: wrap; }
+  .stat-item { min-width: 50%; }
+  .novels-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .grid-area { padding: 12px; }
+  .cover-compare { grid-template-columns: 1fr; }
+  .topbar { padding: 0 14px; }
+  .topbar-status { display: none; }
+  .setup-card { padding: 24px 20px; }
+  .form-row { grid-template-columns: 1fr; }
+  #toastContainer { left: 12px; right: 12px; bottom: 12px; }
+  .toast { max-width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ LOADING OVERLAY ════════════════ -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Loading novels…</div>
+  <div class="loading-progress">
+    <div class="loading-progress-fill" id="loadingProgress"></div>
+  </div>
+</div>
+
+<!-- ════════════════ TOAST CONTAINER ════════════════ -->
+<div id="toastContainer"></div>
+
+<!-- ════════════════ APP WRAPPER ════════════════ -->
+<div class="app-wrapper">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-icon">📚</div>
+      <div class="logo-text">Cover<span>Manager</span></div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="topbar-status">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusLabel">Not connected</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-sm" id="btnRefresh" style="display:none" onclick="refreshData()">↻ Refresh</button>
+      <button class="btn-sm" id="btnSettings" onclick="showSetup()">⚙ Config</button>
+    </div>
+  </header>
+
+  <!-- SETUP PANEL -->
+  <div id="setupPanel">
+    <div class="setup-card">
+      <div class="setup-heading">Connect to GitHub</div>
+      <div class="setup-sub">Enter your repository credentials to load and manage novel cover images.</div>
+
+      <div class="form-group">
+        <label class="form-label">GitHub Personal Access Token</label>
+        <div class="pw-wrap">
+          <input class="form-input" type="password" id="cfgToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+          <button class="pw-eye" onclick="toggleToken()">👁</button>
+        </div>
+        <div class="form-hint">Needs <strong>repo</strong> scope. <a href="https://github.com/settings/tokens/new" target="_blank">Create one here →</a></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Repository Owner</label>
+          <input class="form-input" type="text" id="cfgOwner" placeholder="Karma845">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Repository Name</label>
+          <input class="form-input" type="text" id="cfgRepo" placeholder="Karma845.github.io">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Branch</label>
+          <input class="form-input" type="text" id="cfgBranch" placeholder="main" value="main">
+        </div>
+        <div class="form-group">
+          <label class="form-label">novels.json path</label>
+          <input class="form-input" type="text" id="cfgJsonPath" placeholder="novels.json" value="novels.json">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Image Upload Directory</label>
+        <input class="form-input" type="text" id="cfgImgDir" placeholder="docs/assets/html/img" value="docs/assets/html/img">
+        <div class="form-hint">Where cover images will be uploaded in the repo.</div>
+      </div>
+
+      <button class="btn-connect" id="btnConnect" onclick="connect()">
+        <span id="connectBtnText">🔌 Test & Connect</span>
+      </button>
+
+      <div class="setup-alert" id="setupAlert"></div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="mainApp">
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-icon total">📚</div>
+        <div>
+          <div class="stat-value" id="statTotal">0</div>
+          <div class="stat-label">Total Novels</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon broken">🔴</div>
+        <div>
+          <div class="stat-value text-red" id="statBroken">0</div>
+          <div class="stat-label">Broken Covers</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon missing">🟡</div>
+        <div>
+          <div class="stat-value text-yellow" id="statMissing">0</div>
+          <div class="stat-label">Missing Covers</div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-icon working">🟢</div>
+        <div>
+          <div class="stat-value text-green" id="statWorking">0</div>
+          <div class="stat-label">Working Covers</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('all', this)">📖 All Novels</button>
+      <button class="tab-btn" onclick="switchTab('queue', this)">
+        🔧 Maintenance Queue
+        <span class="tab-badge" id="queueBadge">0</span>
+      </button>
+    </nav>
+
+    <!-- ══ TAB: ALL NOVELS ══ -->
+    <div class="tab-content active" id="tabAll">
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" id="searchInput" placeholder="Search novels…" oninput="onSearch()">
+        </div>
+        <button class="filter-toggle red-filter" id="filterBroken" onclick="toggleFilter('broken')">🔴 Broken Only</button>
+        <button class="filter-toggle green-filter" id="filterWorking" onclick="toggleFilter('working')">🟢 Working Only</button>
+        <button class="btn-sm" onclick="revalidateAll()" title="Re-check all image statuses">⟳ Revalidate</button>
+      </div>
+
+      <!-- A-Z Nav -->
+      <div class="az-nav" id="azNav"></div>
+
+      <!-- Grid -->
+      <div class="grid-area" id="gridArea">
+        <div class="novels-grid" id="novelsGrid"></div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- ══ TAB: MAINTENANCE QUEUE ══ -->
+    <div class="tab-content" id="tabQueue">
+      <div class="section-header">
+        <div class="section-title">Broken &amp; Missing Covers</div>
+        <button class="btn-sm primary" onclick="replaceAllBroken()">Replace All Selected</button>
+      </div>
+      <div class="queue-list" id="queueList"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════ REPLACE MODAL ════════════════ -->
+<div class="modal-overlay" id="replaceModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">Replace Cover</div>
+        <div class="modal-subtitle" id="modalSlug"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('replaceModal')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Cover Comparison -->
+      <div class="cover-compare">
+        <div class="cover-slot">
+          <div class="cover-slot-label">Current Cover</div>
+          <div id="currentCoverSlot" class="cover-placeholder">📖</div>
+          <div class="cover-slot-status" id="currentStatusBadge"></div>
+        </div>
+        <div class="cover-slot">
+          <div class="cover-slot-label">New Cover Preview</div>
+          <div id="newCoverSlot" class="cover-placeholder" style="background:var(--surface3);font-size:28px;color:var(--text3);">＋</div>
+        </div>
+      </div>
+
+      <!-- Upload or URL -->
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <button class="filter-toggle active" id="methodFile" onclick="setMethod('file')" style="flex:1;justify-content:center;">📁 Upload File</button>
+          <button class="filter-toggle" id="methodUrl" onclick="setMethod('url')" style="flex:1;justify-content:center;">🔗 Use URL</button>
+        </div>
+
+        <!-- File Drop Zone -->
+        <div id="fileMethod">
+          <div class="dropzone-modal" id="dropzoneModal"
+               onclick="document.getElementById('coverFileInput').click()"
+               ondragover="handleModalDragOver(event)"
+               ondragleave="handleModalDragLeave(event)"
+               ondrop="handleModalDrop(event)">
+            <span class="dz-icon">📂</span>
+            <div class="dz-label">Click or drop image here</div>
+            <div class="dz-sub">JPEG, PNG, WEBP, GIF supported</div>
+            <input type="file" id="coverFileInput" accept="image/*" onchange="handleCoverFile(this.files[0])">
+          </div>
+          <div id="selectedFileName" style="font-size:11px;color:var(--green);margin-top:-8px;margin-bottom:10px;display:none;"></div>
+        </div>
+
+        <!-- URL Input -->
+        <div id="urlMethod" style="display:none;">
+          <div class="url-row">
+            <input class="form-input" type="url" id="coverUrlInput" placeholder="https://example.com/cover.jpg" oninput="previewCoverUrl()">
+            <button class="btn-sm primary" onclick="previewCoverUrl()">Preview</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rollback Info -->
+      <div class="rollback-info" id="rollbackInfo">
+        <strong>🔄 Previous Cover URL</strong>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+          <code id="rollbackUrl" style="flex:1;word-break:break-all;"></code>
+          <button class="inline-copy-btn" id="rollbackCopyBtn" onclick="copyRollbackUrl()" style="flex-shrink:0;">📋 Copy</button>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:4px;">Copy this URL to download the image and re-upload it.</div>
+      </div>
+
+      <!-- Commit Log -->
+      <div class="commit-log" id="commitLog"></div>
+
+      <!-- Alerts -->
+      <div class="modal-alert" id="modalAlert"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm" onclick="closeModal('replaceModal')">Cancel</button>
+      <button class="btn-sm primary" id="btnCommit" onclick="commitReplace()">
+        🚀 Upload &amp; Update JSON
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ CONFIRM MODAL ════════════════ -->
+<div class="modal-overlay confirm-modal" id="confirmModal">
+  <div class="modal" style="max-width:420px">
+    <div class="confirm-body">
+      <span class="confirm-icon" id="confirmIcon">🚀</span>
+      <div class="confirm-title" id="confirmTitle">Confirm Action</div>
+      <div class="confirm-text" id="confirmText"></div>
+      <div class="commit-summary" id="confirmSummary"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="btn-sm primary" id="btnConfirmOk">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════════════════ */
+const STATE = {
+  token: '', repo: '', branch: '', jsonPath: '', imgDir: '',
+  novels: [],        // raw parsed array from JSON
+  statuses: {},      // slug → 'working' | 'broken' | 'missing' | 'pending'
+  jsonSha: null,
+  filtered: [],      // currently displayed subset
+  currentPage: 1,
+  pageSize: 50,
+  searchQ: '',
+  filterMode: null,  // null | 'broken' | 'working'
+  currentLetter: null,
+  replaceTarget: null,   // novel being replaced
+  replaceFile: null,     // File object if uploading
+  replaceMethod: 'file', // 'file' | 'url'
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════════════════ */
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function decodeB64(b64) {
+  const bin = atob(b64.replace(/\n/g,''));
+  const bytes = new Uint8Array(bin.length);
+  for (let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
+function toB64(str) {
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+function slugFromUrl(url) {
+  if (!url) return '';
+  return url.split('/').pop().replace(/\.html$/,'');
+}
+
+function slugFromNovel(novel) {
+  // prefer extracted slug from URL; fallback: sanitize title
+  if (novel.url) return slugFromUrl(novel.url);
+  if (novel.slug) return novel.slug;
+  return novel.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+function isValidUrl(str) {
+  try { new URL(str); return true; } catch { return false; }
+}
+
+function toast(msg, type='info', duration=3500) {
+  const icons = { success:'✅', error:'❌', info:'💡' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type]||'💡'}</span><span>${esc(msg)}</span>`;
+  document.getElementById('toastContainer').appendChild(el);
+  setTimeout(() => {
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 350);
+  }, duration);
+}
+
+function setLoading(show, text='Loading…', progress=0) {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.classList.toggle('show', show);
+  document.getElementById('loadingText').textContent = text;
+  document.getElementById('loadingProgress').style.width = progress + '%';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LOCAL STORAGE
+═══════════════════════════════════════════════════════════════════════ */
+function saveConfig() {
+  localStorage.setItem('cm_config', JSON.stringify({
+    token: STATE.token, repo: STATE.repo, branch: STATE.branch,
+    jsonPath: STATE.jsonPath, imgDir: STATE.imgDir
+  }));
+}
+
+function loadConfig() {
+  try {
+    const cfg = JSON.parse(localStorage.getItem('cm_config') || '{}');
+    if (cfg.token) {
+      STATE.token    = cfg.token;
+      STATE.repo     = cfg.repo;
+      STATE.branch   = cfg.branch;
+      STATE.jsonPath = cfg.jsonPath;
+      STATE.imgDir   = cfg.imgDir;
+      document.getElementById('cfgToken').value    = cfg.token;
+      document.getElementById('cfgOwner').value    = cfg.repo ? cfg.repo.split('/')[0] : '';
+      document.getElementById('cfgRepo').value     = cfg.repo ? cfg.repo.split('/').slice(1).join('/') : '';
+      document.getElementById('cfgBranch').value   = cfg.branch || 'main';
+      document.getElementById('cfgJsonPath').value = cfg.jsonPath || 'novels.json';
+      document.getElementById('cfgImgDir').value   = cfg.imgDir  || 'docs/assets/images';
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   GITHUB API
+═══════════════════════════════════════════════════════════════════════ */
+const GH_API = 'https://api.github.com';
+
+function ghHeaders() {
+  return {
+    'Authorization': 'token ' + STATE.token,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+}
+
+async function ghGetFile(path) {
+  const url = `${GH_API}/repos/${STATE.repo}/contents/${path}?ref=${STATE.branch}`;
+  const r = await fetch(url, { headers: ghHeaders() });
+  if (r.status === 404) return { sha: null, content: null };
+  if (!r.ok) { const d = await r.json().catch(()=>({})); throw new Error(d.message || `HTTP ${r.status}`); }
+  const d = await r.json();
+  return { sha: d.sha, content: decodeB64(d.content), download_url: d.download_url };
+}
+
+async function ghPutFile(path, content, message, sha) {
+  // content is either a string (text) or ArrayBuffer (binary)
+  let encoded;
+  if (content instanceof ArrayBuffer) {
+    const bytes = new Uint8Array(content);
+    let bin = '';
+    bytes.forEach(b => bin += String.fromCharCode(b));
+    encoded = btoa(bin);
+  } else {
+    encoded = toB64(content);
+  }
+  const body = { message, content: encoded, branch: STATE.branch };
+  if (sha) body.sha = sha;
+  const r = await fetch(`${GH_API}/repos/${STATE.repo}/contents/${path}`, {
+    method: 'PUT', headers: ghHeaders(), body: JSON.stringify(body)
+  });
+  if (!r.ok) { const d = await r.json().catch(()=>({})); throw new Error(d.message || `HTTP ${r.status}`); }
+  return r.json();
+}
+
+async function ghTestConn(token, repo) {
+  const r = await fetch(`${GH_API}/repos/${repo}`, {
+    headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (!r.ok) { const d = await r.json().catch(()=>({})); throw new Error(d.message || `HTTP ${r.status}`); }
+  return r.json();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CONNECT & SETUP
+═══════════════════════════════════════════════════════════════════════ */
+function toggleToken() {
+  const inp = document.getElementById('cfgToken');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function showSetup() {
+  document.getElementById('setupPanel').style.display = 'flex';
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('btnRefresh').style.display = 'none';
+}
+
+async function connect() {
+  const token = document.getElementById('cfgToken').value.trim();
+  const owner = document.getElementById('cfgOwner').value.trim();
+  const repoName = document.getElementById('cfgRepo').value.trim();
+  const branch = document.getElementById('cfgBranch').value.trim() || 'main';
+  const jsonPath = document.getElementById('cfgJsonPath').value.trim() || 'novels.json';
+  const imgDir = document.getElementById('cfgImgDir').value.trim().replace(/\/$/, '') || 'docs/assets/images';
+
+  const alertEl = document.getElementById('setupAlert');
+  alertEl.style.display = 'none';
+
+  if (!token || !owner || !repoName) {
+    alertEl.className = 'setup-alert error';
+    alertEl.textContent = '❌ Please fill in all required fields.';
+    alertEl.style.display = 'block';
+    return;
+  }
+
+  const repo = `${owner}/${repoName}`;
+  const btn = document.getElementById('btnConnect');
+  btn.disabled = true;
+  document.getElementById('connectBtnText').textContent = '⏳ Connecting…';
+
+  try {
+    await ghTestConn(token, repo);
+
+    STATE.token    = token;
+    STATE.repo     = repo;
+    STATE.branch   = branch;
+    STATE.jsonPath = jsonPath;
+    STATE.imgDir   = imgDir;
+
+    saveConfig();
+
+    alertEl.className = 'setup-alert success';
+    alertEl.textContent = '✅ Connected! Loading novels…';
+    alertEl.style.display = 'block';
+
+    setTimeout(() => loadNovels(), 600);
+  } catch(e) {
+    alertEl.className = 'setup-alert error';
+    alertEl.textContent = '❌ ' + e.message;
+    alertEl.style.display = 'block';
+    btn.disabled = false;
+    document.getElementById('connectBtnText').textContent = '🔌 Test & Connect';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LOAD NOVELS
+═══════════════════════════════════════════════════════════════════════ */
+async function loadNovels() {
+  setLoading(true, 'Fetching novels.json…', 10);
+  try {
+    const { sha, content } = await ghGetFile(STATE.jsonPath);
+    if (!content) throw new Error('novels.json not found in repo.');
+    STATE.jsonSha = sha;
+    STATE.novels = JSON.parse(content);
+
+    // Normalise: ensure each novel has a .slug derived from URL
+    STATE.novels.forEach(n => { n._slug = slugFromNovel(n); });
+
+    setLoading(true, `Loaded ${STATE.novels.length} novels. Validating covers…`, 30);
+    updateStatusDot('connected', `${STATE.novels.length} novels`);
+
+    // Show app
+    document.getElementById('setupPanel').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    document.getElementById('btnRefresh').style.display = 'flex';
+
+    // Mark all as pending
+    STATE.statuses = {};
+    STATE.novels.forEach(n => {
+      STATE.statuses[n._slug] = n.cover ? 'pending' : 'missing';
+    });
+
+    updateStats();
+    buildAzNav();
+    renderGrid();
+    renderQueueTab();
+    setLoading(false);
+
+    // Start lazy validation in background
+    validateCovers();
+  } catch(e) {
+    setLoading(false);
+    toast('Failed to load: ' + e.message, 'error', 6000);
+  }
+}
+
+async function refreshData() {
+  STATE.statuses = {};
+  await loadNovels();
+  toast('Data refreshed', 'success');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   IMAGE VALIDATION
+═══════════════════════════════════════════════════════════════════════ */
+let validationQueue = [];
+let validating = false;
+
+function validateCovers() {
+  validationQueue = STATE.novels.filter(n => n.cover && isValidUrl(n.cover)).map(n => n._slug);
+  if (!validating) runValidation();
+}
+
+async function revalidateAll() {
+  STATE.novels.forEach(n => { STATE.statuses[n._slug] = n.cover ? 'pending' : 'missing'; });
+  renderGrid();
+  updateStats();
+  validateCovers();
+  toast('Revalidating all covers…', 'info');
+}
+
+async function runValidation() {
+  validating = true;
+  const BATCH = 8;
+  while (validationQueue.length > 0) {
+    const batch = validationQueue.splice(0, BATCH);
+    await Promise.all(batch.map(slug => validateOne(slug)));
+    updateStats();
+    renderGrid();
+    renderQueueTab();
+  }
+  validating = false;
+}
+
+function validateOne(slug) {
+  return new Promise(resolve => {
+    const novel = STATE.novels.find(n => n._slug === slug);
+    if (!novel || !novel.cover) { STATE.statuses[slug] = 'missing'; resolve(); return; }
+    if (!isValidUrl(novel.cover)) { STATE.statuses[slug] = 'broken'; resolve(); return; }
+    const img = new Image();
+    const timer = setTimeout(() => { STATE.statuses[slug] = 'broken'; resolve(); }, 8000);
+    img.onload = () => { clearTimeout(timer); STATE.statuses[slug] = 'working'; resolve(); };
+    img.onerror = () => { clearTimeout(timer); STATE.statuses[slug] = 'broken'; resolve(); };
+    img.src = novel.cover;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STATS
+═══════════════════════════════════════════════════════════════════════ */
+function updateStats() {
+  const total = STATE.novels.length;
+  const missing = STATE.novels.filter(n => !n.cover || !isValidUrl(n.cover || '')).length;
+  const broken  = Object.values(STATE.statuses).filter(s => s === 'broken').length;
+  const working = Object.values(STATE.statuses).filter(s => s === 'working').length;
+
+  document.getElementById('statTotal').textContent   = total;
+  document.getElementById('statBroken').textContent  = broken;
+  document.getElementById('statMissing').textContent = missing;
+  document.getElementById('statWorking').textContent = working;
+
+  const queueCount = STATE.novels.filter(n => {
+    const s = STATE.statuses[n._slug];
+    return s === 'broken' || s === 'missing' || !n.cover;
+  }).length;
+  document.getElementById('queueBadge').textContent = queueCount;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   A-Z NAV
+═══════════════════════════════════════════════════════════════════════ */
+function buildAzNav() {
+  const letters = new Set();
+  STATE.novels.forEach(n => {
+    const ch = (n.title||'')[0]?.toUpperCase();
+    if (ch && /[A-Z0-9(]/.test(ch)) letters.add(ch === '(' ? '#' : /[0-9]/.test(ch) ? '#' : ch);
+  });
+
+  const allLetters = ['ALL', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('')];
+  const nav = document.getElementById('azNav');
+  nav.innerHTML = allLetters.map(l => {
+    const hasItems = l === 'ALL' || letters.has(l) || (l === '#' && letters.has('#'));
+    return `<button class="az-btn${hasItems ? ' has-items' : ''}${STATE.currentLetter===l ? ' active' : ''}"
+      onclick="filterByLetter('${l}')">${l}</button>`;
+  }).join('');
+}
+
+function filterByLetter(letter) {
+  STATE.currentLetter = letter === 'ALL' ? null : letter;
+  STATE.currentPage = 1;
+  buildAzNav();
+  applyFilters();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FILTERS & SEARCH
+═══════════════════════════════════════════════════════════════════════ */
+function onSearch() {
+  STATE.searchQ = document.getElementById('searchInput').value.toLowerCase();
+  STATE.currentPage = 1;
+  applyFilters();
+}
+
+function toggleFilter(mode) {
+  if (STATE.filterMode === mode) {
+    STATE.filterMode = null;
+    document.getElementById('filterBroken').classList.remove('active');
+    document.getElementById('filterWorking').classList.remove('active');
+  } else {
+    STATE.filterMode = mode;
+    document.getElementById('filterBroken').classList.toggle('active', mode === 'broken');
+    document.getElementById('filterWorking').classList.toggle('active', mode === 'working');
+  }
+  STATE.currentPage = 1;
+  applyFilters();
+}
+
+function applyFilters() {
+  let list = [...STATE.novels];
+
+  // letter filter
+  if (STATE.currentLetter) {
+    list = list.filter(n => {
+      const ch = (n.title||'')[0]?.toUpperCase();
+      if (STATE.currentLetter === '#') return ch && !/[A-Z]/.test(ch);
+      return ch === STATE.currentLetter;
+    });
+  }
+
+  // search
+  if (STATE.searchQ) {
+    list = list.filter(n =>
+      n.title.toLowerCase().includes(STATE.searchQ) ||
+      n._slug.toLowerCase().includes(STATE.searchQ)
+    );
+  }
+
+  // status filter
+  if (STATE.filterMode === 'broken') {
+    list = list.filter(n => STATE.statuses[n._slug] === 'broken' || STATE.statuses[n._slug] === 'missing' || !n.cover);
+  } else if (STATE.filterMode === 'working') {
+    list = list.filter(n => STATE.statuses[n._slug] === 'working');
+  }
+
+  STATE.filtered = list;
+  renderGrid();
+  renderPagination();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RENDER GRID
+═══════════════════════════════════════════════════════════════════════ */
+function renderGrid() {
+  applyFiltersIfNeeded();
+  const start = (STATE.currentPage - 1) * STATE.pageSize;
+  const page  = STATE.filtered.slice(start, start + STATE.pageSize);
+  const grid  = document.getElementById('novelsGrid');
+
+  if (STATE.filtered.length === 0) {
+    document.getElementById('gridArea').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">No results found</div>
+        <div class="empty-sub">Try adjusting your search or filters.</div>
+      </div>`;
+    return;
+  }
+
+  // Restore grid if it was replaced with empty state
+  if (!document.getElementById('novelsGrid')) {
+    document.getElementById('gridArea').innerHTML = '<div class="novels-grid" id="novelsGrid"></div>';
+  }
+
+  document.getElementById('novelsGrid').innerHTML = page.map(n => renderCard(n)).join('');
+  renderPagination();
+}
+
+let _filterApplied = false;
+function applyFiltersIfNeeded() {
+  if (!_filterApplied) {
+    _filterApplied = true;
+    STATE.filtered = [...STATE.novels];
+  }
+}
+
+function renderCard(n) {
+  const status = STATE.statuses[n._slug] || (n.cover ? 'pending' : 'missing');
+  const badgeMap = {
+    working: '<span class="card-status-badge badge-working">✓ OK</span>',
+    broken:  '<span class="card-status-badge badge-broken">✕ Broken</span>',
+    missing: '<span class="card-status-badge badge-missing">⚠ Missing</span>',
+    pending: '',
+  };
+  const coverHtml = n.cover && isValidUrl(n.cover)
+    ? `<img class="card-cover" src="${esc(n.cover)}" loading="lazy"
+          onerror="onCardImgError(this, '${esc(n._slug)}')"
+          onload="onCardImgLoad(this, '${esc(n._slug)}')">`
+    : `<div class="card-cover-placeholder">📖</div>`;
+
+  const cardClass = status === 'broken' ? ' broken' : status === 'missing' ? ' missing' : '';
+
+  return `<div class="novel-card${cardClass}" id="card-${esc(n._slug)}">
+    <div style="position:relative;">
+      ${coverHtml}
+      ${badgeMap[status]||''}
+    </div>
+    <div class="card-info">
+      <div class="card-title" title="${esc(n.title)}">${esc(n.title)}</div>
+      <div class="card-slug">${esc(n._slug)}</div>
+    </div>
+    <div class="card-action-bar" id="card-actions-${esc(n._slug)}">
+      <button class="card-btn replace-btn" onclick="toggleInlinePanel('${esc(n._slug)}')">🖼 Replace</button>
+    </div>
+    <div class="card-inline-panel" id="inline-${esc(n._slug)}" style="display:none;">
+      ${buildInlinePanelHtml(n)}
+    </div>
+  </div>`;
+}
+
+function buildInlinePanelHtml(n) {
+  const slug = n._slug;
+  const hasUrl = n.cover && isValidUrl(n.cover);
+  const urlDisplay = n.cover ? n.cover.substring(0, 55) + (n.cover.length > 55 ? '…' : '') : 'No URL';
+  return `
+    ${hasUrl ? `
+    <div class="inline-current-url" title="${esc(n.cover)}">
+      <span class="inline-url-text">${esc(urlDisplay)}</span>
+      <button class="inline-copy-btn" id="icp-${esc(slug)}" onclick="inlineCopyUrl('${esc(slug)}')">📋 Copy</button>
+    </div>` : `
+    <div style="font-size:10px;color:var(--text3);margin-bottom:8px;padding:5px 8px;background:var(--surface3);border-radius:6px;">⚠ No current cover URL</div>`}
+    <div class="inline-method-row">
+      <button class="inline-method-btn active" id="im-file-${esc(slug)}" onclick="inlineSetMethod('${esc(slug)}','file')">📁 File</button>
+      <button class="inline-method-btn" id="im-url-${esc(slug)}"  onclick="inlineSetMethod('${esc(slug)}','url')">🔗 URL</button>
+      <button class="card-btn close-inline-btn" onclick="toggleInlinePanel('${esc(slug)}')" title="Close">✕</button>
+    </div>
+    <div id="im-file-area-${esc(slug)}">
+      <div class="inline-dropzone" id="idz-${esc(slug)}"
+           onclick="document.getElementById('ifi-${esc(slug)}').click()"
+           ondragover="inlineDragOver(event,'${esc(slug)}')"
+           ondragleave="inlineDragLeave('${esc(slug)}')"
+           ondrop="inlineDrop(event,'${esc(slug)}')">
+        📂 Tap to pick image
+        <input type="file" id="ifi-${esc(slug)}" accept="image/*" onchange="inlineFileChosen(this.files[0],'${esc(slug)}')">
+      </div>
+    </div>
+    <div id="im-url-area-${esc(slug)}" style="display:none;">
+      <input class="inline-url-input" id="iui-${esc(slug)}" type="url" placeholder="https://example.com/cover.jpg"
+             oninput="inlinePreviewUrl('${esc(slug)}')">
+    </div>
+    <img class="inline-preview-img" id="ipv-${esc(slug)}" src="" alt="preview">
+    <div class="inline-status-msg" id="ism-${esc(slug)}"></div>
+    <div class="inline-log" id="ilg-${esc(slug)}"></div>
+    <button class="inline-commit-btn" id="icb-${esc(slug)}" onclick="inlineCommit('${esc(slug)}')">🚀 Upload &amp; Save</button>
+  `;
+}
+
+// Per-card state
+const INLINE = {}; // slug → { method:'file'|'url', file:File|null }
+
+function toggleInlinePanel(slug) {
+  const panel = document.getElementById('inline-' + slug);
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  // Close any other open panels first
+  document.querySelectorAll('.card-inline-panel').forEach(p => { p.style.display = 'none'; });
+  if (!isOpen) {
+    panel.style.display = 'block';
+    INLINE[slug] = { method: 'file', file: null };
+    // Reset panel state
+    inlineReset(slug);
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function inlineReset(slug) {
+  const sm = document.getElementById('ism-' + slug);
+  const lg = document.getElementById('ilg-' + slug);
+  const pv = document.getElementById('ipv-' + slug);
+  const cb = document.getElementById('icb-' + slug);
+  if (sm) { sm.style.display='none'; sm.textContent=''; }
+  if (lg) { lg.style.display='none'; lg.innerHTML=''; }
+  if (pv) { pv.style.display='none'; pv.src=''; }
+  if (cb) { cb.disabled=false; cb.textContent='🚀 Upload & Save'; }
+  const dz = document.getElementById('idz-' + slug);
+  if (dz) dz.textContent = '📂 Tap to pick image';
+  const ifi = document.getElementById('ifi-' + slug);
+  if (ifi) ifi.value = '';
+  const iui = document.getElementById('iui-' + slug);
+  if (iui) iui.value = '';
+  if (!INLINE[slug]) INLINE[slug] = { method:'file', file:null };
+  INLINE[slug].file = null;
+}
+
+function inlineSetMethod(slug, method) {
+  if (!INLINE[slug]) INLINE[slug] = { method, file: null };
+  INLINE[slug].method = method;
+  const fa = document.getElementById('im-file-area-' + slug);
+  const ua = document.getElementById('im-url-area-' + slug);
+  const fb = document.getElementById('im-file-' + slug);
+  const ub = document.getElementById('im-url-' + slug);
+  if (fa) fa.style.display = method === 'file' ? 'block' : 'none';
+  if (ua) ua.style.display = method === 'url'  ? 'block' : 'none';
+  if (fb) fb.classList.toggle('active', method === 'file');
+  if (ub) ub.classList.toggle('active', method === 'url');
+  // Reset preview
+  const pv = document.getElementById('ipv-' + slug);
+  if (pv) { pv.style.display='none'; pv.src=''; }
+}
+
+function inlineFileChosen(file, slug) {
+  if (!file) return;
+  if (!INLINE[slug]) INLINE[slug] = { method:'file', file:null };
+  INLINE[slug].file = file;
+  const dz = document.getElementById('idz-' + slug);
+  if (dz) dz.textContent = `📎 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const pv = document.getElementById('ipv-' + slug);
+    if (pv) { pv.src = e.target.result; pv.style.display = 'block'; }
+  };
+  reader.readAsDataURL(file);
+}
+
+function inlinePreviewUrl(slug) {
+  const url = (document.getElementById('iui-' + slug)||{}).value?.trim();
+  const pv  = document.getElementById('ipv-' + slug);
+  if (!pv) return;
+  if (!url) { pv.style.display='none'; return; }
+  pv.src = url;
+  pv.style.display = 'block';
+  pv.style.opacity = '1';
+  pv.onerror = () => { pv.style.opacity = '0.25'; };
+}
+
+function inlineDragOver(e, slug) { e.preventDefault(); const dz=document.getElementById('idz-'+slug); if(dz) dz.classList.add('drag-over'); }
+function inlineDragLeave(slug)   { const dz=document.getElementById('idz-'+slug); if(dz) dz.classList.remove('drag-over'); }
+function inlineDrop(e, slug) {
+  e.preventDefault(); inlineDragLeave(slug);
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) inlineFileChosen(file, slug);
+}
+
+function inlineCopyUrl(slug) {
+  const novel = STATE.novels.find(n => n._slug === slug);
+  if (!novel || !novel.cover) { toast('No URL to copy', 'error'); return; }
+  navigator.clipboard.writeText(novel.cover).then(() => {
+    const btn = document.getElementById('icp-' + slug);
+    if (btn) { btn.textContent = '✓ Copied!'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = '📋 Copy'; btn.classList.remove('copied'); }, 2000); }
+    toast('URL copied to clipboard', 'success', 2000);
+  }).catch(() => {
+    // Fallback for browsers that block clipboard
+    const ta = document.createElement('textarea');
+    ta.value = novel.cover; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    toast('URL copied!', 'success', 2000);
+  });
+}
+
+async function inlineCommit(slug) {
+  const novel = STATE.novels.find(n => n._slug === slug);
+  if (!novel) return;
+  const state = INLINE[slug] || { method: 'file', file: null };
+
+  const cb  = document.getElementById('icb-' + slug);
+  const sm  = document.getElementById('ism-' + slug);
+  const lg  = document.getElementById('ilg-' + slug);
+
+  let uploadFile = null;
+  let urlToSave  = '';
+
+  if (state.method === 'file') {
+    if (!state.file) { inlineShowStatus(slug, 'error', '❌ Pick an image file first'); return; }
+    uploadFile = state.file;
+  } else {
+    urlToSave = (document.getElementById('iui-' + slug)||{}).value?.trim() || '';
+    if (!urlToSave || !isValidUrl(urlToSave)) { inlineShowStatus(slug, 'error', '❌ Enter a valid URL'); return; }
+  }
+
+  const ext     = uploadFile ? uploadFile.name.split('.').pop().toLowerCase() : '';
+  const imgPath = uploadFile ? `${STATE.imgDir}/${slug}.${ext}` : null;
+  const finalUrl = uploadFile ? `/${STATE.imgDir}/${slug}.${ext}` : urlToSave;
+
+  // Confirm dialog
+  const summaryHtml = `
+    <div class="s-row"><span>Novel</span><span class="s-val">${esc(novel.title.substring(0,30))}…</span></div>
+    <div class="s-row"><span>Action</span><span class="s-val">${uploadFile ? '📤 Upload + update JSON' : '🔗 Update JSON URL'}</span></div>
+    ${uploadFile ? `<div class="s-row"><span>Path</span><span class="s-val">${esc(imgPath)}</span></div>` : ''}
+    <div class="s-row"><span>New URL</span><span class="s-val">${esc(finalUrl.substring(0,40))}…</span></div>
+  `;
+  showConfirm('🚀', 'Commit Changes?',
+    'This will push commits to your GitHub repo.',
+    summaryHtml,
+    async () => {
+      closeModal('confirmModal');
+      await doInlineCommit(novel, uploadFile, imgPath, finalUrl, slug);
+    }
+  );
+}
+
+async function doInlineCommit(novel, uploadFile, imgPath, finalUrl, slug) {
+  const cb = document.getElementById('icb-' + slug);
+  const lg = document.getElementById('ilg-' + slug);
+  if (cb) { cb.disabled = true; cb.textContent = '⏳ Committing…'; }
+  lg.style.display = 'block';
+  lg.innerHTML = '';
+
+  const addLog = (text, st='wait') => {
+    const id = 'il' + Date.now() + Math.random().toString(36).slice(2);
+    lg.insertAdjacentHTML('beforeend',
+      `<div class="log-line" id="${id}"><div class="log-dot dot-${st}"></div><div>${esc(text)}</div></div>`);
+    lg.scrollTop = lg.scrollHeight; return id;
+  };
+  const updLog = (id, text, st) => {
+    const el = document.getElementById(id); if (!el) return;
+    el.querySelector('.log-dot').className = 'log-dot dot-' + st;
+    el.querySelector('div:last-child').textContent = text;
+    lg.scrollTop = lg.scrollHeight;
+  };
+
+  try {
+    if (uploadFile) {
+      const l1 = addLog(`Uploading → ${imgPath}…`, 'run');
+      const arrBuf = await uploadFile.arrayBuffer();
+      let existSha = null;
+      try { const ex = await ghGetFile(imgPath); existSha = ex.sha; } catch(e){}
+      await ghPutFile(imgPath, arrBuf, `🖼 Upload cover: ${slug}`, existSha);
+      updLog(l1, `✅ Image uploaded`, 'ok');
+    }
+
+    const l2 = addLog('Updating novels.json…', 'run');
+    const { sha: latestSha, content } = await ghGetFile(STATE.jsonPath);
+    const novels = JSON.parse(content);
+    const target = novels.find(n => slugFromNovel(n) === slug || n.title === novel.title);
+    if (!target) throw new Error('Novel not found in JSON');
+    const oldCover = target.cover;
+    target.cover = finalUrl;
+    await ghPutFile(STATE.jsonPath, JSON.stringify(novels, null, 2), `🔄 Update cover: ${slug}`, latestSha);
+    updLog(l2, '✅ novels.json saved', 'ok');
+
+    // Update local state
+    novel.cover = finalUrl;
+    novel._oldCover = oldCover;
+    STATE.statuses[slug] = 'pending';
+
+    addLog('🎉 Done! Pages rebuild in ~30s.', 'ok');
+    inlineShowStatus(slug, 'success', `✅ Cover updated! Old: ${(oldCover||'none').substring(0,40)}…`);
+    toast(`Cover updated for "${novel.title.substring(0,28)}"`, 'success');
+
+    // Refresh card cover image immediately
+    const cardCoverWrap = document.querySelector(`#card-${slug} > div:first-child`);
+    if (cardCoverWrap) {
+      const newImg = document.createElement('img');
+      newImg.className = 'card-cover';
+      newImg.src = finalUrl;
+      newImg.loading = 'lazy';
+      newImg.setAttribute('onerror', `onCardImgError(this,'${slug}')`);
+      newImg.setAttribute('onload', `onCardImgLoad(this,'${slug}')`);
+      const oldImg = cardCoverWrap.querySelector('.card-cover, .card-cover-placeholder');
+      if (oldImg) oldImg.replaceWith(newImg); else cardCoverWrap.prepend(newImg);
+    }
+
+    // Rebuild inline panel with new URL (so copy button updates)
+    const panel = document.getElementById('inline-' + slug);
+    if (panel) panel.innerHTML = buildInlinePanelHtml(novel);
+
+    // Update commit button to allow another upload
+    const cb = document.getElementById('icb-' + slug);
+    if (cb) { cb.disabled = false; cb.textContent = '🚀 Upload & Save'; }
+
+    setTimeout(() => {
+      validateOne(slug).then(() => { updateStats(); renderQueueTab(); });
+    }, 600);
+
+  } catch(e) {
+    addLog('❌ ' + e.message, 'err');
+    inlineShowStatus(slug, 'error', '❌ ' + e.message);
+    toast('Commit failed: ' + e.message, 'error', 6000);
+    const cb = document.getElementById('icb-' + slug);
+    if (cb) { cb.disabled = false; cb.textContent = '🚀 Upload & Save'; }
+  }
+}
+
+function inlineShowStatus(slug, type, text) {
+  const el = document.getElementById('ism-' + slug);
+  if (!el) return;
+  el.className = `inline-status-msg ${type}`;
+  el.textContent = text;
+  el.style.display = 'block';
+}
+
+function onCardImgError(img, slug) {
+  STATE.statuses[slug] = 'broken';
+  const card = document.getElementById('card-' + slug);
+  if (card) {
+    card.classList.add('broken');
+    const badge = card.querySelector('.card-status-badge');
+    if (badge) badge.outerHTML = '<span class="card-status-badge badge-broken">✕ Broken</span>';
+    else {
+      const badgeEl = document.createElement('span');
+      badgeEl.className = 'card-status-badge badge-broken';
+      badgeEl.textContent = '✕ Broken';
+      card.querySelector('div').appendChild(badgeEl);
+    }
+    img.outerHTML = '<div class="card-cover-placeholder">📖</div>';
+  }
+  updateStats();
+}
+
+function onCardImgLoad(img, slug) {
+  if (STATE.statuses[slug] !== 'broken') {
+    STATE.statuses[slug] = 'working';
+    const card = document.getElementById('card-' + slug);
+    if (card) {
+      card.classList.remove('broken','missing');
+      const badge = card.querySelector('.card-status-badge');
+      if (badge) badge.outerHTML = '<span class="card-status-badge badge-working">✓ OK</span>';
+      else {
+        const badgeEl = document.createElement('span');
+        badgeEl.className = 'card-status-badge badge-working';
+        badgeEl.textContent = '✓ OK';
+        card.querySelector('div').appendChild(badgeEl);
+      }
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAGINATION
+═══════════════════════════════════════════════════════════════════════ */
+function renderPagination() {
+  const total = STATE.filtered.length;
+  const totalPages = Math.ceil(total / STATE.pageSize);
+  const curr = STATE.currentPage;
+  const el = document.getElementById('pagination');
+
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+  const pages = [];
+  pages.push(`<button class="page-btn" onclick="goPage(${curr-1})" ${curr<=1?'disabled':''}>‹</button>`);
+
+  const range = pageRange(curr, totalPages);
+  range.forEach(p => {
+    if (p === '…') pages.push(`<span class="page-info">…</span>`);
+    else pages.push(`<button class="page-btn ${p===curr?'active':''}" onclick="goPage(${p})">${p}</button>`);
+  });
+
+  pages.push(`<button class="page-btn" onclick="goPage(${curr+1})" ${curr>=totalPages?'disabled':''}>›</button>`);
+  pages.push(`<span class="page-info">${total} novels</span>`);
+  el.innerHTML = pages.join('');
+}
+
+function pageRange(curr, total) {
+  if (total <= 7) return Array.from({length:total},(_,i)=>i+1);
+  const delta = 2;
+  const range = [];
+  for (let i=Math.max(2,curr-delta); i<=Math.min(total-1,curr+delta); i++) range.push(i);
+  if (curr-delta > 2) range.unshift('…');
+  if (curr+delta < total-1) range.push('…');
+  range.unshift(1);
+  range.push(total);
+  return range;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(STATE.filtered.length / STATE.pageSize);
+  if (p < 1 || p > totalPages) return;
+  STATE.currentPage = p;
+  document.getElementById('gridArea').scrollTop = 0;
+  renderGrid();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MAINTENANCE QUEUE TAB
+═══════════════════════════════════════════════════════════════════════ */
+function renderQueueTab() {
+  const broken = STATE.novels.filter(n => {
+    const s = STATE.statuses[n._slug];
+    return s === 'broken' || s === 'missing' || !n.cover || !isValidUrl(n.cover||'');
+  });
+
+  const el = document.getElementById('queueList');
+  if (broken.length === 0) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🎉</div>
+        <div class="empty-title">All covers look good!</div>
+        <div class="empty-sub">No broken or missing covers detected.</div>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = broken.map(n => {
+    const s = STATE.statuses[n._slug] || 'missing';
+    const coverHtml = n.cover && isValidUrl(n.cover)
+      ? `<img class="queue-cover" src="${esc(n.cover)}" loading="lazy" onerror="this.outerHTML='<div class=queue-cover-ph>📖</div>'">`
+      : `<div class="queue-cover-ph">📖</div>`;
+    const badge = s === 'broken'
+      ? `<span class="card-status-badge badge-broken">✕ Broken</span>`
+      : `<span class="card-status-badge badge-missing">⚠ Missing</span>`;
+    const copyBtn = n.cover
+      ? `<button class="inline-copy-btn" onclick="queueCopyUrl('${esc(n._slug)}')" style="margin-top:4px;display:inline-block;">📋 Copy URL</button>`
+      : '';
+    return `<div class="queue-item ${s}">
+      ${coverHtml}
+      <div class="queue-info">
+        <div class="queue-title">${esc(n.title)}</div>
+        <div class="queue-meta">${esc(n._slug)}</div>
+        ${n.cover
+          ? `<div class="queue-meta" style="margin-top:3px;color:var(--text3)">${esc(n.cover.substring(0,55))}${n.cover.length>55?'…':''}</div>${copyBtn}`
+          : '<div class="queue-meta" style="color:var(--red)">No cover URL</div>'}
+      </div>
+      <div class="queue-status">${badge}</div>
+      <button class="btn-sm primary" onclick="queueReplace('${esc(n._slug)}')">Replace</button>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   QUEUE HELPERS
+═══════════════════════════════════════════════════════════════════════ */
+function queueCopyUrl(slug) {
+  const novel = STATE.novels.find(n => n._slug === slug);
+  if (!novel || !novel.cover) { toast('No URL to copy', 'error'); return; }
+  navigator.clipboard.writeText(novel.cover).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = novel.cover; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  }).finally(() => {
+    toast('URL copied — paste in browser to download image', 'success', 3000);
+  });
+}
+
+function queueReplace(slug) {
+  // Switch to All Novels tab, then open the inline panel for this card
+  const allBtn = document.querySelector('.tab-btn');
+  switchTab('all', allBtn);
+  // Clear any active letter/search filters so the card is visible
+  STATE.searchQ = '';
+  STATE.filterMode = null;
+  STATE.currentLetter = null;
+  STATE.currentPage = 1;
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterBroken').classList.remove('active');
+  document.getElementById('filterWorking').classList.remove('active');
+  applyFilters();
+  buildAzNav();
+  // Wait for render, then open inline panel and scroll to it
+  setTimeout(() => {
+    const card = document.getElementById('card-' + slug);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => toggleInlinePanel(slug), 300);
+    } else {
+      // Card may be on another page — open modal as fallback
+      openReplace(slug);
+    }
+  }, 120);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   REPLACE MODAL (secondary — used as fallback when card not in view)
+═══════════════════════════════════════════════════════════════════════ */
+function openReplace(slug) {
+  const novel = STATE.novels.find(n => n._slug === slug);
+  if (!novel) return;
+
+  STATE.replaceTarget = novel;
+  STATE.replaceFile = null;
+  STATE.replaceMethod = 'file';
+
+  document.getElementById('modalTitle').textContent = 'Replace Cover — ' + novel.title.substring(0,50) + (novel.title.length>50?'…':'');
+  document.getElementById('modalSlug').textContent = slug;
+
+  const currentSlot = document.getElementById('currentCoverSlot');
+  if (novel.cover && isValidUrl(novel.cover)) {
+    currentSlot.outerHTML = `<img id="currentCoverSlot" src="${esc(novel.cover)}" style="width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;border:1px solid var(--border2);" onerror="this.outerHTML='<div id=currentCoverSlot class=cover-placeholder>📖</div>'">`;
+  } else {
+    currentSlot.outerHTML = `<div id="currentCoverSlot" class="cover-placeholder">📖</div>`;
+  }
+
+  const st = STATE.statuses[slug];
+  const statusEl = document.getElementById('currentStatusBadge');
+  statusEl.style.cssText = 'font-size:11px;padding:4px 10px;border-radius:20px;text-align:center;font-weight:600;';
+  if (st === 'broken')      { statusEl.textContent = '✕ Broken';  statusEl.style.background='var(--red-dim)';    statusEl.style.color='var(--red)'; }
+  else if (st === 'missing'){ statusEl.textContent = '⚠ Missing'; statusEl.style.background='var(--yellow-dim)'; statusEl.style.color='var(--yellow)'; }
+  else if (st === 'working'){ statusEl.textContent = '✓ Working'; statusEl.style.background='var(--green-dim)';  statusEl.style.color='var(--green)'; }
+  else                       { statusEl.textContent = '… Pending'; statusEl.style.background='var(--surface3)';  statusEl.style.color='var(--text2)'; }
+
+  document.getElementById('newCoverSlot').outerHTML = `<div id="newCoverSlot" class="cover-placeholder" style="background:var(--surface3);font-size:28px;color:var(--text3);">＋</div>`;
+
+  const rbInfo = document.getElementById('rollbackInfo');
+  const rbUrl  = document.getElementById('rollbackUrl');
+  if (novel.cover) {
+    rbInfo.style.display = 'block';
+    rbUrl.textContent = novel.cover;
+  } else {
+    rbInfo.style.display = 'none';
+  }
+
+  document.getElementById('coverFileInput').value = '';
+  document.getElementById('coverUrlInput').value  = '';
+  document.getElementById('selectedFileName').style.display = 'none';
+  document.getElementById('commitLog').style.display = 'none';
+  document.getElementById('commitLog').innerHTML = '';
+  document.getElementById('modalAlert').style.display = 'none';
+
+  setMethod('file');
+  openModal('replaceModal');
+}
+
+function setMethod(method) {
+  STATE.replaceMethod = method;
+  document.getElementById('fileMethod').style.display = method === 'file' ? 'block' : 'none';
+  document.getElementById('urlMethod').style.display  = method === 'url'  ? 'block' : 'none';
+  document.getElementById('methodFile').classList.toggle('active', method === 'file');
+  document.getElementById('methodUrl').classList.toggle('active', method === 'url');
+}
+
+function handleCoverFile(file) {
+  if (!file) return;
+  STATE.replaceFile = file;
+  const nameEl = document.getElementById('selectedFileName');
+  nameEl.textContent = `📎 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  nameEl.style.display = 'block';
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const slot = document.getElementById('newCoverSlot');
+    slot.outerHTML = `<img id="newCoverSlot" src="${e.target.result}" style="width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;border:1px solid var(--accent);">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewCoverUrl() {
+  const url = document.getElementById('coverUrlInput').value.trim();
+  const slot = document.getElementById('newCoverSlot');
+  if (!url) { slot.outerHTML = `<div id="newCoverSlot" class="cover-placeholder" style="background:var(--surface3);font-size:28px;color:var(--text3);">＋</div>`; return; }
+  slot.outerHTML = `<img id="newCoverSlot" src="${esc(url)}" style="width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:8px;border:1px solid var(--accent);" onerror="this.style.opacity='0.3'">`;
+}
+
+function handleModalDragOver(e) {
+  e.preventDefault();
+  document.getElementById('dropzoneModal').classList.add('drag-over');
+}
+function handleModalDragLeave() {
+  document.getElementById('dropzoneModal').classList.remove('drag-over');
+}
+function handleModalDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropzoneModal').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) handleCoverFile(file);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   COMMIT REPLACE
+═══════════════════════════════════════════════════════════════════════ */
+async function commitReplace() {
+  const novel = STATE.replaceTarget;
+  if (!novel) return;
+
+  const method = STATE.replaceMethod;
+  let urlToSave = '';
+  let uploadFile = null;
+
+  if (method === 'file') {
+    if (!STATE.replaceFile) { showModalAlert('error', '❌ Please select an image file first.'); return; }
+    uploadFile = STATE.replaceFile;
+  } else {
+    urlToSave = document.getElementById('coverUrlInput').value.trim();
+    if (!urlToSave || !isValidUrl(urlToSave)) { showModalAlert('error', '❌ Please enter a valid URL.'); return; }
+  }
+
+  // Build commit summary for confirm modal
+  const ext = uploadFile ? uploadFile.name.split('.').pop().toLowerCase() : '';
+  const imgPath = uploadFile ? `${STATE.imgDir}/${novel._slug}.${ext}` : null;
+  const finalUrl = uploadFile ? `/${STATE.imgDir}/${novel._slug}.${ext}` : urlToSave;
+
+  const summaryHtml = `
+    <div class="s-row"><span>Novel</span><span class="s-val">${esc(novel.title.substring(0,35))}…</span></div>
+    <div class="s-row"><span>Action</span><span class="s-val">${uploadFile ? '📤 Upload image + update JSON' : '🔗 Update JSON URL only'}</span></div>
+    ${uploadFile ? `<div class="s-row"><span>Upload to</span><span class="s-val">${esc(imgPath)}</span></div>` : ''}
+    <div class="s-row"><span>New URL</span><span class="s-val">${esc(finalUrl.substring(0,45))}${finalUrl.length>45?'…':''}</span></div>
+  `;
+
+  showConfirm(
+    '🚀', 'Commit Changes?',
+    'This will push commits to your GitHub repository. The site will update after GitHub Pages rebuilds.',
+    summaryHtml,
+    async () => {
+      closeModal('confirmModal');
+      await doCommit(novel, uploadFile, imgPath, finalUrl);
+    }
+  );
+}
+
+async function doCommit(novel, uploadFile, imgPath, finalUrl) {
+  const logEl = document.getElementById('commitLog');
+  logEl.style.display = 'block';
+  logEl.innerHTML = '';
+  document.getElementById('btnCommit').disabled = true;
+
+  const addLog = (text, status='wait') => {
+    const id = 'l' + Date.now() + Math.random().toString(36).slice(2);
+    logEl.insertAdjacentHTML('beforeend',
+      `<div class="log-line" id="${id}"><div class="log-dot dot-${status}"></div><div>${esc(text)}</div></div>`);
+    logEl.scrollTop = logEl.scrollHeight;
+    return id;
+  };
+  const updLog = (id, text, status) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.querySelector('.log-dot').className = 'log-dot dot-' + status;
+    el.querySelector('div:last-child').textContent = text;
+    logEl.scrollTop = logEl.scrollHeight;
+  };
+
+  try {
+    let newImageUrl = finalUrl;
+
+    // Step 1: Upload image if file
+    if (uploadFile) {
+      const l1 = addLog(`Uploading image to ${imgPath}…`, 'run');
+      const arrBuf = await uploadFile.arrayBuffer();
+      let existingSha = null;
+      try { const ex = await ghGetFile(imgPath); existingSha = ex.sha; } catch(e) {}
+      await ghPutFile(imgPath, arrBuf, `🖼 Upload cover: ${novel._slug}`, existingSha);
+      updLog(l1, `✅ Image uploaded → ${imgPath}`, 'ok');
+    }
+
+    // Step 2: Update novels.json
+    const l2 = addLog('Updating novels.json…', 'run');
+    let { sha: latestSha, content } = await ghGetFile(STATE.jsonPath);
+    const novels = JSON.parse(content);
+    const idx = novels.findIndex(n => n._slug === novel._slug || slugFromNovel(n) === novel._slug);
+    const target = idx >= 0 ? novels[idx] : novels.find(n => n.title === novel.title);
+    if (!target) throw new Error('Could not find novel in JSON to update.');
+    const oldCover = target.cover;
+    target.cover = newImageUrl;
+    await ghPutFile(STATE.jsonPath, JSON.stringify(novels, null, 2), `🔄 Update cover: ${novel._slug}`, latestSha);
+    STATE.jsonSha = latestSha; // will be stale after write — fine
+    updLog(l2, `✅ novels.json updated`, 'ok');
+
+    // Step 3: Update local state
+    const l3 = addLog('Updating local state…', 'run');
+    novel.cover = newImageUrl;
+    novel._oldCover = oldCover;
+    STATE.statuses[novel._slug] = 'pending';
+    setTimeout(() => validateOne(novel._slug).then(() => { updateStats(); renderGrid(); renderQueueTab(); }), 500);
+    updLog(l3, '✅ Local state synced', 'ok');
+
+    addLog('🎉 All done! GitHub Pages will rebuild in ~30s.', 'ok');
+    showModalAlert('success', `✅ Cover updated successfully!`);
+    toast(`Cover updated for "${novel.title.substring(0,30)}"`, 'success');
+
+    // Show rollback info
+    document.getElementById('rollbackInfo').style.display = 'block';
+    document.getElementById('rollbackUrl').textContent = oldCover || '(none)';
+  } catch(e) {
+    addLog('❌ Error: ' + e.message, 'err');
+    showModalAlert('error', '❌ ' + e.message);
+    toast('Commit failed: ' + e.message, 'error', 6000);
+  }
+
+  document.getElementById('btnCommit').disabled = false;
+}
+
+function showModalAlert(type, text) {
+  const el = document.getElementById('modalAlert');
+  el.className = `modal-alert ${type}`;
+  el.textContent = text;
+  el.style.display = 'block';
+}
+
+function copyRollbackUrl() {
+  const url = document.getElementById('rollbackUrl').textContent.trim();
+  if (!url || url === '(none)') { toast('No URL to copy', 'error'); return; }
+  const btn = document.getElementById('rollbackCopyBtn');
+  navigator.clipboard.writeText(url).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = url; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  }).finally(() => {
+    if (btn) { const orig = btn.textContent; btn.textContent = '✓ Copied!'; btn.classList.add('copied'); setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000); }
+    toast('URL copied — paste in browser to download the image', 'success', 3000);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CONFIRM MODAL
+═══════════════════════════════════════════════════════════════════════ */
+let _confirmCallback = null;
+
+function showConfirm(icon, title, text, summaryHtml, callback) {
+  document.getElementById('confirmIcon').textContent = icon;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmText').textContent = text;
+  document.getElementById('confirmSummary').innerHTML = summaryHtml;
+  _confirmCallback = callback;
+  const okBtn = document.getElementById('btnConfirmOk');
+  okBtn.onclick = () => { if (_confirmCallback) _confirmCallback(); };
+  openModal('confirmModal');
+}
+
+function replaceAllBroken() {
+  toast('Select individual novels from the queue to replace covers.', 'info');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MODAL HELPERS
+═══════════════════════════════════════════════════════════════════════ */
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeModal(overlay.id);
+  });
+});
+
+// ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TAB SWITCHER
+═══════════════════════════════════════════════════════════════════════ */
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  if (name === 'queue') renderQueueTab();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   STATUS DOT
+═══════════════════════════════════════════════════════════════════════ */
+function updateStatusDot(state, label) {
+  const dot = document.getElementById('statusDot');
+  const lbl = document.getElementById('statusLabel');
+  dot.className = 'status-dot ' + state;
+  lbl.textContent = label;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════════════ */
+(function init() {
+  _filterApplied = true;  // prevent double apply on first load
+  const hasConfig = loadConfig();
+  if (hasConfig && STATE.token && STATE.repo) {
+    // Auto-connect if creds are saved
+    document.getElementById('setupPanel').style.display = 'flex';
+    setTimeout(() => connect(), 300);
+  }
+})();
+</script>
+</body>
+</html>
