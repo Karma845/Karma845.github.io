@@ -1102,6 +1102,52 @@ body::before {
 }
 .queue-status { flex-shrink: 0; }
 
+/* ─── New / Updated Badges ──────────────────────────── */
+.badge-new {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 3px 7px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+.badge-updated {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+  color: #1a0a00;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 3px 7px;
+  border-radius: 20px;
+  text-transform: uppercase;
+}
+/* stack two status badges: cover-status top-right, novel-type bottom-left */
+.card-novel-badge {
+  position: absolute;
+  bottom: 8px; left: 8px;
+  backdrop-filter: blur(8px);
+}
+/* reason tooltip */
+.card-reason {
+  font-size: 9px;
+  color: var(--text3);
+  font-style: italic;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* novel card border glow for new/updated */
+.novel-card.is-new     { border-color: rgba(0,114,255,0.4); }
+.novel-card.is-new:hover { border-color: #0072ff; box-shadow: 0 4px 20px rgba(0,114,255,0.25); }
+.novel-card.is-updated { border-color: rgba(255,210,0,0.35); }
+.novel-card.is-updated:hover { border-color: #ffd200; box-shadow: 0 4px 20px rgba(255,210,0,0.2); }
+/* filter toggle colours for new/updated */
+.filter-toggle.active.blue-filter { background: rgba(0,114,255,0.15); color: #4da6ff; border-color: rgba(0,114,255,0.3); }
+.filter-toggle.active.orange-filter { background: rgba(255,210,0,0.15); color: #ffd200; border-color: rgba(255,210,0,0.3); }
+
 /* Empty State */
 .empty-state {
   display: flex;
@@ -1232,6 +1278,12 @@ body::before {
       </div>
 
       <div class="form-group">
+        <label class="form-label">updates.json path</label>
+        <input class="form-input" type="text" id="cfgUpdatesPath" placeholder="updates.json" value="updates.json">
+        <div class="form-hint">JSON file with recently updated novels (has <code>timestamp</code> + <code>reason</code> fields).</div>
+      </div>
+
+      <div class="form-group">
         <label class="form-label">Image Upload Directory</label>
         <input class="form-input" type="text" id="cfgImgDir" placeholder="docs/assets/html/img" value="docs/assets/html/img">
         <div class="form-hint">Where cover images will be uploaded in the repo.</div>
@@ -1278,6 +1330,20 @@ body::before {
           <div class="stat-label">Working Covers</div>
         </div>
       </div>
+      <div class="stat-item" style="cursor:pointer" onclick="toggleFilter('new')">
+        <div class="stat-icon" style="background:rgba(0,114,255,0.15)">🆕</div>
+        <div>
+          <div class="stat-value" style="color:#4da6ff" id="statNew">0</div>
+          <div class="stat-label">Newly Added</div>
+        </div>
+      </div>
+      <div class="stat-item" style="cursor:pointer" onclick="toggleFilter('updated')">
+        <div class="stat-icon" style="background:rgba(255,210,0,0.15)">🔄</div>
+        <div>
+          <div class="stat-value" style="color:#ffd200" id="statUpdated">0</div>
+          <div class="stat-label">Recently Updated</div>
+        </div>
+      </div>
     </div>
 
     <!-- Tab Navigation -->
@@ -1300,6 +1366,8 @@ body::before {
         </div>
         <button class="filter-toggle red-filter" id="filterBroken" onclick="toggleFilter('broken')">🔴 Broken Only</button>
         <button class="filter-toggle green-filter" id="filterWorking" onclick="toggleFilter('working')">🟢 Working Only</button>
+        <button class="filter-toggle blue-filter" id="filterNew" onclick="toggleFilter('new')">🆕 New</button>
+        <button class="filter-toggle orange-filter" id="filterUpdated" onclick="toggleFilter('updated')">🔄 Updated</button>
         <button class="btn-sm" onclick="revalidateAll()" title="Re-check all image statuses">⟳ Revalidate</button>
       </div>
 
@@ -1429,19 +1497,24 @@ body::before {
    STATE
 ═══════════════════════════════════════════════════════════════════════ */
 const STATE = {
-  token: '', repo: '', branch: '', jsonPath: '', imgDir: '',
+  token: '', repo: '', branch: '', jsonPath: '', imgDir: '', updatesPath: '',
   novels: [],        // raw parsed array from JSON
+  updates: [],       // raw parsed array from updates.json
+  newSlugs: new Set(),      // slugs present in novels.json but NOT in updates.json (truly new)
+  updatedSlugs: new Set(),  // slugs in updates.json (recently updated)
+  updateReasons: {},        // slug → latest reason string
+  updateTimestamps: {},     // slug → latest ISO timestamp
   statuses: {},      // slug → 'working' | 'broken' | 'missing' | 'pending'
   jsonSha: null,
   filtered: [],      // currently displayed subset
   currentPage: 1,
   pageSize: 50,
   searchQ: '',
-  filterMode: null,  // null | 'broken' | 'working'
+  filterMode: null,  // null | 'broken' | 'working' | 'new' | 'updated'
   currentLetter: null,
-  replaceTarget: null,   // novel being replaced
-  replaceFile: null,     // File object if uploading
-  replaceMethod: 'file', // 'file' | 'url'
+  replaceTarget: null,
+  replaceFile: null,
+  replaceMethod: 'file',
 };
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -1478,6 +1551,17 @@ function isValidUrl(str) {
   try { new URL(str); return true; } catch { return false; }
 }
 
+function relativeTime(iso) {
+  const ms = Date.now() - new Date(iso).getTime();
+  const d = Math.floor(ms / 86400000);
+  if (d === 0) return 'today';
+  if (d === 1) return 'yesterday';
+  if (d < 7)  return `${d}d ago`;
+  if (d < 30) return `${Math.floor(d/7)}w ago`;
+  if (d < 365) return `${Math.floor(d/30)}mo ago`;
+  return `${Math.floor(d/365)}y ago`;
+}
+
 function toast(msg, type='info', duration=3500) {
   const icons = { success:'✅', error:'❌', info:'💡' };
   const el = document.createElement('div');
@@ -1503,7 +1587,7 @@ function setLoading(show, text='Loading…', progress=0) {
 function saveConfig() {
   localStorage.setItem('cm_config', JSON.stringify({
     token: STATE.token, repo: STATE.repo, branch: STATE.branch,
-    jsonPath: STATE.jsonPath, imgDir: STATE.imgDir
+    jsonPath: STATE.jsonPath, imgDir: STATE.imgDir, updatesPath: STATE.updatesPath
   }));
 }
 
@@ -1511,17 +1595,19 @@ function loadConfig() {
   try {
     const cfg = JSON.parse(localStorage.getItem('cm_config') || '{}');
     if (cfg.token) {
-      STATE.token    = cfg.token;
-      STATE.repo     = cfg.repo;
-      STATE.branch   = cfg.branch;
-      STATE.jsonPath = cfg.jsonPath;
-      STATE.imgDir   = cfg.imgDir;
-      document.getElementById('cfgToken').value    = cfg.token;
-      document.getElementById('cfgOwner').value    = cfg.repo ? cfg.repo.split('/')[0] : '';
-      document.getElementById('cfgRepo').value     = cfg.repo ? cfg.repo.split('/').slice(1).join('/') : '';
-      document.getElementById('cfgBranch').value   = cfg.branch || 'main';
-      document.getElementById('cfgJsonPath').value = cfg.jsonPath || 'novels.json';
-      document.getElementById('cfgImgDir').value   = cfg.imgDir  || 'docs/assets/images';
+      STATE.token       = cfg.token;
+      STATE.repo        = cfg.repo;
+      STATE.branch      = cfg.branch;
+      STATE.jsonPath    = cfg.jsonPath;
+      STATE.imgDir      = cfg.imgDir;
+      STATE.updatesPath = cfg.updatesPath || 'updates.json';
+      document.getElementById('cfgToken').value       = cfg.token;
+      document.getElementById('cfgOwner').value       = cfg.repo ? cfg.repo.split('/')[0] : '';
+      document.getElementById('cfgRepo').value        = cfg.repo ? cfg.repo.split('/').slice(1).join('/') : '';
+      document.getElementById('cfgBranch').value      = cfg.branch || 'main';
+      document.getElementById('cfgJsonPath').value    = cfg.jsonPath || 'novels.json';
+      document.getElementById('cfgUpdatesPath').value = cfg.updatesPath || 'updates.json';
+      document.getElementById('cfgImgDir').value      = cfg.imgDir  || 'docs/assets/html/img';
       return true;
     }
   } catch(e) {}
@@ -1598,7 +1684,8 @@ async function connect() {
   const repoName = document.getElementById('cfgRepo').value.trim();
   const branch = document.getElementById('cfgBranch').value.trim() || 'main';
   const jsonPath = document.getElementById('cfgJsonPath').value.trim() || 'novels.json';
-  const imgDir = document.getElementById('cfgImgDir').value.trim().replace(/\/$/, '') || 'docs/assets/images';
+  const updatesPath = document.getElementById('cfgUpdatesPath').value.trim() || 'updates.json';
+  const imgDir = document.getElementById('cfgImgDir').value.trim().replace(/\/$/, '') || 'docs/assets/html/img';
 
   const alertEl = document.getElementById('setupAlert');
   alertEl.style.display = 'none';
@@ -1618,11 +1705,12 @@ async function connect() {
   try {
     await ghTestConn(token, repo);
 
-    STATE.token    = token;
-    STATE.repo     = repo;
-    STATE.branch   = branch;
-    STATE.jsonPath = jsonPath;
-    STATE.imgDir   = imgDir;
+    STATE.token       = token;
+    STATE.repo        = repo;
+    STATE.branch      = branch;
+    STATE.jsonPath    = jsonPath;
+    STATE.imgDir      = imgDir;
+    STATE.updatesPath = updatesPath;
 
     saveConfig();
 
@@ -1650,19 +1738,73 @@ async function loadNovels() {
     if (!content) throw new Error('novels.json not found in repo.');
     STATE.jsonSha = sha;
     STATE.novels = JSON.parse(content);
-
-    // Normalise: ensure each novel has a .slug derived from URL
     STATE.novels.forEach(n => { n._slug = slugFromNovel(n); });
 
-    setLoading(true, `Loaded ${STATE.novels.length} novels. Validating covers…`, 30);
+    setLoading(true, 'Fetching updates.json…', 25);
+    // Load updates.json — soft fail if missing
+    try {
+      const { content: uc } = await ghGetFile(STATE.updatesPath);
+      STATE.updates = uc ? JSON.parse(uc) : [];
+    } catch(e) { STATE.updates = []; }
+
+    // Build lookup sets from updates.json
+    // updatedSlugs = all slugs that appear in updates.json (recently updated volumes)
+    // newSlugs = slugs in novels.json that appear ONLY in updates.json with the most recent
+    //            timestamps AND are also identifiable as new entries in novels.json
+    STATE.updatedSlugs    = new Set();
+    STATE.newSlugs        = new Set();
+    STATE.updateReasons   = {};
+    STATE.updateTimestamps= {};
+
+    // Index updates by slug — keep latest timestamp per slug
+    const updatesBySlug = {};
+    STATE.updates.forEach(u => {
+      const slug = slugFromUrl(u.url);
+      if (!slug) return;
+      const ts = new Date(u.timestamp||0).getTime();
+      if (!updatesBySlug[slug] || ts > new Date(updatesBySlug[slug].timestamp||0).getTime()) {
+        updatesBySlug[slug] = u;
+      }
+    });
+
+    // Build the novel slugs set for quick lookup
+    const novelSlugSet = new Set(STATE.novels.map(n => n._slug));
+
+    // Determine which update slugs match novels and classify them
+    // "New" = slug exists in updates.json but was NOT in the previous version of novels.json
+    // We approximate: if the slug appears only ONCE in updates.json entries, treat as new,
+    // otherwise as updated. Also expose all within a configurable recency window.
+    const RECENCY_DAYS = 60;
+    const now = Date.now();
+
+    const slugCounts = {};
+    STATE.updates.forEach(u => {
+      const slug = slugFromUrl(u.url);
+      if (slug) slugCounts[slug] = (slugCounts[slug]||0) + 1;
+    });
+
+    Object.entries(updatesBySlug).forEach(([slug, u]) => {
+      if (!novelSlugSet.has(slug)) return; // skip if not in current novels.json
+      const ts = new Date(u.timestamp||0).getTime();
+      const age = (now - ts) / (1000*60*60*24);
+      if (age > RECENCY_DAYS) return; // skip very old entries
+      STATE.updateReasons[slug]    = u.reason || '';
+      STATE.updateTimestamps[slug] = u.timestamp || '';
+      // Appear only once in updates = newly added novel; multiple = repeated volume updates
+      if (slugCounts[slug] === 1) {
+        STATE.newSlugs.add(slug);
+      } else {
+        STATE.updatedSlugs.add(slug);
+      }
+    });
+
+    setLoading(true, `Loaded ${STATE.novels.length} novels. Validating covers…`, 40);
     updateStatusDot('connected', `${STATE.novels.length} novels`);
 
-    // Show app
     document.getElementById('setupPanel').style.display = 'none';
     document.getElementById('mainApp').style.display = 'flex';
     document.getElementById('btnRefresh').style.display = 'flex';
 
-    // Mark all as pending
     STATE.statuses = {};
     STATE.novels.forEach(n => {
       STATE.statuses[n._slug] = n.cover ? 'pending' : 'missing';
@@ -1674,7 +1816,6 @@ async function loadNovels() {
     renderQueueTab();
     setLoading(false);
 
-    // Start lazy validation in background
     validateCovers();
   } catch(e) {
     setLoading(false);
@@ -1737,15 +1878,19 @@ function validateOne(slug) {
    STATS
 ═══════════════════════════════════════════════════════════════════════ */
 function updateStats() {
-  const total = STATE.novels.length;
+  const total   = STATE.novels.length;
   const missing = STATE.novels.filter(n => !n.cover || !isValidUrl(n.cover || '')).length;
   const broken  = Object.values(STATE.statuses).filter(s => s === 'broken').length;
   const working = Object.values(STATE.statuses).filter(s => s === 'working').length;
+  const newCount     = STATE.newSlugs.size;
+  const updatedCount = STATE.updatedSlugs.size;
 
   document.getElementById('statTotal').textContent   = total;
   document.getElementById('statBroken').textContent  = broken;
   document.getElementById('statMissing').textContent = missing;
   document.getElementById('statWorking').textContent = working;
+  document.getElementById('statNew').textContent     = newCount;
+  document.getElementById('statUpdated').textContent = updatedCount;
 
   const queueCount = STATE.novels.filter(n => {
     const s = STATE.statuses[n._slug];
@@ -1792,13 +1937,14 @@ function onSearch() {
 function toggleFilter(mode) {
   if (STATE.filterMode === mode) {
     STATE.filterMode = null;
-    document.getElementById('filterBroken').classList.remove('active');
-    document.getElementById('filterWorking').classList.remove('active');
   } else {
     STATE.filterMode = mode;
-    document.getElementById('filterBroken').classList.toggle('active', mode === 'broken');
-    document.getElementById('filterWorking').classList.toggle('active', mode === 'working');
   }
+  // Sync all toggle button states
+  document.getElementById('filterBroken').classList.toggle('active',  STATE.filterMode === 'broken');
+  document.getElementById('filterWorking').classList.toggle('active', STATE.filterMode === 'working');
+  document.getElementById('filterNew').classList.toggle('active',     STATE.filterMode === 'new');
+  document.getElementById('filterUpdated').classList.toggle('active', STATE.filterMode === 'updated');
   STATE.currentPage = 1;
   applyFilters();
 }
@@ -1806,7 +1952,6 @@ function toggleFilter(mode) {
 function applyFilters() {
   let list = [...STATE.novels];
 
-  // letter filter
   if (STATE.currentLetter) {
     list = list.filter(n => {
       const ch = (n.title||'')[0]?.toUpperCase();
@@ -1815,7 +1960,6 @@ function applyFilters() {
     });
   }
 
-  // search
   if (STATE.searchQ) {
     list = list.filter(n =>
       n.title.toLowerCase().includes(STATE.searchQ) ||
@@ -1823,11 +1967,14 @@ function applyFilters() {
     );
   }
 
-  // status filter
   if (STATE.filterMode === 'broken') {
     list = list.filter(n => STATE.statuses[n._slug] === 'broken' || STATE.statuses[n._slug] === 'missing' || !n.cover);
   } else if (STATE.filterMode === 'working') {
     list = list.filter(n => STATE.statuses[n._slug] === 'working');
+  } else if (STATE.filterMode === 'new') {
+    list = list.filter(n => STATE.newSlugs.has(n._slug));
+  } else if (STATE.filterMode === 'updated') {
+    list = list.filter(n => STATE.updatedSlugs.has(n._slug));
   }
 
   STATE.filtered = list;
@@ -1842,24 +1989,47 @@ function renderGrid() {
   applyFiltersIfNeeded();
   const start = (STATE.currentPage - 1) * STATE.pageSize;
   const page  = STATE.filtered.slice(start, start + STATE.pageSize);
-  const grid  = document.getElementById('novelsGrid');
+
+  // Collect currently open inline panels so we can restore them after re-render
+  const openPanels = new Set();
+  document.querySelectorAll('.card-inline-panel').forEach(p => {
+    if (p.style.display !== 'none') {
+      // id is "inline-{slug}"
+      const slug = p.id.replace(/^inline-/, '');
+      openPanels.add(slug);
+    }
+  });
+
+  const gridArea = document.getElementById('gridArea');
 
   if (STATE.filtered.length === 0) {
-    document.getElementById('gridArea').innerHTML = `
+    gridArea.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">🔍</div>
         <div class="empty-title">No results found</div>
         <div class="empty-sub">Try adjusting your search or filters.</div>
       </div>`;
+    renderPagination();
     return;
   }
 
-  // Restore grid if it was replaced with empty state
-  if (!document.getElementById('novelsGrid')) {
-    document.getElementById('gridArea').innerHTML = '<div class="novels-grid" id="novelsGrid"></div>';
+  // Ensure grid container exists
+  if (!gridArea.querySelector('.novels-grid')) {
+    gridArea.innerHTML = '<div class="novels-grid" id="novelsGrid"></div>';
   }
 
-  document.getElementById('novelsGrid').innerHTML = page.map(n => renderCard(n)).join('');
+  const grid = document.getElementById('novelsGrid');
+  grid.innerHTML = page.map(n => renderCard(n)).join('');
+
+  // Restore any panels that were open before re-render
+  openPanels.forEach(slug => {
+    const panel = document.getElementById('inline-' + slug);
+    if (panel) {
+      panel.style.display = 'block';
+      // Scroll into view gently (only if it's a background revalidation call, not user action)
+    }
+  });
+
   renderPagination();
 }
 
@@ -1885,16 +2055,29 @@ function renderCard(n) {
           onload="onCardImgLoad(this, '${esc(n._slug)}')">`
     : `<div class="card-cover-placeholder">📖</div>`;
 
-  const cardClass = status === 'broken' ? ' broken' : status === 'missing' ? ' missing' : '';
+  const isNew     = STATE.newSlugs.has(n._slug);
+  const isUpdated = STATE.updatedSlugs.has(n._slug);
+  const reason    = STATE.updateReasons[n._slug] || '';
+  const timestamp = STATE.updateTimestamps[n._slug] || '';
+  const timeAgo   = timestamp ? relativeTime(timestamp) : '';
 
-  return `<div class="novel-card${cardClass}" id="card-${esc(n._slug)}">
+  let novelBadge = '';
+  if (isNew)          novelBadge = `<span class="card-novel-badge badge-new">🆕 New</span>`;
+  else if (isUpdated) novelBadge = `<span class="card-novel-badge badge-updated">🔄 Updated</span>`;
+
+  const statusClass = status === 'broken' ? ' broken' : status === 'missing' ? ' missing' : '';
+  const novelClass  = isNew ? ' is-new' : isUpdated ? ' is-updated' : '';
+
+  return `<div class="novel-card${statusClass}${novelClass}" id="card-${esc(n._slug)}">
     <div style="position:relative;">
       ${coverHtml}
       ${badgeMap[status]||''}
+      ${novelBadge}
     </div>
     <div class="card-info">
       <div class="card-title" title="${esc(n.title)}">${esc(n.title)}</div>
       <div class="card-slug">${esc(n._slug)}</div>
+      ${reason ? `<div class="card-reason" title="${esc(reason)}${timeAgo?' · '+timeAgo:''}">📌 ${esc(reason)}${timeAgo?' · '+esc(timeAgo):''}</div>` : ''}
     </div>
     <div class="card-action-bar" id="card-actions-${esc(n._slug)}">
       <button class="card-btn replace-btn" onclick="toggleInlinePanel('${esc(n._slug)}')">🖼 Replace</button>
