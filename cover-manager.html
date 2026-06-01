@@ -1291,7 +1291,13 @@ body::before {
       <div class="form-group">
         <label class="form-label">Image Upload Directory</label>
         <input class="form-input" type="text" id="cfgImgDir" placeholder="docs/assets/html/img" value="docs/assets/html/img">
-        <div class="form-hint">Where cover images will be uploaded in the repo.</div>
+        <div class="form-hint">Repo path where cover images are uploaded.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Site Base URL</label>
+        <input class="form-input" type="text" id="cfgSiteBaseUrl" placeholder="https://animestuff.me" value="https://animestuff.me">
+        <div class="form-hint">Your GitHub Pages domain — used to build absolute image URLs that work in both <code>novels.json</code> and HTML files.</div>
       </div>
 
       <button class="btn-connect" id="btnConnect" onclick="connect()">
@@ -1502,7 +1508,7 @@ body::before {
    STATE
 ═══════════════════════════════════════════════════════════════════════ */
 const STATE = {
-  token: '', repo: '', branch: '', jsonPath: '', imgDir: '', updatesPath: '',
+  token: '', repo: '', branch: '', jsonPath: '', imgDir: '', updatesPath: '', siteBaseUrl: '',
   novels: [],        // raw parsed array from JSON
   updates: [],       // raw parsed array from updates.json
   newSlugs: new Set(),      // slugs present in novels.json but NOT in updates.json (truly new)
@@ -1592,7 +1598,8 @@ function setLoading(show, text='Loading…', progress=0) {
 function saveConfig() {
   localStorage.setItem('cm_config', JSON.stringify({
     token: STATE.token, repo: STATE.repo, branch: STATE.branch,
-    jsonPath: STATE.jsonPath, imgDir: STATE.imgDir, updatesPath: STATE.updatesPath
+    jsonPath: STATE.jsonPath, imgDir: STATE.imgDir,
+    updatesPath: STATE.updatesPath, siteBaseUrl: STATE.siteBaseUrl
   }));
 }
 
@@ -1600,19 +1607,21 @@ function loadConfig() {
   try {
     const cfg = JSON.parse(localStorage.getItem('cm_config') || '{}');
     if (cfg.token) {
-      STATE.token       = cfg.token;
-      STATE.repo        = cfg.repo;
-      STATE.branch      = cfg.branch;
-      STATE.jsonPath    = cfg.jsonPath;
-      STATE.imgDir      = cfg.imgDir;
-      STATE.updatesPath = cfg.updatesPath || 'updates.json';
-      document.getElementById('cfgToken').value       = cfg.token;
-      document.getElementById('cfgOwner').value       = cfg.repo ? cfg.repo.split('/')[0] : '';
-      document.getElementById('cfgRepo').value        = cfg.repo ? cfg.repo.split('/').slice(1).join('/') : '';
-      document.getElementById('cfgBranch').value      = cfg.branch || 'main';
-      document.getElementById('cfgJsonPath').value    = cfg.jsonPath || 'novels.json';
-      document.getElementById('cfgUpdatesPath').value = cfg.updatesPath || 'updates.json';
-      document.getElementById('cfgImgDir').value      = cfg.imgDir  || 'docs/assets/html/img';
+      STATE.token        = cfg.token;
+      STATE.repo         = cfg.repo;
+      STATE.branch       = cfg.branch;
+      STATE.jsonPath     = cfg.jsonPath;
+      STATE.imgDir       = cfg.imgDir;
+      STATE.updatesPath  = cfg.updatesPath || 'updates.json';
+      STATE.siteBaseUrl  = cfg.siteBaseUrl || 'https://animestuff.me';
+      document.getElementById('cfgToken').value        = cfg.token;
+      document.getElementById('cfgOwner').value        = cfg.repo ? cfg.repo.split('/')[0] : '';
+      document.getElementById('cfgRepo').value         = cfg.repo ? cfg.repo.split('/').slice(1).join('/') : '';
+      document.getElementById('cfgBranch').value       = cfg.branch || 'main';
+      document.getElementById('cfgJsonPath').value     = cfg.jsonPath || 'novels.json';
+      document.getElementById('cfgUpdatesPath').value  = cfg.updatesPath || 'updates.json';
+      document.getElementById('cfgImgDir').value       = cfg.imgDir || 'docs/assets/html/img';
+      document.getElementById('cfgSiteBaseUrl').value  = cfg.siteBaseUrl || 'https://animestuff.me';
       return true;
     }
   } catch(e) {}
@@ -1690,7 +1699,8 @@ async function connect() {
   const branch = document.getElementById('cfgBranch').value.trim() || 'main';
   const jsonPath = document.getElementById('cfgJsonPath').value.trim() || 'novels.json';
   const updatesPath = document.getElementById('cfgUpdatesPath').value.trim() || 'updates.json';
-  const imgDir = document.getElementById('cfgImgDir').value.trim().replace(/\/$/, '') || 'docs/assets/html/img';
+  const imgDir      = document.getElementById('cfgImgDir').value.trim().replace(/\/$/, '') || 'docs/assets/html/img';
+  const siteBaseUrl = document.getElementById('cfgSiteBaseUrl').value.trim().replace(/\/$/, '') || 'https://animestuff.me';
 
   const alertEl = document.getElementById('setupAlert');
   alertEl.style.display = 'none';
@@ -1716,6 +1726,7 @@ async function connect() {
     STATE.jsonPath    = jsonPath;
     STATE.imgDir      = imgDir;
     STATE.updatesPath = updatesPath;
+    STATE.siteBaseUrl = siteBaseUrl;
 
     saveConfig();
 
@@ -2312,9 +2323,13 @@ async function inlineCommit(slug) {
     if (!urlToSave || !isValidUrl(urlToSave)) { inlineShowStatus(slug, 'error', '❌ Enter a valid URL'); return; }
   }
 
-  const ext     = uploadFile ? uploadFile.name.split('.').pop().toLowerCase() : '';
-  const imgPath = uploadFile ? `${STATE.imgDir}/${slug}.${ext}` : null;
-  const finalUrl = uploadFile ? `/${STATE.imgDir}/${slug}.${ext}` : urlToSave;
+  const ext      = uploadFile ? uploadFile.name.split('.').pop().toLowerCase() : '';
+  const imgPath  = uploadFile ? `${STATE.imgDir}/${slug}.${ext}` : null;
+  // Always use a full absolute URL — works in novels.json (any page reads it)
+  // AND in the HTML files inside /docs/assets/html/ (no relative path confusion)
+  const finalUrl = uploadFile
+    ? `${STATE.siteBaseUrl}/${STATE.imgDir}/${slug}.${ext}`
+    : urlToSave;
 
   // Confirm dialog
   const summaryHtml = `
@@ -2377,62 +2392,137 @@ async function doInlineCommit(novel, uploadFile, imgPath, finalUrl, slug) {
     await ghPutFile(STATE.jsonPath, JSON.stringify(novels, null, 2), `🔄 Update cover: ${slug}`, latestSha);
     updLog(l2, '✅ novels.json saved', 'ok');
 
-    // ── Step 3: Update HTML file img src ───────────────────────
-    // The novel HTML file lives at: docs/assets/html/{slug}.html
-    // We find the <img ...> tag that contains the old cover URL and replace its src
+    // ── Step 3: Update HTML file ────────────────────────────────
+    // HTML is at docs/assets/html/{slug}.html
+    // Patch strategy (runs in order, stops accumulating when already matched):
+    //   1. class="small-icon"  — top-right floating thumbnail
+    //   2. alt="Cover"         — main cover with standard alt text
+    //   3. old URL exact match — covers any variation where URL is known
+    //   4. <p style="text-align:center"><img ...> — covers inline-styled cover wrappers
+    //   5. cdn.novelupdates.com or known cover CDN domains — common cover host
+    //   6. First <img> inside .ani div — structural fallback for this site's layout
     const htmlFilePath = `docs/assets/html/${slug}.html`;
     const l3 = addLog(`Patching HTML: ${htmlFilePath}…`, 'run');
     try {
       const { sha: htmlSha, content: htmlContent } = await ghGetFile(htmlFilePath);
       if (htmlSha && htmlContent) {
-        // Strategy: replace any img src that matches the old cover URL
-        // Also replace common patterns: src="<oldCover>" or src='<oldCover>'
         let newHtml = htmlContent;
-        let patched = false;
+        let patchCount = 0;
 
+        // 1) small-icon (top-right thumbnail) — both attribute orders
+        newHtml = newHtml.replace(
+          /(<img\b[^>]*\bclass="[^"]*small-icon[^"]*"[^>]*\bsrc=")([^"]*?)(")/gi,
+          (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
+        );
+        newHtml = newHtml.replace(
+          /(<img\b[^>]*\bsrc=")([^"]*?)("[^>]*\bclass="[^"]*small-icon[^"]*")/gi,
+          (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
+        );
+
+        // 2) alt="Cover" — both attribute orders
+        newHtml = newHtml.replace(
+          /(<img\b[^>]*\bsrc=")([^"]*?)("[^>]*\balt="Cover"[^>]*>)/gi,
+          (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
+        );
+        newHtml = newHtml.replace(
+          /(<img\b[^>]*\balt="Cover"[^>]*\bsrc=")([^"]*?)("[^>]*>)/gi,
+          (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
+        );
+
+        // 3) Exact old URL string replacement (most reliable when URL is known)
         if (oldCover && newHtml.includes(oldCover)) {
           newHtml = newHtml.split(oldCover).join(finalUrl);
-          patched = true;
+          patchCount++;
         }
 
-        // Fallback: replace the first <img with a cover-like class/id or within a cover wrapper
-        // Look for patterns like: <img ... src="..." ... class="...cover..." or id="...cover..."
-        if (!patched) {
-          // Try replacing any img src that looks like a cover (in .cover / #cover / cover-img containers)
+        // 4) <p style="text-align: center;"><img src="..."> — this site's cover wrapper pattern
+        //    Matches an img that is the direct/only child of a centered paragraph
+        if (patchCount === 0) {
           newHtml = newHtml.replace(
-            /(<img\b[^>]*\bclass="[^"]*cover[^"]*"[^>]*\bsrc=")([^"]+)(")/gi,
-            (m, pre, src, post) => { patched = true; return pre + finalUrl + post; }
-          );
-        }
-        if (!patched) {
-          newHtml = newHtml.replace(
-            /(<img\b[^>]*\bsrc=")([^"]+)("[^>]*\bclass="[^"]*cover[^"]*")/gi,
-            (m, pre, src, post) => { patched = true; return pre + finalUrl + post; }
-          );
-        }
-        // Last resort: replace first <img src="..."> in the file
-        if (!patched) {
-          newHtml = newHtml.replace(
-            /(<img\b[^>]*?\bsrc=")([^"]+)(")/i,
-            (m, pre, src, post) => { patched = true; return pre + finalUrl + post; }
+            /(<p\b[^>]*\bstyle="[^"]*text-align\s*:\s*center[^"]*"[^>]*>\s*<img\b[^>]*\bsrc=")([^"]*?)(")/gi,
+            (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
           );
         }
 
-        if (patched && newHtml !== htmlContent) {
+        // 5) Known cover CDN domains — cdn.novelupdates.com, i.imgur.com, i.ibb.co etc.
+        if (patchCount === 0) {
+          const COVER_CDNS = [
+            'cdn.novelupdates.com',
+            'i.imgur.com',
+            'i.ibb.co',
+            'blogger.googleusercontent.com',
+            'i0.wp.com',
+            'm.media-amazon.com',
+            'animestuff.me',
+          ];
+          const cdnPattern = new RegExp(
+            `(<img\\b[^>]*\\bsrc=")((?:https?://)?(?:${COVER_CDNS.map(d => d.replace('.', '\\.')).join('|')})[^"]*)(")`,
+            'gi'
+          );
+          newHtml = newHtml.replace(cdnPattern,
+            (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
+          );
+        }
+
+        // 6) Structural fallback: first <img> inside <div class="ani"> (this site's content box)
+        if (patchCount === 0) {
+          // Find the .ani div, then replace only the first img src inside it
+          newHtml = newHtml.replace(
+            /(<div\b[^>]*\bclass="[^"]*\bani\b[^"]*"[^>]*>[\s\S]*?<img\b[^>]*\bsrc=")([^"]*?)(")/i,
+            (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
+          );
+        }
+
+        if (patchCount > 0 && newHtml !== htmlContent) {
           await ghPutFile(htmlFilePath, newHtml, `🖼 Update cover img: ${slug}`, htmlSha);
-          updLog(l3, `✅ HTML img src updated`, 'ok');
+          updLog(l3, `✅ HTML patched (${patchCount} replacement${patchCount>1?'s':''})`, 'ok');
         } else {
-          updLog(l3, `⚠ HTML found but no img src matched — skipped`, 'wait');
+          updLog(l3, `⚠ HTML found but no img pattern matched — manual edit may be needed`, 'wait');
         }
       } else {
-        updLog(l3, `⚠ HTML file not found — skipped`, 'wait');
+        updLog(l3, `⚠ HTML file not found at ${htmlFilePath}`, 'wait');
       }
     } catch(htmlErr) {
-      // Non-fatal — HTML update failure shouldn't block the whole commit
-      updLog(l3, `⚠ HTML update skipped: ${htmlErr.message}`, 'wait');
+      updLog(l3, `⚠ HTML skipped: ${htmlErr.message}`, 'wait');
     }
 
-    // ── Step 4: Update local state ─────────────────────────────
+    // ── Step 4: Update updates.json ────────────────────────────
+    // Patch the cover field of any matching entry in updates.json too,
+    // so the homepage "Recently Updated" section shows the new image
+    const l4 = addLog('Updating updates.json…', 'run');
+    try {
+      const { sha: updatesSha, content: updatesContent } = await ghGetFile(STATE.updatesPath);
+      if (updatesSha && updatesContent) {
+        const updatesArr = JSON.parse(updatesContent);
+        let updatesPatched = 0;
+        updatesArr.forEach(u => {
+          const uSlug = slugFromUrl(u.url);
+          if (uSlug === slug) {
+            u.cover = finalUrl;
+            updatesPatched++;
+          }
+        });
+        if (updatesPatched > 0) {
+          await ghPutFile(
+            STATE.updatesPath,
+            JSON.stringify(updatesArr, null, 2),
+            `🔄 Update cover in updates.json: ${slug}`,
+            updatesSha
+          );
+          updLog(l4, `✅ updates.json patched (${updatesPatched} entr${updatesPatched>1?'ies':'y'})`, 'ok');
+          // Refresh local STATE so the card badge reflects the change
+          STATE.updateReasons[slug]    = updatesArr.find(u => slugFromUrl(u.url) === slug)?.reason || STATE.updateReasons[slug];
+        } else {
+          updLog(l4, `ℹ Novel not in updates.json — skipped`, 'wait');
+        }
+      } else {
+        updLog(l4, `⚠ updates.json not found — skipped`, 'wait');
+      }
+    } catch(updErr) {
+      updLog(l4, `⚠ updates.json skipped: ${updErr.message}`, 'wait');
+    }
+
+    // ── Step 5: Update local state ─────────────────────────────
     novel.cover = finalUrl;
     novel._oldCover = oldCover;
     STATE.statuses[slug] = 'pending';
@@ -2769,7 +2859,7 @@ async function commitReplace() {
   // Build commit summary for confirm modal
   const ext = uploadFile ? uploadFile.name.split('.').pop().toLowerCase() : '';
   const imgPath = uploadFile ? `${STATE.imgDir}/${novel._slug}.${ext}` : null;
-  const finalUrl = uploadFile ? `/${STATE.imgDir}/${novel._slug}.${ext}` : urlToSave;
+  const finalUrl = uploadFile ? `${STATE.siteBaseUrl}/${STATE.imgDir}/${novel._slug}.${ext}` : urlToSave;
 
   const summaryHtml = `
     <div class="s-row"><span>Novel</span><span class="s-val">${esc(novel.title.substring(0,35))}…</span></div>
