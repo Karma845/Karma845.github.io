@@ -1855,10 +1855,45 @@ async function runValidation() {
     const batch = validationQueue.splice(0, BATCH);
     await Promise.all(batch.map(slug => validateOne(slug)));
     updateStats();
-    renderGrid();
+    // Only re-render the grid if NO inline panel is currently open or committing
+    // This prevents the file picker / upload flow from being destroyed mid-operation
+    const anyPanelOpen = ANY_COMMITTING || document.querySelectorAll('.card-inline-panel[style*="block"]').length > 0;
+    if (!anyPanelOpen) {
+      renderGrid();
+    } else {
+      // Just update the status badges on visible cards without destroying anything
+      updateCardBadgesInPlace();
+    }
     renderQueueTab();
   }
   validating = false;
+}
+
+// Update status badges on already-rendered cards without re-rendering HTML
+function updateCardBadgesInPlace() {
+  STATE.novels.forEach(n => {
+    const card = document.getElementById('card-' + n._slug);
+    if (!card) return;
+    const st = STATE.statuses[n._slug];
+    const existingBadge = card.querySelector('.card-status-badge');
+    let newBadgeHtml = '';
+    if (st === 'working') newBadgeHtml = '<span class="card-status-badge badge-working">✓ OK</span>';
+    else if (st === 'broken') newBadgeHtml = '<span class="card-status-badge badge-broken">✕ Broken</span>';
+    else if (st === 'missing') newBadgeHtml = '<span class="card-status-badge badge-missing">⚠ Missing</span>';
+
+    if (newBadgeHtml) {
+      if (existingBadge) {
+        existingBadge.outerHTML = newBadgeHtml;
+      } else {
+        const coverWrap = card.querySelector('div:first-child');
+        if (coverWrap) coverWrap.insertAdjacentHTML('beforeend', newBadgeHtml);
+      }
+    }
+    // Update card border class
+    card.classList.remove('broken', 'missing');
+    if (st === 'broken') card.classList.add('broken');
+    else if (st === 'missing') card.classList.add('missing');
+  });
 }
 
 function validateOne(slug) {
@@ -2021,12 +2056,31 @@ function renderGrid() {
   const grid = document.getElementById('novelsGrid');
   grid.innerHTML = page.map(n => renderCard(n)).join('');
 
-  // Restore any panels that were open before re-render
+  // Restore any panels that were open before re-render, and re-attach file previews
   openPanels.forEach(slug => {
     const panel = document.getElementById('inline-' + slug);
-    if (panel) {
-      panel.style.display = 'block';
-      // Scroll into view gently (only if it's a background revalidation call, not user action)
+    if (!panel) return;
+    panel.style.display = 'block';
+    // Re-apply method tab state
+    const st = INLINE[slug];
+    if (st) {
+      inlineSetMethod(slug, st.method);
+      // If a file was selected, restore the preview
+      if (st.file) {
+        const dz = document.getElementById('idz-' + slug);
+        if (dz) dz.textContent = `📎 ${st.file.name} (${(st.file.size/1024).toFixed(1)} KB)`;
+        const reader = new FileReader();
+        reader.onload = e => {
+          const pv = document.getElementById('ipv-' + slug);
+          if (pv) { pv.src = e.target.result; pv.style.display = 'block'; }
+        };
+        reader.readAsDataURL(st.file);
+      }
+      // If URL mode had a value, restore it
+      if (st.method === 'url' && st.urlValue) {
+        const iui = document.getElementById('iui-' + slug);
+        if (iui) { iui.value = st.urlValue; inlinePreviewUrl(slug); }
+      }
     }
   });
 
@@ -2126,7 +2180,8 @@ function buildInlinePanelHtml(n) {
 }
 
 // Per-card state
-const INLINE = {}; // slug → { method:'file'|'url', file:File|null }
+const INLINE = {}; // slug → { method:'file'|'url', file:File|null, committing:bool }
+let ANY_COMMITTING = false; // global guard — blocks grid re-renders during any active upload
 
 function toggleInlinePanel(slug) {
   const panel = document.getElementById('inline-' + slug);
@@ -2136,8 +2191,7 @@ function toggleInlinePanel(slug) {
   document.querySelectorAll('.card-inline-panel').forEach(p => { p.style.display = 'none'; });
   if (!isOpen) {
     panel.style.display = 'block';
-    INLINE[slug] = { method: 'file', file: null };
-    // Reset panel state
+    if (!INLINE[slug]) INLINE[slug] = { method: 'file', file: null, committing: false };
     inlineReset(slug);
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
@@ -2194,6 +2248,9 @@ function inlineFileChosen(file, slug) {
 
 function inlinePreviewUrl(slug) {
   const url = (document.getElementById('iui-' + slug)||{}).value?.trim();
+  // Persist in INLINE state so it survives re-renders
+  if (!INLINE[slug]) INLINE[slug] = { method:'url', file:null, committing:false };
+  INLINE[slug].urlValue = url || '';
   const pv  = document.getElementById('ipv-' + slug);
   if (!pv) return;
   if (!url) { pv.style.display='none'; return; }
@@ -2274,6 +2331,8 @@ async function doInlineCommit(novel, uploadFile, imgPath, finalUrl, slug) {
   if (cb) { cb.disabled = true; cb.textContent = '⏳ Committing…'; }
   lg.style.display = 'block';
   lg.innerHTML = '';
+  ANY_COMMITTING = true;
+  if (INLINE[slug]) INLINE[slug].committing = true;
 
   const addLog = (text, st='wait') => {
     const id = 'il' + Date.now() + Math.random().toString(36).slice(2);
@@ -2289,15 +2348,17 @@ async function doInlineCommit(novel, uploadFile, imgPath, finalUrl, slug) {
   };
 
   try {
+    // ── Step 1: Upload image ────────────────────────────────────
     if (uploadFile) {
       const l1 = addLog(`Uploading → ${imgPath}…`, 'run');
       const arrBuf = await uploadFile.arrayBuffer();
       let existSha = null;
       try { const ex = await ghGetFile(imgPath); existSha = ex.sha; } catch(e){}
       await ghPutFile(imgPath, arrBuf, `🖼 Upload cover: ${slug}`, existSha);
-      updLog(l1, `✅ Image uploaded`, 'ok');
+      updLog(l1, `✅ Image uploaded → ${imgPath}`, 'ok');
     }
 
+    // ── Step 2: Update novels.json ──────────────────────────────
     const l2 = addLog('Updating novels.json…', 'run');
     const { sha: latestSha, content } = await ghGetFile(STATE.jsonPath);
     const novels = JSON.parse(content);
@@ -2308,16 +2369,71 @@ async function doInlineCommit(novel, uploadFile, imgPath, finalUrl, slug) {
     await ghPutFile(STATE.jsonPath, JSON.stringify(novels, null, 2), `🔄 Update cover: ${slug}`, latestSha);
     updLog(l2, '✅ novels.json saved', 'ok');
 
-    // Update local state
+    // ── Step 3: Update HTML file img src ───────────────────────
+    // The novel HTML file lives at: docs/assets/html/{slug}.html
+    // We find the <img ...> tag that contains the old cover URL and replace its src
+    const htmlFilePath = `docs/assets/html/${slug}.html`;
+    const l3 = addLog(`Patching HTML: ${htmlFilePath}…`, 'run');
+    try {
+      const { sha: htmlSha, content: htmlContent } = await ghGetFile(htmlFilePath);
+      if (htmlSha && htmlContent) {
+        // Strategy: replace any img src that matches the old cover URL
+        // Also replace common patterns: src="<oldCover>" or src='<oldCover>'
+        let newHtml = htmlContent;
+        let patched = false;
+
+        if (oldCover && newHtml.includes(oldCover)) {
+          newHtml = newHtml.split(oldCover).join(finalUrl);
+          patched = true;
+        }
+
+        // Fallback: replace the first <img with a cover-like class/id or within a cover wrapper
+        // Look for patterns like: <img ... src="..." ... class="...cover..." or id="...cover..."
+        if (!patched) {
+          // Try replacing any img src that looks like a cover (in .cover / #cover / cover-img containers)
+          newHtml = newHtml.replace(
+            /(<img\b[^>]*\bclass="[^"]*cover[^"]*"[^>]*\bsrc=")([^"]+)(")/gi,
+            (m, pre, src, post) => { patched = true; return pre + finalUrl + post; }
+          );
+        }
+        if (!patched) {
+          newHtml = newHtml.replace(
+            /(<img\b[^>]*\bsrc=")([^"]+)("[^>]*\bclass="[^"]*cover[^"]*")/gi,
+            (m, pre, src, post) => { patched = true; return pre + finalUrl + post; }
+          );
+        }
+        // Last resort: replace first <img src="..."> in the file
+        if (!patched) {
+          newHtml = newHtml.replace(
+            /(<img\b[^>]*?\bsrc=")([^"]+)(")/i,
+            (m, pre, src, post) => { patched = true; return pre + finalUrl + post; }
+          );
+        }
+
+        if (patched && newHtml !== htmlContent) {
+          await ghPutFile(htmlFilePath, newHtml, `🖼 Update cover img: ${slug}`, htmlSha);
+          updLog(l3, `✅ HTML img src updated`, 'ok');
+        } else {
+          updLog(l3, `⚠ HTML found but no img src matched — skipped`, 'wait');
+        }
+      } else {
+        updLog(l3, `⚠ HTML file not found — skipped`, 'wait');
+      }
+    } catch(htmlErr) {
+      // Non-fatal — HTML update failure shouldn't block the whole commit
+      updLog(l3, `⚠ HTML update skipped: ${htmlErr.message}`, 'wait');
+    }
+
+    // ── Step 4: Update local state ─────────────────────────────
     novel.cover = finalUrl;
     novel._oldCover = oldCover;
     STATE.statuses[slug] = 'pending';
 
-    addLog('🎉 Done! Pages rebuild in ~30s.', 'ok');
+    addLog('🎉 Done! GitHub Pages rebuilds in ~30s.', 'ok');
     inlineShowStatus(slug, 'success', `✅ Cover updated! Old: ${(oldCover||'none').substring(0,40)}…`);
     toast(`Cover updated for "${novel.title.substring(0,28)}"`, 'success');
 
-    // Refresh card cover image immediately
+    // Refresh card cover image immediately without re-render
     const cardCoverWrap = document.querySelector(`#card-${slug} > div:first-child`);
     if (cardCoverWrap) {
       const newImg = document.createElement('img');
@@ -2330,12 +2446,10 @@ async function doInlineCommit(novel, uploadFile, imgPath, finalUrl, slug) {
       if (oldImg) oldImg.replaceWith(newImg); else cardCoverWrap.prepend(newImg);
     }
 
-    // Rebuild inline panel with new URL (so copy button updates)
+    // Rebuild inline panel with updated URL (copy button etc.)
     const panel = document.getElementById('inline-' + slug);
     if (panel) panel.innerHTML = buildInlinePanelHtml(novel);
 
-    // Update commit button to allow another upload
-    const cb = document.getElementById('icb-' + slug);
     if (cb) { cb.disabled = false; cb.textContent = '🚀 Upload & Save'; }
 
     setTimeout(() => {
@@ -2346,8 +2460,10 @@ async function doInlineCommit(novel, uploadFile, imgPath, finalUrl, slug) {
     addLog('❌ ' + e.message, 'err');
     inlineShowStatus(slug, 'error', '❌ ' + e.message);
     toast('Commit failed: ' + e.message, 'error', 6000);
-    const cb = document.getElementById('icb-' + slug);
     if (cb) { cb.disabled = false; cb.textContent = '🚀 Upload & Save'; }
+  } finally {
+    ANY_COMMITTING = false;
+    if (INLINE[slug]) INLINE[slug].committing = false;
   }
 }
 
