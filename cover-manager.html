@@ -634,17 +634,22 @@ body::before {
 .inline-dropzone {
   border: 1.5px dashed var(--border2);
   border-radius: 7px;
-  padding: 10px 8px;
+  padding: 14px 8px;
   text-align: center;
   cursor: pointer;
   transition: var(--transition);
   background: var(--surface);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--text2);
   margin-bottom: 7px;
+  display: block;
+  width: 100%;
+  position: relative;
+  -webkit-tap-highlight-color: rgba(108,99,255,0.2);
+  user-select: none;
 }
 .inline-dropzone:hover, .inline-dropzone.drag-over { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
-.inline-dropzone input { display: none; }
 
 .inline-url-input {
   width: 100%;
@@ -2067,8 +2072,8 @@ function renderGrid() {
       inlineSetMethod(slug, st.method);
       // If a file was selected, restore the preview
       if (st.file) {
-        const dz = document.getElementById('idz-' + slug);
-        if (dz) dz.textContent = `📎 ${st.file.name} (${(st.file.size/1024).toFixed(1)} KB)`;
+        const dzText = document.getElementById('idz-text-' + slug);
+        if (dzText) dzText.textContent = `📎 ${st.file.name} (${(st.file.size/1024).toFixed(1)} KB)`;
         const reader = new FileReader();
         reader.onload = e => {
           const pv = document.getElementById('ipv-' + slug);
@@ -2144,10 +2149,10 @@ function renderCard(n) {
 
 function buildInlinePanelHtml(n) {
   const slug = n._slug;
-  const hasUrl = n.cover && isValidUrl(n.cover);
-  const urlDisplay = n.cover ? n.cover.substring(0, 55) + (n.cover.length > 55 ? '…' : '') : 'No URL';
+  const hasCover = !!(n.cover && n.cover.trim());
+  const urlDisplay = n.cover ? n.cover.substring(0, 52) + (n.cover.length > 52 ? '…' : '') : '';
   return `
-    ${hasUrl ? `
+    ${hasCover ? `
     <div class="inline-current-url" title="${esc(n.cover)}">
       <span class="inline-url-text">${esc(urlDisplay)}</span>
       <button class="inline-copy-btn" id="icp-${esc(slug)}" onclick="inlineCopyUrl('${esc(slug)}')">📋 Copy</button>
@@ -2159,14 +2164,14 @@ function buildInlinePanelHtml(n) {
       <button class="card-btn close-inline-btn" onclick="toggleInlinePanel('${esc(slug)}')" title="Close">✕</button>
     </div>
     <div id="im-file-area-${esc(slug)}">
-      <div class="inline-dropzone" id="idz-${esc(slug)}"
-           onclick="document.getElementById('ifi-${esc(slug)}').click()"
-           ondragover="inlineDragOver(event,'${esc(slug)}')"
-           ondragleave="inlineDragLeave('${esc(slug)}')"
-           ondrop="inlineDrop(event,'${esc(slug)}')">
-        📂 Tap to pick image
-        <input type="file" id="ifi-${esc(slug)}" accept="image/*" onchange="inlineFileChosen(this.files[0],'${esc(slug)}')">
-      </div>
+      <label class="inline-dropzone" id="idz-${esc(slug)}"
+             for="ifi-${esc(slug)}"
+             ondragover="inlineDragOver(event,'${esc(slug)}')"
+             ondragleave="inlineDragLeave('${esc(slug)}')"
+             ondrop="inlineDrop(event,'${esc(slug)}')">
+        <span id="idz-text-${esc(slug)}">📂 Tap to pick image</span>
+        <input type="file" id="ifi-${esc(slug)}" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;" onchange="inlineFileChosen(this.files[0],'${esc(slug)}')">
+      </label>
     </div>
     <div id="im-url-area-${esc(slug)}" style="display:none;">
       <input class="inline-url-input" id="iui-${esc(slug)}" type="url" placeholder="https://example.com/cover.jpg"
@@ -2206,14 +2211,16 @@ function inlineReset(slug) {
   if (lg) { lg.style.display='none'; lg.innerHTML=''; }
   if (pv) { pv.style.display='none'; pv.src=''; }
   if (cb) { cb.disabled=false; cb.textContent='🚀 Upload & Save'; }
-  const dz = document.getElementById('idz-' + slug);
-  if (dz) dz.textContent = '📂 Tap to pick image';
+  // Reset the text span inside the label, not the label itself
+  const dzText = document.getElementById('idz-text-' + slug);
+  if (dzText) dzText.textContent = '📂 Tap to pick image';
   const ifi = document.getElementById('ifi-' + slug);
   if (ifi) ifi.value = '';
   const iui = document.getElementById('iui-' + slug);
   if (iui) iui.value = '';
-  if (!INLINE[slug]) INLINE[slug] = { method:'file', file:null };
+  if (!INLINE[slug]) INLINE[slug] = { method:'file', file:null, committing:false };
   INLINE[slug].file = null;
+  INLINE[slug].urlValue = '';
 }
 
 function inlineSetMethod(slug, method) {
@@ -2234,10 +2241,11 @@ function inlineSetMethod(slug, method) {
 
 function inlineFileChosen(file, slug) {
   if (!file) return;
-  if (!INLINE[slug]) INLINE[slug] = { method:'file', file:null };
+  if (!INLINE[slug]) INLINE[slug] = { method:'file', file:null, committing:false };
   INLINE[slug].file = file;
-  const dz = document.getElementById('idz-' + slug);
-  if (dz) dz.textContent = `📎 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+  // Update label text span (not the label element itself, which contains the hidden input)
+  const dzText = document.getElementById('idz-text-' + slug);
+  if (dzText) dzText.textContent = `📎 ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
   const reader = new FileReader();
   reader.onload = e => {
     const pv = document.getElementById('ipv-' + slug);
