@@ -2393,14 +2393,20 @@ async function doInlineCommit(novel, uploadFile, imgPath, finalUrl, slug) {
     updLog(l2, '✅ novels.json saved', 'ok');
 
     // ── Step 3: Update HTML file ────────────────────────────────
-    // HTML is at docs/assets/html/{slug}.html
-    // Patch strategy (runs in order, stops accumulating when already matched):
-    //   1. class="small-icon"  — top-right floating thumbnail
-    //   2. alt="Cover"         — main cover with standard alt text
-    //   3. old URL exact match — covers any variation where URL is known
-    //   4. <p style="text-align:center"><img ...> — covers inline-styled cover wrappers
-    //   5. cdn.novelupdates.com or known cover CDN domains — common cover host
-    //   6. First <img> inside .ani div — structural fallback for this site's layout
+    // Target ONLY <img> tags whose src is an external cover CDN URL.
+    // The small-icon and header images use local paths so they are
+    // never touched. CDN src is the unique identifier for cover images.
+    const COVER_CDN_DOMAINS = [
+      'cdn.novelupdates.com',
+      'i.imgur.com',
+      'i.ibb.co',
+      'blogger.googleusercontent.com',
+      'i0.wp.com',
+      'm.media-amazon.com',
+      'lh3.googleusercontent.com',
+      'images-na.ssl-images-amazon.com',
+      'upload.wikimedia.org',
+    ];
     const htmlFilePath = `docs/assets/html/${slug}.html`;
     const l3 = addLog(`Patching HTML: ${htmlFilePath}…`, 'run');
     try {
@@ -2409,75 +2415,33 @@ async function doInlineCommit(novel, uploadFile, imgPath, finalUrl, slug) {
         let newHtml = htmlContent;
         let patchCount = 0;
 
-        // 1) small-icon (top-right thumbnail) — both attribute orders
+        // Replace any <img src="CDN_URL"> where CDN_URL contains a known cover host
+        // Handles both: src="..." and src='...'  and any attribute order
         newHtml = newHtml.replace(
-          /(<img\b[^>]*\bclass="[^"]*small-icon[^"]*"[^>]*\bsrc=")([^"]*?)(")/gi,
-          (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
-        );
-        newHtml = newHtml.replace(
-          /(<img\b[^>]*\bsrc=")([^"]*?)("[^>]*\bclass="[^"]*small-icon[^"]*")/gi,
-          (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
-        );
-
-        // 2) alt="Cover" — both attribute orders
-        newHtml = newHtml.replace(
-          /(<img\b[^>]*\bsrc=")([^"]*?)("[^>]*\balt="Cover"[^>]*>)/gi,
-          (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
-        );
-        newHtml = newHtml.replace(
-          /(<img\b[^>]*\balt="Cover"[^>]*\bsrc=")([^"]*?)("[^>]*>)/gi,
-          (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
+          /(<img\b[^>]*?\bsrc=)(["'])([^"']*?)(["'])/gi,
+          (match, imgPre, q1, src, q2) => {
+            const isCoverCdn = COVER_CDN_DOMAINS.some(d => src.includes(d));
+            if (isCoverCdn) {
+              patchCount++;
+              return `${imgPre}${q1}${finalUrl}${q2}`;
+            }
+            return match; // leave non-CDN images untouched
+          }
         );
 
-        // 3) Exact old URL string replacement (most reliable when URL is known)
+        // Safety net: if the old cover URL is still present anywhere (e.g. inside
+        // a <noscript> or data-src attribute), replace those too
         if (oldCover && newHtml.includes(oldCover)) {
+          const before = newHtml;
           newHtml = newHtml.split(oldCover).join(finalUrl);
-          patchCount++;
-        }
-
-        // 4) <p style="text-align: center;"><img src="..."> — this site's cover wrapper pattern
-        //    Matches an img that is the direct/only child of a centered paragraph
-        if (patchCount === 0) {
-          newHtml = newHtml.replace(
-            /(<p\b[^>]*\bstyle="[^"]*text-align\s*:\s*center[^"]*"[^>]*>\s*<img\b[^>]*\bsrc=")([^"]*?)(")/gi,
-            (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
-          );
-        }
-
-        // 5) Known cover CDN domains — cdn.novelupdates.com, i.imgur.com, i.ibb.co etc.
-        if (patchCount === 0) {
-          const COVER_CDNS = [
-            'cdn.novelupdates.com',
-            'i.imgur.com',
-            'i.ibb.co',
-            'blogger.googleusercontent.com',
-            'i0.wp.com',
-            'm.media-amazon.com',
-            'animestuff.me',
-          ];
-          const cdnPattern = new RegExp(
-            `(<img\\b[^>]*\\bsrc=")((?:https?://)?(?:${COVER_CDNS.map(d => d.replace('.', '\\.')).join('|')})[^"]*)(")`,
-            'gi'
-          );
-          newHtml = newHtml.replace(cdnPattern,
-            (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
-          );
-        }
-
-        // 6) Structural fallback: first <img> inside <div class="ani"> (this site's content box)
-        if (patchCount === 0) {
-          // Find the .ani div, then replace only the first img src inside it
-          newHtml = newHtml.replace(
-            /(<div\b[^>]*\bclass="[^"]*\bani\b[^"]*"[^>]*>[\s\S]*?<img\b[^>]*\bsrc=")([^"]*?)(")/i,
-            (m, pre, src, post) => { patchCount++; return pre + finalUrl + post; }
-          );
+          if (newHtml !== before) patchCount++;
         }
 
         if (patchCount > 0 && newHtml !== htmlContent) {
           await ghPutFile(htmlFilePath, newHtml, `🖼 Update cover img: ${slug}`, htmlSha);
-          updLog(l3, `✅ HTML patched (${patchCount} replacement${patchCount>1?'s':''})`, 'ok');
-        } else {
-          updLog(l3, `⚠ HTML found but no img pattern matched — manual edit may be needed`, 'wait');
+          updLog(l3, `✅ HTML patched (${patchCount} CDN src${patchCount > 1 ? 's' : ''} replaced)`, 'ok');
+        } else if (patchCount === 0) {
+          updLog(l3, `⚠ No external CDN cover found in HTML — skipped`, 'wait');
         }
       } else {
         updLog(l3, `⚠ HTML file not found at ${htmlFilePath}`, 'wait');
