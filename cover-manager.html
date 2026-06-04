@@ -2406,6 +2406,7 @@ async function doInlineCommit(novel, uploadFile, imgPath, finalUrl, slug) {
       'lh3.googleusercontent.com',
       'images-na.ssl-images-amazon.com',
       'upload.wikimedia.org',
+      'animestuff.me/novel/', // self-hosted novel covers (NOT the slime/header local imgs)
     ];
     const htmlFilePath = `docs/assets/html/${slug}.html`;
     const l3 = addLog(`Patching HTML: ${htmlFilePath}…`, 'run');
