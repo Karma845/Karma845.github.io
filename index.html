@@ -179,6 +179,7 @@
       font-size: 9px; font-weight: 900; color: white;
       padding: 2px 7px; border-radius: 20px;
       text-transform: uppercase; letter-spacing: 0.4px;
+      z-index: 10;
     }
     .badge-new { background: var(--green); }
     .badge-upd { background: var(--red); }
@@ -205,6 +206,40 @@
     /* ── Feed empty state ── */
     .feed-empty {
       padding: 20px; color: var(--muted); font-size: 13px; text-align: center;
+    }
+
+    /* ── R-18 Cover Blur ── */
+    .ncard-cover-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+    .ncard-cover-wrap .blur-overlay {
+      position: absolute;
+      inset: 0;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.05);
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .ncard-cover-wrap:hover .blur-overlay {
+      opacity: 0;
+    }
+    .novel-cover-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+    .novel-cover-wrap .blur-overlay {
+      position: absolute;
+      inset: 0;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.05);
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .novel-cover-wrap:hover .blur-overlay {
+      opacity: 0;
     }
 
     /* ── Search & Filter Section ── */
@@ -405,6 +440,7 @@
       width: 100%;
       flex-shrink: 0;
       text-decoration: none;
+      overflow: hidden;
     }
     .novel-cover {
       width: 100%;
@@ -702,7 +738,8 @@ function closeNav() {
     return "Just now";
   }
 
-  function makeCard(title, url, cover, tagText, tagClass, badgeText, badgeClass, timestamp) {
+  function makeCard(title, url, cover, tagText, tagClass, badgeText, badgeClass, timestamp, isAdult) {
+    const blurOverlay = isAdult ? `<div class="blur-overlay"></div>` : '';
     const coverHtml = cover && cover.trim()
       ? `<img class="ncard-cover" src="${esc(cover)}" alt="${esc(title)}" loading="lazy" onerror="this.outerHTML='<div class=ncard-placeholder>📖</div>'">`
       : `<div class="ncard-placeholder">📖</div>`;
@@ -710,7 +747,8 @@ function closeNav() {
     const tag   = tagText   ? `<span class="ncard-tag ${esc(tagClass)}">${esc(tagText)}</span>` : "";
     const time  = timestamp ? `<span class="ncard-time">${timeAgo(timestamp)}</span>` : "";
     return `<a class="ncard" href="${esc(url)}">
-      ${badge}${coverHtml}
+      ${badge}
+      <div class="ncard-cover-wrap">${coverHtml}${blurOverlay}</div>
       <div class="ncard-body">
         <div class="ncard-title">${esc(title)}</div>
         ${tag}${time}
@@ -734,7 +772,8 @@ function closeNav() {
       }
       document.getElementById("updatedFeed").innerHTML =
         items.slice(0, 15).map(u =>
-          makeCard(u.title, u.url, u.cover || "", u.reason, "ncard-tag-red", "Updated", "badge-upd", u.timestamp)
+          makeCard(u.title, u.url, u.cover || "", u.reason, "ncard-tag-red", "Updated", "badge-upd", u.timestamp,
+            (u.genres || []).includes("R-18"))
         ).join("");
     } catch {
       renderEmpty("updatedFeed", "Updates will appear here once logged via the Update Panel.");
@@ -751,7 +790,8 @@ function closeNav() {
         list.slice(0, 15).map(n =>
           makeCard(n.title, n.url, n.cover || "",
             (n.genres || []).slice(0,1).join("") || "Novel", "ncard-tag-green",
-            "New", "badge-new", null)
+            "New", "badge-new", null,
+            (n.genres || []).includes("R-18"))
         ).join("");
     } catch {
       renderEmpty("newFeed", "Novel list could not be loaded.");
@@ -900,7 +940,6 @@ function closeNav() {
     }
 
     const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
-    // Clamp currentPage in case results shrank
     currentPage = Math.min(currentPage, totalPages);
 
     const start  = (currentPage - 1) * PAGE_SIZE;
@@ -908,6 +947,8 @@ function closeNav() {
     const page   = sorted.slice(start, end);
 
     grid.innerHTML = page.map(n => {
+      const isAdult = (n.genres || []).includes("R-18");
+      const blurOverlay = isAdult ? `<div class="blur-overlay"></div>` : '';
       const tags = (n.genres || []).slice(0, 4).map(g =>
         `<span class="card-genre${selectedGenres.has(g) ? ' matched' : ''}">${escHtml(g)}</span>`
       ).join('');
@@ -915,7 +956,7 @@ function closeNav() {
         ? `<img class="novel-cover" src="${escHtml(n.cover)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'novel-cover-placeholder\\'>📖</div>'">`
         : `<div class="novel-cover-placeholder">📖</div>`;
       return `<div class="novel-card">
-        <a class="novel-cover-link" href="${escHtml(n.url)}">${coverImg}</a>
+        <a class="novel-cover-link novel-cover-wrap" href="${escHtml(n.url)}">${coverImg}${blurOverlay}</a>
         <div class="novel-card-body">
           <a class="novel-card-title" href="${escHtml(n.url)}">${highlight(n.title, q)}</a>
           <div class="card-genres">${tags}</div>
@@ -935,26 +976,20 @@ function closeNav() {
 
     const pages = [];
 
-    // Always show first
     pages.push(1);
 
-    // Left ellipsis zone
     if (currentPage > 4) pages.push('...');
 
-    // Window around current page
     for (let i = Math.max(2, currentPage - 2); i <= Math.min(totalPages - 1, currentPage + 2); i++) {
       pages.push(i);
     }
 
-    // Right ellipsis zone
     if (currentPage < totalPages - 3) pages.push('...');
 
-    // Always show last
     if (totalPages > 1) pages.push(totalPages);
 
     let html = '';
 
-    // Prev button
     html += `<button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&#8592;</button>`;
 
     pages.forEach(p => {
@@ -965,7 +1000,6 @@ function closeNav() {
       }
     });
 
-    // Next button
     html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>&#8594;</button>`;
 
     wrap.innerHTML = html;
@@ -974,7 +1008,6 @@ function closeNav() {
   function goToPage(page) {
     currentPage = page;
     renderGrid(lastResults);
-    // Scroll back up to results section smoothly
     document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
