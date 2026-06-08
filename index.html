@@ -123,6 +123,12 @@
     }
     .badge-red   { background: var(--red); }
     .badge-green { background: var(--green); }
+    .sh-see-all {
+      font-size: 12px; font-weight: 700;
+      color: var(--muted); text-decoration: none;
+      flex-shrink: 0; transition: color 0.15s;
+    }
+    .sh-see-all:hover { color: var(--red); }
 
     /* ── Horizontal Scroll Feed ── */
     .feed-scroll {
@@ -201,6 +207,22 @@
     @keyframes shimmer {
       0%   { background-position: -400px 0; }
       100% { background-position: 400px 0; }
+    }
+
+    /* ── See All Button ── */
+    .see-all-btn {
+      display: inline-block;
+      font-size: 12px; font-weight: 700;
+      color: var(--red); text-decoration: none;
+      padding: 4px 12px; border-radius: 20px;
+      border: 1.5px solid rgba(200,0,0,0.3);
+      background: var(--red-faint);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .see-all-btn:hover {
+      background: rgba(200,0,0,0.13);
+      border-color: var(--red);
+      color: var(--red);
     }
 
     /* ── Feed empty state ── */
@@ -574,6 +596,8 @@
   <hr>
   <a href="https://animestuff.me/search">🔍 Search</a>
   <hr>
+  <a href="https://animestuff.me/browse.html">🆕 New &amp; Updated</a>
+  <hr>
   <a href="https://t.me/animestuff2023">💬 Contact</a>
   <hr>
 </div>
@@ -621,7 +645,7 @@ function closeNav() {
 <div class="section-head">
   <h3>🔥 Recently Updated</h3>
   <div class="sh-line"></div>
-  <span class="sh-badge badge-red">Live</span>
+  <a href="browse.html?tab=updated" class="sh-see-all">See all →</a>
 </div>
 
 <div class="feed-scroll">
@@ -638,7 +662,7 @@ function closeNav() {
 <div class="section-head">
   <h3>✨ Newly Added</h3>
   <div class="sh-line"></div>
-  <span class="sh-badge badge-green">New</span>
+  <a href="browse.html?tab=new" class="sh-see-all">See all →</a>
 </div>
 
 <div class="feed-scroll">
