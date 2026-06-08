@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse new and recently updated light novels on AnimeStuff">
+  <title>Browse — AnimeStuff</title>
+
+  <link rel="icon" type="image/png" sizes="512x512" href="img/android-chrome-512x512.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="img/apple-icon-76x76.png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --red:       #c00;
+      --red-dark:  #900;
+      --red-faint: rgba(200,0,0,0.07);
+      --bg:        #f4f4f0;
+      --border:    #d8d8d8;
+      --text:      #1a1a1a;
+      --muted:     #777;
+      --shadow:    3px 3px 4px rgba(0,0,0,0.12);
+      --green:     #1a7a3f;
+    }
+
+    body {
+      font-family: "Lato", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+    }
+
+    /* ── Sidebar ── */
+    .slime-icon {
+      width: 60px; height: 60px; float: right;
+      border: 3px solid darkgrey; border-radius: 50%; margin: 8px;
+    }
+    .sidenav {
+      height: 100%; width: 0; position: fixed;
+      z-index: 1000; top: 0; left: 0;
+      background: white; overflow-x: hidden;
+      transition: 0.5s; padding-top: 10px;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+    }
+    .sidenav a {
+      padding: 10px 10px 10px 28px;
+      text-decoration: none; font-size: 20px;
+      color: #666; display: block; transition: 0.2s;
+    }
+    .sidenav a:hover { background: #f5f5f5; color: #111; }
+    .sidenav .closebtn {
+      position: absolute; top: 6px; right: 18px;
+      font-size: 32px; cursor: pointer;
+      background: none; border: none; color: #888;
+    }
+    .nav-icon {
+      width: 110px; height: 110px; display: block;
+      margin: 24px auto 8px; border-radius: 50%;
+    }
+    #main { padding: 10px 14px 4px; }
+    .menu-btn { font-size: 30px; cursor: pointer; }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+    /* ── Page header ── */
+    .page-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px 4px;
+    }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 13px; font-weight: 700; color: var(--muted);
+      text-decoration: none; padding: 5px 10px;
+      border-radius: 20px; border: 1.5px solid var(--border);
+      background: white; transition: all 0.15s; flex-shrink: 0;
+    }
+    .back-btn:hover { color: var(--red); border-color: var(--red); }
+    .page-title {
+      font-size: 18px; font-weight: 900; color: #111; margin: 0;
+    }
+
+    /* ── Tabs ── */
+    .tab-wrap {
+      display: flex; gap: 0;
+      margin: 14px 12px 0;
+      border-radius: 12px; overflow: hidden;
+      border: 1.5px solid var(--border);
+      background: white;
+    }
+    .tab-btn {
+      flex: 1; padding: 11px 0;
+      font-size: 14px; font-weight: 700;
+      font-family: "Lato", sans-serif;
+      border: none; background: white;
+      color: #888; cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .tab-btn:first-child { border-right: 1.5px solid var(--border); }
+    .tab-btn.active.red  { background: var(--red); color: white; }
+    .tab-btn.active.green { background: var(--green); color: white; }
+    .tab-btn:not(.active):hover { background: #f9f9f9; color: #444; }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px 0;
+      font-size: 12px; color: var(--muted);
+    }
+    .stats-count { font-weight: 700; color: #444; }
+
+    /* ── Grid ── */
+    .browse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      padding: 12px 12px 20px;
+    }
+
+    /* ── Novel card ── */
+    .novel-card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 1px 1px 4px rgba(0,0,0,0.05);
+      transition: border-color .15s, transform .15s;
+      display: flex; flex-direction: column;
+      text-decoration: none; color: inherit;
+    }
+    .novel-card:hover { border-color: var(--red); transform: translateY(-2px); }
+    .cover-wrap {
+      position: relative; overflow: hidden;
+      width: 100%; flex-shrink: 0;
+    }
+    .novel-cover {
+      width: 100%; height: 180px;
+      object-fit: cover; display: block; background: #f0f0f0;
+    }
+    .novel-cover-placeholder {
+      width: 100%; height: 180px;
+      background: #f0f0f0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; color: #ccc;
+    }
+    .blur-overlay {
+      position: absolute; inset: 0;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.05);
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .cover-wrap:hover .blur-overlay { opacity: 0; }
+    .card-badge {
+      position: absolute; top: 6px; left: 6px;
+      font-size: 9px; font-weight: 900; color: white;
+      padding: 2px 7px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      z-index: 10;
+    }
+    .badge-upd { background: var(--red); }
+    .badge-new { background: var(--green); }
+    .card-body { padding: 8px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .card-title {
+      font-size: 12px; font-weight: 700; color: #222;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .card-meta { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .card-reason {
+      display: inline-block; margin-top: 3px;
+      font-size: 10px; font-weight: 700;
+      border-radius: 20px; padding: 2px 8px;
+      background: var(--red-faint); color: var(--red);
+      border: 1px solid rgba(200,0,0,0.2);
+    }
+    .card-genres { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+    .card-genre {
+      background: #eee; color: #666;
+      border-radius: 10px; padding: 2px 7px; font-size: 10px;
+    }
+
+    /* ── Skeleton ── */
+    .skel-card {
+      background: white; border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .skel-img { width: 100%; height: 180px; }
+    .skel-line { height: 10px; border-radius: 5px; margin: 8px 9px 5px; }
+    .skel-line.sh { width: 60%; }
+    .skel-img, .skel-line {
+      background: linear-gradient(90deg, #e8e8e8 25%, #f2f2f2 50%, #e8e8e8 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+
+    /* ── Pagination ── */
+    .pagination-wrap {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; padding: 0 12px 20px; flex-wrap: wrap;
+    }
+    .page-btn {
+      min-width: 36px; height: 36px; padding: 0 10px;
+      border: 1.5px solid #ccc; border-radius: 8px;
+      background: #fff; color: #444;
+      font-size: 13px; font-weight: 700;
+      font-family: "Lato", sans-serif;
+      cursor: pointer; transition: all .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .page-btn:hover:not(:disabled) { border-color: var(--red); color: var(--red); background: #fff8f8; }
+    .page-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
+    .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .page-ellipsis { font-size: 13px; color: #aaa; padding: 0 2px; line-height: 36px; }
+    .page-info { text-align: center; font-size: 12px; color: #999; padding-bottom: 20px; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      grid-column: 1 / -1; text-align: center;
+      padding: 3rem 1rem; color: var(--muted);
+    }
+    .empty-state .empty-icon { font-size: 40px; margin-bottom: 10px; }
+    .empty-state p { font-size: 14px; margin: 0; }
+
+    /* ── Footer ── */
+    footer {
+      background: lightgrey; border: 1px solid darkgrey;
+      text-align: center; padding: 12px;
+      margin: 4px 10px 10px; border-radius: 8px; font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<img class="slime-icon" src="img/slime.jpeg" alt="AnimeStuff">
+
+<!-- Sidebar -->
+<div id="mySidenav" class="sidenav">
+  <button class="closebtn" onclick="closeNav()">&times;</button>
+  <img class="nav-icon" src="img/slime.jpeg" alt="AnimeStuff">
+  <a style="cursor:default; font-weight:900; color:#111; font-size:18px;">Animestuff</a>
+  <hr>
+  <a href="https://animestuff.me">🏠 Home</a>
+  <hr>
+  <a href="https://animestuff.me/raw/">📖 Raw Novels (Unavailable)</a>
+  <hr>
+  <a href="https://animestuff.me/search">🔍 Search</a>
+  <hr>
+  <a href="https://animestuff.me/browse.html">🆕 New &amp; Updated</a>
+  <hr>
+  <a href="https://t.me/animestuff2023">💬 Contact</a>
+  <hr>
+</div>
+
+<div id="main">
+  <span class="menu-btn" onclick="openNav()">&#9776;</span>
+</div>
+
+<script>
+function openNav() {
+  document.getElementById("mySidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+  document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+}
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+  document.getElementById("main").style.marginLeft = "0";
+  document.body.style.backgroundColor = "white";
+}
+</script>
+
+<hr>
+
+<!-- Page Header -->
+<div class="page-header">
+  <a class="back-btn" href="https://animestuff.me">← Home</a>
+  <h1 class="page-title">New &amp; Updated</h1>
+</div>
+
+<!-- Tabs -->
+<div class="tab-wrap">
+  <button class="tab-btn active red" id="tabUpdated" onclick="switchTab('updated')">
+    🔥 Recently Updated
+  </button>
+  <button class="tab-btn green" id="tabNew" onclick="switchTab('new')">
+    ✨ Newly Added
+  </button>
+</div>
+
+<!-- Stats bar -->
+<div class="stats-bar">
+  <span id="statsText">Loading...</span>
+</div>
+
+<!-- Grid -->
+<div class="browse-grid" id="browseGrid">
+  <div class="skel-card"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+  <div class="skel-card"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+  <div class="skel-card"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+  <div class="skel-card"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+  <div class="skel-card"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+  <div class="skel-card"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+  <div class="skel-card"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+  <div class="skel-card"><div class="skel-img"></div><div class="skel-line"></div><div class="skel-line sh"></div></div>
+</div>
+
+<!-- Pagination -->
+<div class="pagination-wrap" id="paginationWrap"></div>
+<div class="page-info" id="pageInfo"></div>
+
+<footer>Copyright 2022 — AnimeStuff</footer>
+
+<script>
+  const PAGE_SIZE = 24;
+  let currentTab  = 'updated';
+  let currentPage = 1;
+  let updatedList = [];
+  let newList     = [];
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return "";
+    const diff = Date.now() - new Date(iso).getTime();
+    const m = Math.floor(diff / 60000);
+    const h = Math.floor(m / 60);
+    const d = Math.floor(h / 24);
+    if (d > 30) return new Date(iso).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" });
+    if (d >= 1)  return d + "d ago";
+    if (h >= 1)  return h + "h ago";
+    if (m >= 1)  return m + "m ago";
+    return "Just now";
+  }
+
+  function makeCard(item, tab) {
+    const isAdult = (item.genres || []).includes("R-18");
+    const blurOverlay = isAdult ? `<div class="blur-overlay"></div>` : '';
+    const badgeClass = tab === 'updated' ? 'badge-upd' : 'badge-new';
+    const badgeText  = tab === 'updated' ? 'Updated' : 'New';
+    const coverImg = item.cover && item.cover.trim()
+      ? `<img class="novel-cover" src="${esc(item.cover)}" alt="${esc(item.title)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='flex')">`
+      : '';
+    const placeholder = `<div class="novel-cover-placeholder" ${item.cover ? 'style="display:none"' : ''}>📖</div>`;
+
+    const genreTags = (item.genres || []).slice(0, 3).map(g =>
+      `<span class="card-genre">${esc(g)}</span>`
+    ).join('');
+
+    const metaLine = tab === 'updated'
+      ? `<span class="card-reason">${esc(item.reason || 'Updated')}</span><span class="card-meta">${timeAgo(item.timestamp)}</span>`
+      : `<div class="card-genres">${genreTags}</div>`;
+
+    return `<a class="novel-card" href="${esc(item.url)}">
+      <div class="cover-wrap">
+        <span class="card-badge ${badgeClass}">${badgeText}</span>
+        ${coverImg}${placeholder}
+        ${blurOverlay}
+      </div>
+      <div class="card-body">
+        <div class="card-title">${esc(item.title)}</div>
+        ${metaLine}
+      </div>
+    </a>`;
+  }
+
+  function renderGrid() {
+    const list = currentTab === 'updated' ? updatedList : newList;
+    const grid = document.getElementById('browseGrid');
+
+    if (list.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>Nothing here yet.</p></div>`;
+      document.getElementById('paginationWrap').innerHTML = '';
+      document.getElementById('pageInfo').textContent = '';
+      document.getElementById('statsText').textContent = '0 entries';
+      return;
+    }
+
+    const totalPages = Math.ceil(list.length / PAGE_SIZE);
+    currentPage = Math.min(currentPage, totalPages);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end   = Math.min(start + PAGE_SIZE, list.length);
+    const page  = list.slice(start, end);
+
+    grid.innerHTML = page.map(item => makeCard(item, currentTab)).join('');
+
+    const label = currentTab === 'updated' ? 'updates' : 'novels';
+    document.getElementById('statsText').innerHTML =
+      `<span class="stats-count">${list.length}</span> ${label} total`;
+    document.getElementById('pageInfo').textContent =
+      `Showing ${start + 1}–${end} of ${list.length}`;
+
+    renderPagination(totalPages);
+  }
+
+  function renderPagination(totalPages) {
+    const wrap = document.getElementById('paginationWrap');
+    if (totalPages <= 1) { wrap.innerHTML = ''; return; }
+
+    const pages = [1];
+    if (currentPage > 4) pages.push('...');
+    for (let i = Math.max(2, currentPage - 2); i <= Math.min(totalPages - 1, currentPage + 2); i++) pages.push(i);
+    if (currentPage < totalPages - 3) pages.push('...');
+    if (totalPages > 1) pages.push(totalPages);
+
+    let html = `<button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&#8592;</button>`;
+    pages.forEach(p => {
+      if (p === '...') html += `<span class="page-ellipsis">…</span>`;
+      else html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+    });
+    html += `<button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>&#8594;</button>`;
+    wrap.innerHTML = html;
+  }
+
+  function goToPage(page) {
+    currentPage = page;
+    renderGrid();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function switchTab(tab) {
+    currentTab  = tab;
+    currentPage = 1;
+    document.getElementById('tabUpdated').className = 'tab-btn' + (tab === 'updated' ? ' active red' : '');
+    document.getElementById('tabNew').className     = 'tab-btn' + (tab === 'new'     ? ' active green' : '');
+    renderGrid();
+  }
+
+  async function loadData() {
+    try {
+      const r = await fetch("updates.json?t=" + Date.now());
+      if (r.ok) {
+        const list = await r.json();
+        const seen = new Set();
+        for (const u of list) {
+          if (!seen.has(u.url)) { seen.add(u.url); updatedList.push(u); }
+        }
+      }
+    } catch(e) {}
+
+    try {
+      const r = await fetch("novels.json?t=" + Date.now());
+      if (r.ok) {
+        const text = await r.text();
+        const clean = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+        newList = JSON.parse(clean);
+      }
+    } catch(e) {}
+
+    // Read tab from URL param
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam === 'new') switchTab('new');
+    else switchTab('updated');
+  }
+
+  loadData();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
