@@ -1,123 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="Free light novel, EPUB, PDF, Anime">
+  <meta name="description" content="Free light novel downloads in EPUB and PDF format">
+  <link rel="icon" type="image/png" size="512x512" href="img/android-chrome-512x512.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="img/apple-icon-76x76.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <title>The Only Thing I'd Do in a No-Boys-Allowed Game World – EPUB & PDF</title>
 
-<meta name="keywords" content="Free light novel, EPUB, PDF, Anime">
-<meta name="description" content="Free light novel downloads in EPUB and PDF format">
+  <style>
+    body {
+      font-family: "Lato", sans-serif;
+      margin: 0;
+      background: white;
+      transition: background-color .5s;
+    }
 
-<title>Reincarnated in the World of a Yuri Game</title>
+    .small-icon {
+      width: 60px;
+      height: 60px;
+      float: right;
+      border-radius: 50%;
+      border: 3px solid darkgrey;
+      margin: 10px;
+    }
 
-<link rel="icon" href="img/android-chrome-512x512.png">
-<link rel="apple-touch-icon" href="img/apple-icon-76x76.png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    .sidenav {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      left: 0;
+      background-color: white;
+      overflow-x: hidden;
+      transition: 0.5s;
+      padding-top: 60px;
+      box-shadow: 2px 0 5px rgba(0,0,0,.3);
+    }
 
-<style>
-body {
-  font-family: Lato, sans-serif;
-  margin: 0;
-  background: white;
-}
+    .sidenav a {
+      padding: 10px 32px;
+      text-decoration: none;
+      font-size: 22px;
+      color: #555;
+      display: block;
+    }
 
-.small-icon {
-  width: 60px;
-  height: 60px;
-  float: right;
-  border-radius: 50%;
-  border: 3px solid darkgrey;
-  margin: 10px;
-}
+    .sidenav a:hover {
+      background: #f1f1f1;
+    }
 
-.sidenav {
-  height: 100%;
-  width: 0;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: white;
-  overflow-x: hidden;
-  transition: 0.5s;
-  padding-top: 60px;
-  z-index: 1000;
-  box-shadow: 2px 0 6px rgba(0,0,0,.3);
-}
+    .sidenav .closebtn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 30px;
+      cursor: pointer;
+    }
 
-.sidenav a {
-  padding: 10px 32px;
-  font-size: 22px;
-  color: #555;
-  text-decoration: none;
-  display: block;
-}
+    .slime-icon {
+      width: 150px;
+      height: 150px;
+      margin: 20px auto;
+      display: block;
+    }
 
-.sidenav .closebtn {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  font-size: 30px;
-  cursor: pointer;
-}
+    #main {
+      padding: 16px;
+    }
 
-.slime-icon {
-  width: 150px;
-  display: block;
-  margin: 20px auto;
-}
+    .menu-btn {
+      font-size: 30px;
+      cursor: pointer;
+    }
 
-#main {
-  padding: 16px;
-}
+    .header-icon {
+      width: 316px;
+      max-width: 100%;
+      border-radius: 5px;
+      border: 1px solid darkgrey;
+      box-shadow: 3px 3px 4px #888;
+    }
 
-.menu-btn {
-  font-size: 30px;
-  cursor: pointer;
-}
+    .ani {
+      background-color: lightgrey;
+      margin: 15px auto;
+      max-width: 650px;
+      border: 1px solid darkgrey;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 3px 3px 4px #888;
+    }
 
-.header-icon {
-  width: 316px;
-  max-width: 100%;
-  border-radius: 5px;
-  border: 1px solid darkgrey;
-  box-shadow: 3px 3px 4px #888;
-}
-
-.ani {
-  background: lightgrey;
-  max-width: 700px;
-  margin: 20px auto;
-  padding: 15px;
-  border-radius: 15px;
-  box-shadow: 3px 3px 4px #888;
-}
-
-.ani img {
-  width: 300px;
-  max-width: 100%;
-  border-radius: 5px;
-  box-shadow: 3px 3px 4px #888;
-}
-
-.download-section {
-  margin-top: 20px;
-}
-
-.download-group {
-  background: #f2f2f2;
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 15px;
-}
-
-.download-group h4 {
-  text-align: center;
-}
-
-.download-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
+    .ani img {
+      width: 300px;
+      max-width: 100%;
+      border-radius: 5px;
+      border: 1px solid lightgrey;
+    }
 
     .btn {
       text-decoration: none;
@@ -125,199 +108,282 @@ body {
       font-size: 25px;
     }
 
-.download-btn {
-  flex: 1;
-  min-width: 120px;
-  text-align: center;
-  padding: 10px;
-  background: white;
-  border-radius: 10px;
-  border: 1px solid #888;
-  text-decoration: none;
-  color: black;
-  font-weight: bold;
-}
+    footer {
+      background-color: lightgrey;
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid darkgrey;
+      margin-top: 20px;
+    }
 
-footer {
-  background: lightgrey;
-  text-align: center;
-  padding: 10px;
-}
+    .download-section {
+      margin-top: 20px;
+    }
 
+    .section-label {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 20px 0 10px;
+      padding-bottom: 4px;
+      border-bottom: 2px solid #aaa;
+    }
 
-.format-btn i {
-  margin-right: 6px;
-}
+    .volume-box {
+      background: #f2f2f2;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+    }
 
-.fa-file-pdf {
-  color: #d62828;
-}
+    .volume-title {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 12px;
+    }
 
-.fa-book {
-  color: #1f6aa5;
-}
-</style>
+    .format-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .format-btn {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      font-size: 18px;
+      text-decoration: none;
+      color: black;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #888;
+      box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .format-btn i {
+      margin-right: 6px;
+    }
+
+    .fa-file-pdf { color: #d62828; }
+    .fa-book { color: #1f6aa5; }
+  </style>
 </head>
 
 <body>
 
-<img class="small-icon" src="img/slime.jpeg">
+<img class="small-icon" src="img/slime.jpeg" alt="AnimeStuff">
 
 <div id="mySidenav" class="sidenav">
   <span class="closebtn" onclick="closeNav()">&times;</span>
-  <img class="slime-icon" src="img/slime.jpeg">
-  <a><b>Animestuff</b></a>
+  <img class="slime-icon" src="img/slime.jpeg" alt="AnimeStuff">
+  <a style="cursor:default;"><strong>Animestuff</strong></a>
   <hr>
   <a href="https://animestuff.me">Home</a>
-  <a href="https://animestuff.me/nav/list.html">Light Novels</a>
+  <hr>
+  <a href="https://animestuff.me/nav/list.html">Light novels</a>
+  <hr>
   <a href="https://www.facebook.com/AnimeStuff-164188781071265/">Contact</a>
 </div>
 
 <div id="main">
-<span class="menu-btn" onclick="openNav()">&#9776;</span>
+  <span class="menu-btn" onclick="openNav()">&#9776;</span>
 
-<header style="text-align:center;">
-  <img class="header-icon" src="img/V3_7.jpg">
-</header>
+  <header style="text-align:center;">
+    <img class="header-icon" src="img/V3_7.jpg" alt="Header">
+  </header>
 
-<div class="ani">
-<a href="#" onclick="history.back()" class="btn">&#8592;</a>
+  <div class="ani">
+    <a href="#" onclick="history.back()" class="btn">&#8592;</a>
 
-<h2>The Only Thing I’d Do in a No-Boys-Allowed Game World</h2>
+    <h2>(LN/WN) The Only Thing I'd Do in a No-Boys-Allowed Game World</h2>
 
-<p style="text-align:center">
-<img src="https://i.imgur.com/sKVF63H.jpeg">
-</p>
+    <p style="text-align: center;"><img src="https://i.imgur.com/sKVF63H.jpeg" alt="Cover"></p>
 
-<h3 style="color:red">Status</h3>
-<p>Ongoing</p>
+    <h3 style="color:red">Status:</h3>
+    <p>Ongoing.</p>
 
-<h3 style="color:red">Synopsis</h3>
+    <h3 style="color:red">Synopsis:</h3>
     <p>–A man who gets sandwiched by Yuri can just go to hell.</p>
+    <p>Hiiro unfortunately got reincarnated in the world of the Yuri game 『Everything for the Score』, where such words are true.</p>
+    <p>At first, for Hiiro, who loves Yuri, the world seemed like an ideal world for him, but…he gradually became aware of the reality.</p>
+    <p>Because the world he lived in was a modern Japan world where magic exists, a fantasy world where scores are everything.</p>
+    <p>On top of that, the world was a caste world where everything from behavior, accomplishments, even daily life affairs such as how to fold a futon was evaluated, and the 『Score』 given by the government is the one that determines the caste.</p>
+    <p>In such a world, Hiiro continues to be persecuted unreasonably, being given 0 points just because he is a man. Moreover, he was destined to die a horrible death because he got reincarnated as the one and only male annoyance in the game.</p>
+    <p>In order to deal with the approaching death flag, he seeks power by training his magic, and making strategy after strategy by making the best use of the game's knowledge until….Even though it is supposed to be a Yuri game, he, who was just an annoyance, somehow got surrounded by the heroines.</p>
+    <p>"… are? Where is the Yuri?"</p>
+    <p>This is a story about a man who was supposed to be an annoyance until he destroyed the world of the Yuri game in another sense.</p>
 
-<p>Hiiro unfortunately got reincarnated in the world of the Yuri game 『Everything for the Score』,  where such words are true.</p>
+    <h3 style="color:red">Genre:</h3>
+    <p>Action, Adventure, Comedy, Fantasy, Harem, Mystery, School Life, Supernatural.</p>
 
-<p>At first, for Hiiro, who loves Yuri, the world seemed like an ideal world for him, but…he gradually became aware of the reality.</p>
+    <h3>Download</h3>
 
-<p>Because the world he lived in was a modern Japan world where magic exists, a fantasy world where scores are everything.</p>
+    <div class="download-section">
 
-<p>On top of that, the world was a caste world where everything from behavior, accomplishments, even daily life affairs such as how to fold a futon was evaluated, and the 『Score』 given by the government is the one that determines the caste.</p>
+      <div class="section-label">Light Novel</div>
 
-<p>In such a world, Hiiro continues to be persecuted unreasonably, being given 0 points just because he is a man. Moreover, he was destined to die a horrible death because he got reincarnated as the one and only male annoyance in the game.</p>
+      <div class="volume-box">
+        <div class="volume-title">Volume 1</div>
+        <div class="format-buttons">
+          <a href="https://link-center.net/718937/epub-sinker-vol-1" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-target.net/718937/pdf-sinker-vol-1" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
 
-<p>In order to deal with the approaching death flag, he seeks power by training his magic, and making strategy after strategy by making the best use of the game’s knowledge until….Even though it is supposed to be a Yuri game, he, who was just an annoyance, somehow got surrounded by the heroines.</p>
+      <div class="section-label">Web Novel</div>
 
-<p>“… are? Where is the Yuri?”</p>
+      <div class="volume-box">
+        <div class="volume-title">Volume 1</div>
+        <div class="format-buttons">
+          <a href="https://link-target.net/718937/epub-vol-01-animestuff13" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-hub.net/718937/pdf-vol-01-animestuff15" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
 
-<p>This is a story about a man who was supposed to be an annoyance until he destroyed the world of the Yuri game in another sense.</p>
+      <div class="volume-box">
+        <div class="volume-title">Volume 2</div>
+        <div class="format-buttons">
+          <a href="https://direct-link.net/718937/epub-animestuff-vol-024" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-hub.net/718937/pdf-animestuff-vol-028" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
 
-<h3 style="color:red">Genre</h3>
-<p>Action, Adventure, Comedy, Fantasy, Harem, Mystery, School Life, Supernatural</p>
+      <div class="volume-box">
+        <div class="volume-title">Volume 3</div>
+        <div class="format-buttons">
+          <a href="https://link-target.net/718937/epub-yurigame-vol-03" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-center.net/718937/pdf-yurigame-vol-03" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
 
-<h3 style="color:red">Download: LN</h3>
-<div class="download-section">
-  <div class="download-group">
-    <h4>Volume 1</h4>
-    <div class="download-buttons">
-      <a class="download-btn" href="https://link-center.net/718937/epub-sinker-vol-1"><i class="fa-solid fa-book"></i> EPUB</a>
-      <a class="download-btn" href="https://link-target.net/718937/pdf-sinker-vol-1"><i class="fa-solid fa-file-pdf"></i> PDF</a>
+      <div class="volume-box">
+        <div class="volume-title">Volume 4</div>
+        <div class="format-buttons">
+          <a href="https://link-target.net/718937/epub-yuri-game-vol-4" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-hub.net/718937/pdf-yuri-game-vol-04" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
+
+      <div class="volume-box">
+        <div class="volume-title">Volume 5</div>
+        <div class="format-buttons">
+          <a href="https://direct-link.net/718937/epub-yuri-game-vol-5" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-center.net/718937/pdf-yuri-game-vol-5" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
+
+      <div class="volume-box">
+        <div class="volume-title">Volume 6</div>
+        <div class="format-buttons">
+          <a href="https://direct-link.net/718937/epub-yuri-game-vol-6" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-hub.net/718937/pdf-yuri-game-vol-6" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
+
+      <div class="volume-box">
+        <div class="volume-title">Volume 7</div>
+        <div class="format-buttons">
+          <a href="https://link-target.net/718937/epub-yuri-vol-7" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-hub.net/718937/pdf-yuri-vol-7" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
+
+      <div class="volume-box">
+        <div class="volume-title">Volume 8</div>
+        <div class="format-buttons">
+          <a href="https://direct-link.net/718937/mySlSNTeexyq" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-hub.net/718937/u4nlokE8FtED" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
+
+      <div class="volume-box">
+        <div class="volume-title">Volume 9</div>
+        <div class="format-buttons">
+          <a href="https://link-target.net/718937/5mO7Oir5WkgW" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-target.net/718937/vaejvx6Alt2Q" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
+
+      <div class="volume-box">
+        <div class="volume-title">Volume 10</div>
+        <div class="format-buttons">
+          <a href="https://link-hub.net/718937/zhMCTmMNBHlC" class="format-btn">
+            <i class="fa-solid fa-book"></i> EPUB
+          </a>
+          <a href="https://link-target.net/718937/BLfLoQjAbmOY" class="format-btn">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </div>
+      </div>
+
     </div>
   </div>
-</div>
 
-<h3 style="color:red">Download: WN</h3>
-<div class="download-section">
-
-<div class="download-group">
-<h4>Volume 1</h4>
-<div class="download-buttons">
-<a class="download-btn" href="https://link-target.net/718937/epub-vol-01-animestuff13"><i class="fa-solid fa-book"></i> EPUB</a>
-<a class="download-btn" href="https://link-hub.net/718937/pdf-vol-01-animestuff15"><i class="fa-solid fa-file-pdf"></i> PDF</a>
-</div>
-</div>
-
-<div class="download-group">
-<h4>Volume 2</h4>
-<div class="download-buttons">
-<a class="download-btn" href="https://direct-link.net/718937/epub-animestuff-vol-024"><i class="fa-solid fa-book"></i> EPUB</a>
-<a class="download-btn" href="https://link-hub.net/718937/pdf-animestuff-vol-028"><i class="fa-solid fa-file-pdf"></i> PDF</a>
-</div>
-</div>
-
-<div class="download-group">
-<h4>Volume 3</h4>
-<div class="download-buttons">
-<a class="download-btn" href="https://link-target.net/718937/epub-yurigame-vol-03"><i class="fa-solid fa-book"></i> EPUB</a>
-<a class="download-btn" href="https://link-center.net/718937/pdf-yurigame-vol-03"><i class="fa-solid fa-file-pdf"></i> PDF</a>
-</div>
-</div>
-
-<div class="download-group">
-<h4>Volume 4</h4>
-<div class="download-buttons">
-<a class="download-btn" href="https://link-target.net/718937/epub-yuri-game-vol-4"><i class="fa-solid fa-book"></i> EPUB</a>
-<a class="download-btn" href="https://link-hub.net/718937/pdf-yuri-game-vol-04"><i class="fa-solid fa-file-pdf"></i> PDF</a>
-</div>
-</div>
-
-<div class="download-group">
-<h4>Volume 5</h4>
-<div class="download-buttons">
-<a class="download-btn" href="https://direct-link.net/718937/epub-yuri-game-vol-5"><i class="fa-solid fa-book"></i> EPUB</a>
-<a class="download-btn" href="https://link-center.net/718937/pdf-yuri-game-vol-5"><i class="fa-solid fa-file-pdf"></i> PDF</a>
-</div>
-</div>
-
-<div class="download-group">
-<h4>Volume 6</h4>
-<div class="download-buttons">
-<a class="download-btn" href="https://direct-link.net/718937/epub-yuri-game-vol-6"><i class="fa-solid fa-book"></i> EPUB</a>
-<a class="download-btn" href="https://link-hub.net/718937/pdf-yuri-game-vol-6"><i class="fa-solid fa-file-pdf"></i> PDF</a>
-</div>
-</div>
-
-<div class="download-group">
-<h4>Volume 7</h4>
-<div class="download-buttons">
-<a class="download-btn" href="https://link-target.net/718937/epub-yuri-vol-7"><i class="fa-solid fa-book"></i> EPUB</a>
-<a class="download-btn" href="https://link-hub.net/718937/pdf-yuri-vol-7"><i class="fa-solid fa-file-pdf"></i> PDF</a>
-</div>
-</div>
-
-<div class="download-group">
-<h4>Volume 8</h4>
-<div class="download-buttons">
-<a class="download-btn" href="https://direct-link.net/718937/mySlSNTeexyq"><i class="fa-solid fa-book"></i> EPUB</a>
-<a class="download-btn" href="https://link-hub.net/718937/u4nlokE8FtED"><i class="fa-solid fa-file-pdf"></i> PDF</a>
-</div>
-</div>
-
-<div class="download-group">
-<h4>Volume 9</h4>
-<div class="download-buttons">
-<a class="download-btn" href="https://link-target.net/718937/5mO7Oir5WkgW"><i class="fa-solid fa-book"></i> EPUB</a>
-<a class="download-btn" href="https://link-target.net/718937/vaejvx6Alt2Q"><i class="fa-solid fa-file-pdf"></i> PDF</a>
-</div>
-</div>
-
-</div>
-</div>
-
-<footer>© 2022 AnimeStuff</footer>
+<footer>
+  © 2022 AnimeStuff
+</footer>
 
 <script>
-function openNav(){document.getElementById("mySidenav").style.width="250px";}
-function closeNav(){document.getElementById("mySidenav").style.width="0";}
+  function openNav() {
+    document.getElementById("mySidenav").style.width = "250px";
+    document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+  }
+
+  function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+    document.body.style.backgroundColor = "white";
+  }
 </script>
 
 <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
 <script>
-kofiWidgetOverlay.draw('animestuff85370',{
-'type':'floating-chat',
-'floating-chat.donateButton.text':'Support me',
-'floating-chat.donateButton.background-color':'#00b9fe',
-'floating-chat.donateButton.text-color':'#fff'
-});
+  kofiWidgetOverlay.draw('animestuff85370', {
+    'type': 'floating-chat',
+    'floating-chat.donateButton.text': 'Support me',
+    'floating-chat.donateButton.background-color': '#00b9fe',
+    'floating-chat.donateButton.text-color': '#fff'
+  });
 </script>
 
 </body>
