@@ -1,5 +1,20 @@
 [
   {
+    "title": "Paradise Noise",
+    "url": "https://animestuff.me/docs/assets/html/Rakuen-Noise.html",
+    "cover": "https://cdn.novelupdates.com/images/2021/06/Paradise-Noise.png",
+    "genres": [
+      "Comedy",
+      "Drama",
+      "Harem",
+      "Romance",
+      "School Life",
+      "Slice of Life"
+    ],
+    "reason": "Volume 5 Added",
+    "timestamp": "2026-07-18T01:04:14.368Z"
+  },
+  {
     "title": "Reincarnated as a Mandragora, Worshipped as the Flower Witch. ...If They Find Out I'm a Monster, Will They Hunt Me Down?",
     "url": "https://animestuff.me/docs/assets/html/Mamono-Mandoragora-tte-Baretara-Toubatsu-Desu-Ka.html",
     "cover": "https://animestuff.me/novel/Lewd-Novel/1.jpg",
@@ -664,18 +679,5 @@
     ],
     "reason": "Volume 7 added",
     "timestamp": "2026-04-29T02:02:27.045Z"
-  },
-  {
-    "title": "After Work, My Single Boss Asked Me Out",
-    "url": "https://animestuff.me/docs/assets/html/Shigoto-Kaeri-Dokushin-no-Bijin-Joushi-ni-Tanomarete.html",
-    "cover": "https://animestuff.me/docs/assets/html/img/Shigoto-Kaeri-Dokushin-no-Bijin-Joushi-ni-Tanomarete.jpg",
-    "genres": [
-      "Comedy",
-      "Ecchi",
-      "Romance",
-      "Slice of Life"
-    ],
-    "reason": "Volume 2 added",
-    "timestamp": "2026-04-26T02:45:56.530Z"
   }
 ]
