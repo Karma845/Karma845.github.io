@@ -1,5 +1,22 @@
 [
   {
+    "title": "King of the Labyrinth Frontier",
+    "url": "https://animestuff.me/docs/assets/html/Makutsu-no-Ou.html",
+    "cover": "https://animestuff.me/novel/Slave-Childhood-Friend/cover.jpeg",
+    "genres": [
+      "Action",
+      "Adventure",
+      "Ecchi",
+      "Fantasy",
+      "Harem",
+      "Mature",
+      "R-18",
+      "Seinen"
+    ],
+    "reason": "Volume 2 Added",
+    "timestamp": "2026-07-19T01:34:55.842Z"
+  },
+  {
     "title": "Paradise Noise",
     "url": "https://animestuff.me/docs/assets/html/Rakuen-Noise.html",
     "cover": "https://animestuff.me/docs/assets/html/img/Rakuen-Noise.jpg",
@@ -668,16 +685,5 @@
     ],
     "reason": "Volume 7 added",
     "timestamp": "2026-05-02T00:25:37.282Z"
-  },
-  {
-    "title": "A Very Popular Idol Classmate Has Taken a Liking to Me, A Person Who Doesnt Want to Work for Whole Life",
-    "url": "https://animestuff.me/docs/assets/html/Isshou-Hataraki-Takunai-Ore-ga-Classmate-no-Dainiki-Idol-ni-Natsukaretara.html",
-    "cover": "https://animestuff.me/docs/assets/html/img/A-Very-Popular-Idol-Classmate-Has-Taken-a-Liking-to-Me-A-Person-Who-Doesnt-Want-to-Work-for-Whole-Life.jpg",
-    "genres": [
-      "Romance",
-      "School Life"
-    ],
-    "reason": "Volume 7 added",
-    "timestamp": "2026-04-29T02:02:27.045Z"
   }
 ]
