@@ -1,5 +1,18 @@
 [
   {
+    "title": "Im Fine With Being the Second Girlfriend",
+    "url": "https://animestuff.me/docs/assets/html/Im-fine-with-being-the-second-girlfriend.html",
+    "cover": "https://animestuff.me/docs/assets/html/img/Im-fine-with-being-the-second-girlfriend.jpg",
+    "genres": [
+      "Drama",
+      "Romance",
+      "School Life",
+      "Slice of Life"
+    ],
+    "reason": "Volume 8 Added",
+    "timestamp": "2026-07-22T02:08:32.371Z"
+  },
+  {
     "title": "I Fixed a Gyarus Bicycle and She Became Attached to Me",
     "url": "https://animestuff.me/docs/assets/html/Gal-no-Jitensha-wo-Naoshitara-Natsukareta.html",
     "cover": "https://animestuff.me/docs/assets/html/img/Gal-no-Jitensha-wo-Naoshitara-Natsukareta.jpg",
@@ -668,21 +681,5 @@
     ],
     "reason": "Volume 3 added",
     "timestamp": "2026-05-06T01:55:12.829Z"
-  },
-  {
-    "title": "High School Hack and Slash",
-    "url": "https://animestuff.me/docs/assets/html/High-School-Hack-and-Slash.html",
-    "cover": "https://animestuff.me/novel/Over-OP/cover.jpg",
-    "genres": [
-      "Action",
-      "Adult",
-      "Fantasy",
-      "Harem",
-      "Mature",
-      "R-18",
-      "School Life"
-    ],
-    "reason": "Volume 2 added",
-    "timestamp": "2026-05-05T02:16:57.226Z"
   }
 ]
