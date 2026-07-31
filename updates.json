@@ -1,5 +1,18 @@
 [
   {
+    "title": "Wand Maker of the Ruined World",
+    "url": "https://animestuff.me/docs/assets/html/Houkai-Sekai-no-Mahou-Tsue-Shokunin.html",
+    "cover": "https://animestuff.me/novel/Shimotsuki/cover.jpg",
+    "genres": [
+      "Adventure",
+      "Fantasy",
+      "Romance",
+      "Slice of Life"
+    ],
+    "reason": "Volume 4 Added",
+    "timestamp": "2026-07-31T01:40:00.615Z"
+  },
+  {
     "title": "The Demon Sword Master of Excalibur Academy",
     "url": "https://animestuff.me/docs/assets/html/Demon-Sword-Master-of-the-Holy-Sword-Academy.html",
     "cover": "https://animestuff.me/docs/assets/html/img/F281CE27-4C6B-4F94-87E8-1B7A405B09F3.jpg",
@@ -669,19 +682,5 @@
     ],
     "reason": "Volume 2 added",
     "timestamp": "2026-05-10T00:53:18.499Z"
-  },
-  {
-    "title": "I Reincarnated as the Villain in a Rom-Com, but Im Enjoying Youth with My Favorite Heroine",
-    "url": "https://animestuff.me/docs/assets/html/RabuKome-no-Akuyaku-ni-Tensei-shita-Ore-wa-Oshi-no-Hiroin-to-Seishun-wo-Tanoshimu.html",
-    "cover": "https://animestuff.me/docs/assets/html/img/RabuKome-no-Akuyaku-ni-Tensei-shita-Ore-wa-Oshi-no-Hiroin-to-Seishun-wo-Tanoshimu.jpg",
-    "genres": [
-      "Comedy",
-      "Drama",
-      "Romance",
-      "School Life",
-      "Slice of Life"
-    ],
-    "reason": "Volume 2 added",
-    "timestamp": "2026-05-09T05:05:06.941Z"
   }
 ]
