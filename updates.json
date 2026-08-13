@@ -1,5 +1,23 @@
 [
   {
+    "title": "Asuka of the Scarlet Sky",
+    "url": "https://animestuff.me/docs/assets/html/Hiten-no-Asuka.html",
+    "cover": "https://animestuff.me/novel/Kamatte/1.jpg",
+    "genres": [
+      "Action",
+      "Adult",
+      "Adventure",
+      "Fantasy",
+      "Harem",
+      "Mature",
+      "R-18",
+      "Romance",
+      "Seinen"
+    ],
+    "reason": "Volume 2 Added",
+    "timestamp": "2026-08-13T01:17:22.088Z"
+  },
+  {
     "title": "An Introverts Hookup Hiccups: This Gyaru Is Head Over Heels for Me!",
     "url": "https://animestuff.me/docs/assets/html/Inkya-no-Boku-ni-Batsu-Game-ni-Kokuhaku-Shitekita-Hazu-no-Gyaru-ga-Doumitemo-Boku-ni-Betahore-Desu.html",
     "cover": "https://animestuff.me/docs/assets/html/img/Inkya-no-Boku-ni-Batsu-Game-ni-Kokuhaku-Shitekita-Hazu-no-Gyaru-ga-Doumitemo-Boku-ni-Betahore-Desu.jpeg",
@@ -679,19 +697,5 @@
     ],
     "reason": "Volume 3 added",
     "timestamp": "2026-05-20T01:36:29.540Z"
-  },
-  {
-    "title": "Noble Reincarnation: Blessed With the Strongest Power From Birth",
-    "url": "https://animestuff.me/docs/assets/html/Kizoku-Tensei-Megumareta-Umare-kara-Saikyou-no-Chikara-wo-Eru.html",
-    "cover": "https://animestuff.me/Senki/00001.jpeg",
-    "genres": [
-      "Adventure",
-      "Fantasy",
-      "Harem",
-      "Martial Arts",
-      "Shounen"
-    ],
-    "reason": "Volume 6 added",
-    "timestamp": "2026-05-19T03:14:47.018Z"
   }
 ]
