@@ -1,5 +1,18 @@
 [
   {
+    "title": "Life as an Adventurer with the Banished Marquis Daughter",
+    "url": "https://animestuff.me/docs/assets/html/Tsuihou-Sareta-Koushaku-Reijou-to-Iku-Boukensha-Seikatsu.html",
+    "cover": "https://i.imgur.com/zc0nhvD.jpeg",
+    "genres": [
+      "Action",
+      "Adventure",
+      "Fantasy",
+      "Romance"
+    ],
+    "reason": "Volume 2 Added",
+    "timestamp": "2026-08-14T01:43:39.034Z"
+  },
+  {
     "title": "Asuka of the Scarlet Sky",
     "url": "https://animestuff.me/docs/assets/html/Hiten-no-Asuka.html",
     "cover": "https://animestuff.me/novel/Kamatte/1.jpg",
@@ -685,17 +698,5 @@
     ],
     "reason": "Volume 4 added",
     "timestamp": "2026-05-22T02:27:43.819Z"
-  },
-  {
-    "title": "Amamiya-san is the Cutest. And Im Second",
-    "url": "https://animestuff.me/docs/assets/html/Sekai-de-Ichiban-Kawaii-Amamiya-san-Nibanme-wa-Ore.html",
-    "cover": "https://animestuff.me/docs/assets/html/img/Sekai-de-Ichiban-Kawaii-Amamiya-san-Nibanme-wa-Ore.jpg",
-    "genres": [
-      "Comedy",
-      "Romance",
-      "School Life"
-    ],
-    "reason": "Volume 3 added",
-    "timestamp": "2026-05-20T01:36:29.540Z"
   }
 ]
