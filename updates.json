@@ -1,5 +1,20 @@
 [
   {
+    "title": "Saijo no Osewa ~ Takane no Hana",
+    "url": "https://animestuff.me/docs/assets/html/Takane-no-Hana.html",
+    "cover": "https://animestuff.me/docs/assets/html/img/Takane-No-Hana-LN.jpg",
+    "genres": [
+      "Comedy",
+      "Drama",
+      "Harem",
+      "Romance",
+      "School Life",
+      "Shounen"
+    ],
+    "reason": "Volume 7 Added",
+    "timestamp": "2026-09-08T02:38:02.095Z"
+  },
+  {
     "title": "The Healer Ditches the Boonies to Become an S-Rank Adventurer",
     "url": "https://animestuff.me/docs/assets/html/Henkyou-No-Yakushi-Miyako-De-S-Rank-Boukensha-To-Naru.html",
     "cover": "https://animestuff.me/novel/Frivolous-Gyaru/cover.jpg",
@@ -688,17 +703,5 @@
     ],
     "reason": "Volume 2 added",
     "timestamp": "2026-06-14T01:58:37.134Z"
-  },
-  {
-    "title": "My Little Sister Is the Best F*p Material",
-    "url": "https://animestuff.me/docs/assets/html/Ore-no-Imouto-ga-Saikou-no-Okazu-Datta.html",
-    "cover": "https://animestuff.me/docs/assets/html/img/Ore-no-Imouto-ga-Saikou-no-Okazu-Datta.jpg",
-    "genres": [
-      "Adult",
-      "Mature",
-      "Romance"
-    ],
-    "reason": "Volume 5 added",
-    "timestamp": "2026-06-13T02:19:01.702Z"
   }
 ]
