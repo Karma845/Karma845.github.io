@@ -1,5 +1,20 @@
 [
   {
+    "title": "Soot Steeped Knight",
+    "url": "https://animestuff.me/docs/assets/html/Susu-mamire-no-Kishi.html",
+    "cover": "https://animestuff.me/docs/assets/html/img/SootSteeped-Knight.jpg",
+    "genres": [
+      "Action",
+      "Adventure",
+      "Drama",
+      "Fantasy",
+      "Mature",
+      "Tragedy"
+    ],
+    "reason": "Volume 4 Added",
+    "timestamp": "2026-09-17T02:24:30.313Z"
+  },
+  {
     "title": "Life Reversal ~ I Was Cheated On and Falsely Accused, but Now the Most Beautiful Girl in the School Is Getting Close to Me ~",
     "url": "https://animestuff.me/docs/assets/html/Jinsei-Gyakuten.html",
     "cover": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj-PlmWEg_L-UVH3JHLZqGdGKoJjDQXR7b0aXbI-fSXI2eB_RKUd9RTdtY9IrHlZBNca5W5Xq3sPpUzwoYup5hN-AONhQ3U5gf_pSF0eNwTeFIosuTc2VlOvRo92Ghcu1ajk2XN0ky04nW8cOs6OQVlGwbVBEM5rTB4wj3S2CdSrfzFV9TGK7HFZvA97wQA/s1600/cover.jpeg",
@@ -693,19 +708,5 @@
     ],
     "reason": "Volume 2 Added",
     "timestamp": "2026-06-22T02:45:22.959Z"
-  },
-  {
-    "title": "Noble Reincarnation: Blessed With the Strongest Power From Birth",
-    "url": "https://animestuff.me/docs/assets/html/Kizoku-Tensei-Megumareta-Umare-kara-Saikyou-no-Chikara-wo-Eru.html",
-    "cover": "https://animestuff.me/Senki/00001.jpeg",
-    "genres": [
-      "Adventure",
-      "Fantasy",
-      "Harem",
-      "Martial Arts",
-      "Shounen"
-    ],
-    "reason": "Volume 7 Added",
-    "timestamp": "2026-06-21T01:48:27.652Z"
   }
 ]
