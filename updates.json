@@ -1,5 +1,18 @@
 [
   {
+    "title": "Isekai Harem Monogatari",
+    "url": "https://animestuff.me/docs/assets/html/Isekai-Harem-Monogatari.html",
+    "cover": "https://animestuff.me/docs/assets/html/img/isekai-harem-monogatri.png",
+    "genres": [
+      "Adult",
+      "Fantasy",
+      "Harem",
+      "R-18"
+    ],
+    "reason": "Quality Improved",
+    "timestamp": "2026-09-17T10:54:55.048Z"
+  },
+  {
     "title": "Soot Steeped Knight",
     "url": "https://animestuff.me/docs/assets/html/Susu-mamire-no-Kishi.html",
     "cover": "https://animestuff.me/docs/assets/html/img/SootSteeped-Knight.jpg",
@@ -696,17 +709,5 @@
     ],
     "reason": "Volume 5 Added",
     "timestamp": "2026-06-24T02:08:11.313Z"
-  },
-  {
-    "title": "The Possessive Maid I Recently Hired is Actually a Princess",
-    "url": "https://animestuff.me/docs/assets/html/Saikin-Yatotta-Dokusen-Yoku-no-Tsuyoi-Bishoujo-Maid-ga-Jitsuwa-Oujo-Sama-Datta.html",
-    "cover": "https://animestuff.me/docs/assets/html/img/Saikin-Yatotta-Dokusen-Yoku-no-Tsuyoi-Bishoujo-Maid-ga-Jitsuwa-Oujo-Sama-Datta.jpg",
-    "genres": [
-      "Fantasy",
-      "Romance",
-      "School Life"
-    ],
-    "reason": "Volume 2 Added",
-    "timestamp": "2026-06-22T02:45:22.959Z"
   }
 ]
