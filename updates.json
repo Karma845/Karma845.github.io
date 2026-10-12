@@ -1,5 +1,21 @@
 [
   {
+    "title": "Seirei Gensouki: Spirit Chronicles",
+    "url": "https://animestuff.me/docs/assets/html/Seirei-Gensouki.html",
+    "cover": "https://animestuff.me/docs/assets/html/img/Serei-Gensouki.png",
+    "genres": [
+      "Action",
+      "Adventure",
+      "Drama",
+      "Fantasy",
+      "Harem",
+      "Romance",
+      "Shounen"
+    ],
+    "reason": "Volume 28 Added",
+    "timestamp": "2026-10-12T01:52:07.766Z"
+  },
+  {
     "title": "Valkyrie Bullet",
     "url": "https://animestuff.me/docs/assets/html/Valkyrie-Bullet.html",
     "cover": "https://i.imgur.com/b6Vd69k.jpeg",
@@ -716,18 +732,5 @@
     ],
     "reason": "Volume 17-19 Added.",
     "timestamp": "2026-07-16T01:37:17.452Z"
-  },
-  {
-    "title": "Life as an Adventurer with the Banished Marquis Daughter",
-    "url": "https://animestuff.me/docs/assets/html/Tsuihou-Sareta-Koushaku-Reijou-to-Iku-Boukensha-Seikatsu.html",
-    "cover": "https://i.imgur.com/zc0nhvD.jpeg",
-    "genres": [
-      "Action",
-      "Adventure",
-      "Fantasy",
-      "Romance"
-    ],
-    "reason": "Link Reset to LN",
-    "timestamp": "2026-07-15T01:15:26.902Z"
   }
 ]
