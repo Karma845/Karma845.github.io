@@ -1,5 +1,20 @@
 [
   {
+    "title": "Saijo no Osewa ~ Takane no Hana",
+    "url": "https://animestuff.me/docs/assets/html/Takane-no-Hana.html",
+    "cover": "https://animestuff.me/docs/assets/html/img/Takane-No-Hana-LN.jpg",
+    "genres": [
+      "Comedy",
+      "Drama",
+      "Harem",
+      "Romance",
+      "School Life",
+      "Shounen"
+    ],
+    "reason": "Volume 8 Added",
+    "timestamp": "2026-10-15T01:42:18.885Z"
+  },
+  {
     "title": "Exiled Alchemist’s Frontier Life: A Former Elite’s Fresh Start in the Backcountry",
     "url": "https://animestuff.me/docs/assets/html/Sasen-Renkinjutsu-shi-no-Henkyou-Kurashi.html",
     "cover": "https://animestuff.me/novel/Trashed/1.jpg",
@@ -717,18 +732,5 @@
     ],
     "reason": "Volume 5 Added",
     "timestamp": "2026-07-18T01:04:14.368Z"
-  },
-  {
-    "title": "Reincarnated as a Mandragora, Worshipped as the Flower Witch. ...If They Find Out I'm a Monster, Will They Hunt Me Down?",
-    "url": "https://animestuff.me/docs/assets/html/Mamono-Mandoragora-tte-Baretara-Toubatsu-Desu-Ka.html",
-    "cover": "https://animestuff.me/docs/assets/html/img/Mamono-Mandoragora-tte-Baretara-Toubatsu-Desu-Ka.jpg",
-    "genres": [
-      "Adventure",
-      "Comedy",
-      "Fantasy",
-      "Slice of Life"
-    ],
-    "reason": "Volume 2 Added",
-    "timestamp": "2026-07-17T01:04:10.348Z"
   }
 ]
