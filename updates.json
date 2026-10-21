@@ -1,5 +1,19 @@
 [
   {
+    "title": "The Science Note by δ and γ",
+    "url": "https://animestuff.me/docs/assets/html/Yotte-Hatsukoi-wa-Shoumeisareta-Delta-to-Gamma-no-Rigakubu-Note.html",
+    "cover": "https://i.imgur.com/Ya7WsjY.jpeg",
+    "genres": [
+      "Drama",
+      "Mystery",
+      "Romance",
+      "School Life",
+      "Slice of Life"
+    ],
+    "reason": "Volume 2 Added",
+    "timestamp": "2026-10-21T02:56:47.603Z"
+  },
+  {
     "title": "The Gal Game Heroines Who Were Supposed to Die Somehow Learned My Secret",
     "url": "https://animestuff.me/docs/assets/html/Shibou-End-o-Kaihi-shita-Gal-Game-no-Hiroin-tachi-ga-Nazeka-Ore-no-Hmitsu-o-Shittarashii.html",
     "cover": "https://animestuff.me/novel/Onna-Kishi/00000.jpg",
@@ -721,18 +735,5 @@
     ],
     "reason": "Volume 8 Added",
     "timestamp": "2026-07-22T02:08:32.371Z"
-  },
-  {
-    "title": "I Fixed a Gyarus Bicycle and She Became Attached to Me",
-    "url": "https://animestuff.me/docs/assets/html/Gal-no-Jitensha-wo-Naoshitara-Natsukareta.html",
-    "cover": "https://animestuff.me/docs/assets/html/img/Gal-no-Jitensha-wo-Naoshitara-Natsukareta.jpg",
-    "genres": [
-      "Comedy",
-      "Romance",
-      "School Life",
-      "Slice of Life"
-    ],
-    "reason": "Volume 4 Added",
-    "timestamp": "2026-07-21T01:31:47.501Z"
   }
 ]
