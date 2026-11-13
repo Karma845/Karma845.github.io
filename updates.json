@@ -1,5 +1,17 @@
 [
   {
+    "title": "My Little Sister Is the Best F*p Material",
+    "url": "https://animestuff.me/docs/assets/html/Ore-no-Imouto-ga-Saikou-no-Okazu-Datta.html",
+    "cover": "https://animestuff.me/docs/assets/html/img/Ore-no-Imouto-ga-Saikou-no-Okazu-Datta.jpg",
+    "genres": [
+      "Adult",
+      "Mature",
+      "Romance"
+    ],
+    "reason": "Volume 9 Added",
+    "timestamp": "2026-11-13T01:39:46.900Z"
+  },
+  {
     "title": "I Got Fired from the Hero Party, So I Went Back to My Hometown, but All the Party Members Followed Me",
     "url": "https://animestuff.me/docs/assets/html/Yuusha-Partyo-kubi-ni-natta-node-Kokyou-ni-Kaettara-Member-Zenin-ga-suitekitan-daga.html",
     "cover": "https://cdn.novelupdates.com/images/2023/09/I-Got-Fired-from-the-Hero-Party-So-I-Went-Back-to-My-Hometown-but-All-the-Party-Members-Followed-Me.jpg",
@@ -712,23 +724,5 @@
     ],
     "reason": "Volume 2 Added",
     "timestamp": "2026-08-14T01:43:39.034Z"
-  },
-  {
-    "title": "Asuka of the Scarlet Sky",
-    "url": "https://animestuff.me/docs/assets/html/Hiten-no-Asuka.html",
-    "cover": "https://animestuff.me/novel/Kamatte/1.jpg",
-    "genres": [
-      "Action",
-      "Adult",
-      "Adventure",
-      "Fantasy",
-      "Harem",
-      "Mature",
-      "R-18",
-      "Romance",
-      "Seinen"
-    ],
-    "reason": "Volume 2 Added",
-    "timestamp": "2026-08-13T01:17:22.088Z"
   }
 ]
