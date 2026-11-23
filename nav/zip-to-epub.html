@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zip → EPUB Builder</title>
+<style>
+:root{--bg:#faf8f5;--fg:#2a2623;--mut:#7a726b;--card:#fff;--bd:#e3ddd5;--ac:#b4532a;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1b19;--fg:#ece7e1;--mut:#a39a91;--card:#272421;--bd:#3a3632;--ac:#e08a5e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1d1b19;--fg:#ece7e1;--mut:#a39a91;--card:#272421;--bd:#3a3632;--ac:#e08a5e;color-scheme:dark}
+html,body{margin:0}body{background:var(--bg);color:var(--fg);font:16px/1.55 Georgia,'Times New Roman',serif}
+main{max-width:760px;margin:0 auto;padding:28px 18px 60px}h1{font-size:1.7em;margin:.2em 0}p.sub{color:var(--mut);margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px;margin:16px 0}
+#drop{border:2px dashed var(--bd);text-align:center;padding:38px 16px;cursor:pointer;border-radius:12px}#drop.on{border-color:var(--ac)}
+label{display:block;font:600 .8em system-ui,sans-serif;color:var(--mut);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+input[type=text],select{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg);font:15px system-ui,sans-serif}
+button{background:var(--ac);color:#fff;border:0;border-radius:9px;padding:11px 20px;font:600 15px system-ui,sans-serif;cursor:pointer}button:disabled{opacity:.5}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:200px}
+#thumbs{display:flex;gap:8px;overflow-x:auto;padding:4px 0}#thumbs img{height:90px;border-radius:5px;border:3px solid transparent;cursor:pointer}#thumbs img.c{border-color:var(--ac)}
+#chs{max-height:340px;overflow:auto}#chs div{display:flex;gap:8px;align-items:center;margin:5px 0;font:13px system-ui,sans-serif;color:var(--mut)}#chs input{flex:1}
+#msg{font:14px system-ui,sans-serif;color:var(--mut);margin-top:12px;white-space:pre-wrap}.ok{color:var(--ac)!important}
+</style></head><body><main>
+<h1>Zip → EPUB Builder</h1>
+<p class="sub">Drop a zip with one <b>.txt</b> (or JSON files named <b>ch1, ch2.1, pro, int2, final, ss</b>) plus an <b>image</b> folder. Everything runs in your browser; nothing is uploaded.</p>
+<div id="drop" class="card">Drop your .zip here, or click to choose<input id="f" type="file" accept=".zip" hidden></div>
+<div id="app" hidden>
+ <div class="card"><div class="row"><div><label>Book title</label><input type="text" id="t"></div><div><label>Author (optional)</label><input type="text" id="a"></div></div>
+  <label><input type="checkbox" id="cr" checked> Add Credits page at the end</label>
+  <label>Credits – translation link</label><input type="text" id="tl" value="https://cclawtranslations.home.blog/">
+  <label>Import your own CSS (optional – replaces the default stylesheet)</label><input type="file" id="css" accept=".css,text/css">
+  <label><input type="checkbox" id="vol" checked> Remove “Volume N” from chapter titles</label>
+  <label>Cover (click an image) – all images not used inline go on the Illustration page</label><div id="thumbs"></div></div>
+ <div class="card"><label>Chapters – edit titles, reorder with ▲ ▼, remove with ✕</label><div id="chs"></div></div>
+ <button id="go">Build EPUB</button><div id="msg"></div>
+</div>
+</main>
+<script>
+const $=s=>document.querySelector(s),esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),enc=new TextEncoder(),dec=new TextDecoder();
+const T=new Uint32Array(256).map((_,n)=>{for(let k=0;k<8;k++)n=n&1?0xEDB88320^(n>>>1):n>>>1;return n>>>0});
+const crc=b=>{let c=~0;for(let i=0;i<b.length;i++)c=T[(c^b[i])&255]^(c>>>8);return ~c>>>0};
+async function readZip(buf){const v=new DataView(buf),u=new Uint8Array(buf);let e=u.length-22;while(e>=0&&v.getUint32(e,true)!==0x06054b50)e--;
+ const n=v.getUint16(e+10,true);let p=v.getUint32(e+16,true);const out={};
+ for(let i=0;i<n;i++){const m=v.getUint16(p+10,true),cs=v.getUint32(p+20,true),nl=v.getUint16(p+28,true),xl=v.getUint16(p+30,true),cl=v.getUint16(p+32,true),lo=v.getUint32(p+42,true);
+  const name=dec.decode(u.subarray(p+46,p+46+nl));p+=46+nl+xl+cl;if(name.endsWith('/')||/__MACOSX|\.DS_Store/.test(name))continue;
+  const ln=v.getUint16(lo+26,true),lx=v.getUint16(lo+28,true),d=u.subarray(lo+30+ln+lx,lo+30+ln+lx+cs);
+  out[name]=m===0?d:new Uint8Array(await new Response(new Blob([d]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer())}
+ return out}
+function writeZip(files){const parts=[],cd=[];let off=0;
+ for(const [name,data] of files){const nb=enc.encode(name),c=crc(data),h=new DataView(new ArrayBuffer(30)),d=new DataView(new ArrayBuffer(46));
+  h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x800,true);h.setUint32(14,c,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,nb.length,true);parts.push(h,nb,data);
+  d.setUint32(0,0x02014b50,true);d.setUint16(4,20,true);d.setUint16(6,20,true);d.setUint16(8,0x800,true);d.setUint32(16,c,true);d.setUint32(20,data.length,true);d.setUint32(24,data.length,true);d.setUint16(28,nb.length,true);d.setUint32(42,off,true);cd.push(d,nb);off+=30+nb.length+data.length}
+ const sz=cd.reduce((a,x)=>a+x.byteLength,0),e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,sz,true);e.setUint32(16,off,true);
+ return new Blob([...parts,...cd,e],{type:'application/epub+zip'})}
+
+const D=/^-{5,}$/,H=/^(?:Chapter \d+(?:\.\d+)?|Prologue|Epilogue|Interlude|Final Chapter|Short Story|Afterword)\b/,SEP=/^[\*＊◇◆★☆\s]{3,}$/;
+function parseTxt(text,mode){const L=text.replace(/\r/g,'').split('\n'),ch=[];let title='',cur=null,s0=0;
+ if(L[1]&&/^={5,}$/.test(L[1].trim())){title=L[0].trim();s0=2}
+ const nn=i=>{i++;while(i<L.length&&!L[i].trim())i++;return i};
+ for(let i=s0;i<L.length;i++){const t=L[i].trim();if(!t||D.test(t)||/^={5,}$/.test(t))continue;
+  const j=nn(i),isH=mode?H.test(t):(j<L.length&&D.test(L[j].trim())&&!t.startsWith('<img'));
+  if(isH){let h=t;const m=h.match(/^Chapter (\d+(?:\.\d+)?)\.? (.+?) Ch \1\. (.+)$/);if(m&&m[2]===m[3])h=`Chapter ${m[1]}: ${m[2]}`;cur={title:h,items:[]};ch.push(cur);continue}
+  if(!cur)continue;const g=t.match(/^<img src=\\?"?([^"\\ ]+)/);
+  if(g)cur.items.push({img:g[1]});else if(SEP.test(t))cur.items.push({sep:1});
+  else if(/^<p>.*<\/p>$/.test(t))cur.items.push({h:t.slice(3,-4)});else cur.items.push({p:t.replace(/\\\*/g,'*')})}
+ return{title,ch}}
+function jinfo(n){const b=n.split('/').pop().replace(/\.json$/i,''),m=b.match(/^(?:ch)?(\d+)(?:\.(\d+))?$/i);if(m)return{g:'c'+m[1],r:+m[1],part:+(m[2]||0),tag:''};
+ const t=b.toLowerCase(),i=t.match(/^int(?:erlude)?[\s_.-]*(\d+)?(?:[._-](\d+))?/);
+ if(/^pro/.test(t))return{g:'pro',r:-1,part:0,tag:'pro',name:'Prologue'};
+ if(/^final/.test(t))return{g:'final',r:1e5,part:0,tag:'final',name:'Final Chapter'};
+ if(/^ss/.test(t))return{g:'ss',r:1e6,part:0,tag:'ss',name:'Short Story'};
+ if(i)return{g:'int'+(i[1]||b),r:i[1]?+i[1]+.5:5e4,part:+(i[2]||0),tag:'int',name:'Interlude'};return null}
+function parseJson(files){const nm=Object.keys(files).filter(n=>/\.json$/i.test(n)&&jinfo(n)),groups={};
+ nm.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).sort((a,b)=>jinfo(a).part-jinfo(b).part).forEach(n=>(groups[jinfo(n).g]??=[]).push(n));
+ return{title:'',ch:Object.keys(groups).sort((a,b)=>jinfo(groups[a][0]).r-jinfo(groups[b][0]).r).map(k=>{let items=[],title='';const f=jinfo(groups[k][0]);groups[k].forEach(n=>{let r=dec.decode(files[n]),d;
+  try{d=JSON.parse(r)}catch{d=JSON.parse(r.replace(/"(\s*\n\s*")/g,'",$1').replace(/,(\s*\])/g,'$1'))}
+  title||=d.title||'';(d.content||[]).forEach(s=>{s=String(s).trim();if(!s||s==='"')return;const g=s.match(/^\[img\](.+)$/);
+   items.push(g?{img:g[1].trim()}:/^[＊*]$/.test(s)?{sep:1}:{p:s})})});
+  title=title.replace(/^Volume \d+\s+/,'');if(groups[k].length>1)title=title.replace(/\s+\d+$/,'');return{title:title||f.name||'Chapter '+k.slice(1),items,tag:f.tag}})}}
+let S=null;
+async function load(file){msg('Reading zip…');const z=await readZip(await file.arrayBuffer()),imgs={};
+ for(const [n,d] of Object.entries(z))if(/\.(jpe?g|png|webp|gif)$/i.test(n))imgs[n.split('/').pop()]=d;
+ const txt=Object.keys(z).find(n=>/\.txt$/i.test(n));let p;
+ if(txt){const t=dec.decode(z[txt]);p=parseTxt(t,0);if(p.ch.length<2)p=parseTxt(t,1);if(!p.title)p.title=txt.split('/').pop().replace(/\.txt$/i,'').replace(/_/g,' ')}
+ else p=parseJson(z);
+ if(!p.ch.length)return msg('No chapters found. Expected a .txt file or ch*.json files.');
+ const used=new Set(p.ch.flatMap(c=>c.items.filter(i=>i.img).map(i=>i.img))),names=Object.keys(imgs).sort((a,b)=>parseInt(a)-parseInt(b)||a.localeCompare(b)),extras=names.filter(n=>!used.has(n));
+ S={p,imgs,names,extras,cover:extras[0]||names[0]};
+ $('#t').value=p.title;$('#app').hidden=false;
+ $('#thumbs').innerHTML='';names.forEach(n=>{const im=new Image();im.src=URL.createObjectURL(new Blob([imgs[n]]));im.title=n+(used.has(n)?' (inline)':'');im.className=n===S.cover?'c':'';
+  im.onclick=()=>{S.cover=n;[...$('#thumbs').children].forEach(x=>x.classList.toggle('c',x===im))};$('#thumbs').append(im)});
+ render();
+ msg(`Found ${p.ch.length} chapters, ${names.length} images (${extras.length} for the Illustration page). Check the cover, then build.`,1)}
+function render(){const box=$('#chs');box.innerHTML='';S.p.ch.forEach((c,i)=>{const d=document.createElement('div'),inp=document.createElement('input'),mk=(t,f)=>{const b=document.createElement('button');b.textContent=t;b.style.cssText='padding:4px 9px;background:var(--bd);color:var(--fg)';b.onclick=f;return b};
+  inp.type='text';inp.value=c.title;inp.oninput=()=>c.title=inp.value;
+  d.append(String(i+1).padStart(2,'0'),inp,c.tag||'',mk('▲',()=>mv(i,-1)),mk('▼',()=>mv(i,1)),mk('✕',()=>{S.p.ch.splice(i,1);render()}));box.append(d)})}
+function mv(i,d){const a=S.p.ch,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];render()}
+function msg(t,ok){const m=$('#msg');m.textContent=t;m.className=ok?'ok':''}
+const CRED='<?xml version="1.0" encoding="utf-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>Credits</title><link href="../Styles/stylesheet.css" type="text/css" rel="stylesheet" /></head><body><h1>Credits</h1>\n\n<p><strong>EPUB/PDF:</strong></p>\n<a href="https://animestuff.me/">https://animestuff.me/</a>\n\n<p><strong>Translation:</strong></p>\n<a href="https://cclawtranslations.home.blog/">https://cclawtranslations.home.blog/</a>\n\n<p><strong>Telegram:</strong></p>\n<a href="https://t.me/animestuff2023">https://t.me/animestuff2023</a></body></html>';
+const CSS='body{margin:0;padding:0 3%;line-height:1.6;text-align:justify}\nh1{font-size:1.4em;text-align:center;margin:1.5em 0 1.2em;line-height:1.3;page-break-before:always}\np{margin:0 0 .8em 0;text-indent:0}\np.sep{text-align:center;margin:1.2em 0}\ndiv.illus{text-align:center;margin:1em 0;page-break-inside:avoid}\ndiv.illus img{max-width:100%;max-height:95vh;height:auto;width:auto}\ndiv.cover{text-align:center;margin:0;padding:0}\ndiv.cover img{max-width:100%;max-height:100vh;height:auto;width:auto}\nnav ol{list-style:none;padding-left:0}\nnav li{margin:.5em 0}\na{color:inherit}\n';
+const page=(b,t)=>`<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" lang="en" xml:lang="en">\n<head>\n<meta charset="utf-8" />\n<title>${esc(t)}</title>\n<link rel="stylesheet" href="../Styles/stylesheet.css" type="text/css" />\n</head>\n<body>\n${b}\n</body>\n</html>\n`;
+const im=(n,a='Illustration')=>`<div class="illus"><img src="../Images/${esc(n)}" alt="${a}" /></div>`;
+async function build(){const{p,imgs,names,extras}=S,title=$('#t').value.trim()||'Untitled',author=$('#a').value.trim(),cr=$('#cr').checked,F=[];
+ const id='urn:uuid:'+crypto.randomUUID(),mt=n=>/png$/i.test(n)?'image/png':/webp$/i.test(n)?'image/webp':/gif$/i.test(n)?'image/gif':'image/jpeg',
+ chs=p.ch.map((c,i)=>{let t=c.title.trim();if($('#vol').checked)t=t.replace(/^Volume \d+\s+/i,'');return{n:i+1,t,items:c.items}});
+ const A=(n,s)=>F.push([n,typeof s==='string'?enc.encode(s):s]);
+ F.push(['mimetype',enc.encode('application/epub+zip')]);
+ A('META-INF/container.xml','<?xml version="1.0" encoding="utf-8"?>\n<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>');
+ chs.forEach(c=>A(`OEBPS/Text/ch${c.n}.xhtml`,page(`<h1>${esc(c.t)}</h1>\n`+c.items.map(x=>x.img?(imgs[x.img]?im(x.img):''):x.sep?'<p class="sep">∗ ∗ ∗</p>':x.h!==undefined?`<p>${x.h}</p>`:`<p>${esc(x.p)}</p>`).join('\n'),c.t)));
+ A('OEBPS/Text/cover.xhtml',page(`<div class="cover"><img src="../Images/${esc(S.cover)}" alt="Cover" /></div>`,'Cover'));
+ const ex=[...new Set([S.cover,...extras])].filter(n=>imgs[n]);A('OEBPS/Text/Illustration.xhtml',page(ex.map((n,i)=>im(n,'Illustration '+(i+1))).join('\n'),'Illustrations'));
+ if(cr){const tl=($('#tl').value.trim()||'https://cclawtranslations.home.blog/').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');A('OEBPS/Text/Credits.xhtml',CRED.split('https://cclawtranslations.home.blog/').join(tl))}
+ const toc=[['Cover','cover'],['Illustrations','Illustration'],['Table of Contents','nav'],...chs.map(c=>[c.t,'ch'+c.n]),...(cr?[['Credits','Credits']]:[])];
+ A('OEBPS/Text/nav.xhtml',page(`<nav epub:type="toc" id="toc"><h1>Table of Contents</h1><ol>\n${toc.filter(x=>x[1]!=='nav').map(x=>`<li><a href="${x[1]}.xhtml">${esc(x[0])}</a></li>`).join('\n')}\n</ol></nav>`,'Table of Contents'));
+ A('OEBPS/toc.ncx',`<?xml version="1.0" encoding="utf-8"?>\n<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="${id}"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="0"/><meta name="dtb:maxPageNumber" content="0"/></head><docTitle><text>${esc(title)}</text></docTitle><navMap>\n${toc.map((x,i)=>`<navPoint id="np${i+1}" playOrder="${i+1}"><navLabel><text>${esc(x[0])}</text></navLabel><content src="Text/${x[1]}.xhtml"/></navPoint>`).join('\n')}\n</navMap></ncx>`);
+ A('OEBPS/Styles/stylesheet.css',customCss?customCss+(/illus/.test(customCss)?'':'\ndiv.illus,div.cover{text-align:center}\ndiv.illus img,div.cover img{max-width:100%;height:auto}\n'):CSS);
+ names.forEach(n=>A('OEBPS/Images/'+n,imgs[n]));
+ const man=['<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>','<item id="css" href="Styles/stylesheet.css" media-type="text/css"/>',...toc.map(x=>`<item id="${x[1]}" href="Text/${x[1]}.xhtml" media-type="application/xhtml+xml"${x[1]==='nav'?' properties="nav"':''}/>`),
+  ...names.map((n,i)=>`<item id="img${i}" href="Images/${esc(n)}" media-type="${mt(n)}"${n===S.cover?' properties="cover-image"':''}/>`)];
+ A('OEBPS/content.opf',`<?xml version="1.0" encoding="utf-8"?>\n<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid" xml:lang="en"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="bookid">${id}</dc:identifier><dc:title>${esc(title)}</dc:title>${author?`<dc:creator>${esc(author)}</dc:creator>`:''}<dc:language>en</dc:language><meta property="dcterms:modified">${new Date().toISOString().slice(0,19)}Z</meta><meta name="cover" content="img${names.indexOf(S.cover)}"/></metadata>\n<manifest>\n${man.join('\n')}\n</manifest>\n<spine toc="ncx">\n${toc.map(x=>`<itemref idref="${x[1]}"/>`).join('\n')}\n</spine></package>`);
+ return writeZip(F)}
+$('#go').onclick=async()=>{try{$('#go').disabled=true;msg('Building…');const blob=await build(),fn=($('#t').value.trim().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'_').slice(0,60)||'book')+'.epub';let d=null;try{d=await claude.use('downloads')}catch{}
+ if(d)await d.save({filename:fn,data:blob});else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;a.click()}
+ msg(`Done: ${fn} (${(blob.size/1048576).toFixed(1)} MB)`,1)}catch(e){msg('Could not finish: '+(e.message||e.code||e))}finally{$('#go').disabled=false}};
+let customCss='';$('#css').onchange=async e=>{const f=e.target.files[0];customCss=f?await f.text():'';msg(f?`Custom CSS loaded: ${f.name}. It will replace the default stylesheet.`:'Using the default stylesheet.',1)};
+const dz=$('#drop');dz.onclick=()=>$('#f').click();$('#f').onchange=e=>e.target.files[0]&&load(e.target.files[0]);
+dz.ondragover=e=>{e.preventDefault();dz.classList.add('on')};dz.ondragleave=()=>dz.classList.remove('on');dz.ondrop=e=>{e.preventDefault();dz.classList.remove('on');e.dataTransfer.files[0]&&load(e.dataTransfer.files[0])};
+</script></body></html>

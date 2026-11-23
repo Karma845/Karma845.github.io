@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EPUB → PDF</title>
+<style>
+:root{--bg:#faf8f5;--fg:#2a2623;--mut:#7a726b;--card:#fff;--bd:#e3ddd5;--ac:#b4532a;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1b19;--fg:#ece7e1;--mut:#a39a91;--card:#272421;--bd:#3a3632;--ac:#e08a5e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1d1b19;--fg:#ece7e1;--mut:#a39a91;--card:#272421;--bd:#3a3632;--ac:#e08a5e;color-scheme:dark}
+html,body{margin:0}body{background:var(--bg);color:var(--fg);font:16px/1.55 Georgia,'Times New Roman',serif}
+main{max-width:820px;margin:0 auto;padding:28px 18px 60px}h1{font-size:1.7em;margin:.2em 0}p.sub{color:var(--mut);margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px;margin:16px 0}
+#drop{border:2px dashed var(--bd);text-align:center;padding:38px 16px;cursor:pointer}#drop.on{border-color:var(--ac)}
+label{display:block;font:600 .8em system-ui,sans-serif;color:var(--mut);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+input,select,textarea{width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg);font:15px system-ui,sans-serif}
+textarea{min-height:70px;font-family:ui-monospace,monospace;font-size:13px}
+button{background:var(--ac);color:#fff;border:0;border-radius:9px;padding:11px 18px;font:600 15px system-ui,sans-serif;cursor:pointer}button.s{background:var(--bd);color:var(--fg)}button:disabled{opacity:.5}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:140px}
+#fr{width:100%;height:540px;border:1px solid var(--bd);border-radius:8px;background:#fff}
+#msg{font:14px system-ui,sans-serif;color:var(--mut);margin-top:12px;white-space:pre-wrap}.ok{color:var(--ac)!important}
+</style></head><body><main>
+<h1>EPUB → PDF</h1>
+<p class="sub">Drop an EPUB. Its own CSS (alignment, spacing, page breaks, sizes) drives the page layout, and one click downloads a real PDF named after your EPUB. Nothing is uploaded.</p>
+<div id="drop" class="card">Drop your .epub here, or click to choose<input id="f" type="file" accept=".epub,application/epub+zip" hidden></div>
+<div id="app" hidden>
+ <div class="card"><b id="nm"></b>
+  <div class="row"><div><label>Page size</label><select id="sz"><option>A5</option><option>A4</option><option>Letter</option><option value="6x9">6 × 9 in</option></select></div>
+  <div><label>Margin (mm)</label><input id="mg" type="number" value="15" min="0" max="40"></div>
+  <div><label>Font size (pt, blank = EPUB’s)</label><input id="fs" type="number" value="11" min="6" max="24" step=".5"></div></div>
+  <label><input type="checkbox" id="ip" checked style="width:auto"> Put each illustration on its own page (nothing above or below it)</label>
+  <label><input type="checkbox" id="ch" checked style="width:auto"> Center every h1 / h2 heading</label>
+  <label>Extra CSS (optional, applied last)</label><textarea id="xc" placeholder="p{text-indent:1.2em}"></textarea></div>
+ <div class="card"><label>Preview (the PDF itself is paginated)</label><iframe id="fr" title="preview"></iframe></div>
+ <div class="row"><button id="pr">Save PDF</button></div>
+ <div id="msg"></div>
+</div>
+</main>
+<script>
+const $=s=>document.querySelector(s),dec=new TextDecoder(),esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+async function readZip(buf){const v=new DataView(buf),u=new Uint8Array(buf);let e=u.length-22;while(e>=0&&v.getUint32(e,true)!==0x06054b50)e--;
+ const n=v.getUint16(e+10,true);let p=v.getUint32(e+16,true);const out={};
+ for(let i=0;i<n;i++){const m=v.getUint16(p+10,true),cs=v.getUint32(p+20,true),nl=v.getUint16(p+28,true),xl=v.getUint16(p+30,true),cl=v.getUint16(p+32,true),lo=v.getUint32(p+42,true);
+  const name=dec.decode(u.subarray(p+46,p+46+nl));p+=46+nl+xl+cl;if(name.endsWith('/'))continue;
+  const ln=v.getUint16(lo+26,true),lx=v.getUint16(lo+28,true),d=u.subarray(lo+30+ln+lx,lo+30+ln+lx+cs);
+  out[name]=m===0?d:new Uint8Array(await new Response(new Blob([d]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer())}
+ return out}
+const dir=p=>p.includes('/')?p.slice(0,p.lastIndexOf('/')+1):'';
+const norm=(d,rel)=>{rel=decodeURIComponent(rel.split('#')[0].split('?')[0]);const o=[];for(const p of(rel[0]==='/'?rel.slice(1):d+rel).split('/')){if(p==='..')o.pop();else if(p&&p!=='.')o.push(p)}return o.join('/')};
+const MIME={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',svg:'image/svg+xml',ttf:'font/ttf',otf:'font/otf',woff:'font/woff',woff2:'font/woff2'};
+let E=null;const cache=new Map();
+function dataUrl(p){if(!cache.has(p))cache.set(p,new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(new Blob([E.z[p]],{type:MIME[p.split('.').pop().toLowerCase()]||'application/octet-stream'}))}));return cache.get(p)}
+const msg=(t,ok)=>{const m=$('#msg');m.textContent=t;m.className=ok?'ok':''};
+async function fixCss(t,base){let o='',last=0;for(const m of t.matchAll(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g)){o+=t.slice(last,m.index);const u=m[1],p=norm(base,u);o+=(/^(data:|https?:|#)/.test(u)||!E.z[p])?m[0]:`url("${await dataUrl(p)}")`;last=m.index+m[0].length}return o+t.slice(last)}
+async function load(f){try{msg('Reading EPUB…');const z=await readZip(await f.arrayBuffer()),ct=z['META-INF/container.xml'];if(!ct)return msg('This does not look like an EPUB (no META-INF/container.xml).');
+ const rf=new DOMParser().parseFromString(dec.decode(ct),'application/xml').querySelector('rootfile').getAttribute('full-path'),od=dir(rf),opf=new DOMParser().parseFromString(dec.decode(z[rf]),'application/xml'),man={};
+ [...opf.getElementsByTagName('item')].forEach(i=>man[i.getAttribute('id')]=norm(od,i.getAttribute('href')));
+ const spine=[...opf.getElementsByTagName('itemref')].map(i=>man[i.getAttribute('idref')]).filter(p=>p&&z[p]);
+ E={base:f.name.replace(/\.epub$/i,''),z,spine,title:(opf.getElementsByTagName('dc:title')[0]||{}).textContent||f.name.replace(/\.epub$/i,''),parts:null,cover:false};cache.clear();
+ $('#app').hidden=false;$('#nm').textContent=E.title+' · '+spine.length+' sections';msg('Applying the EPUB’s CSS…');await prep();await renderFrame();msg('Ready. Click Save PDF.',1)}catch(e){msg('Could not read this EPUB: '+(e.message||e))}}
+async function prep(){const secs=[],seen=new Set(),css=[],idx={};E.spine.forEach((p,i)=>idx[p]=i);
+ for(const [i,p] of E.spine.entries()){const d=new DOMParser().parseFromString(dec.decode(E.z[p]),'text/html'),b=dir(p),body=d.body;if(!body)continue;
+  for(const l of d.querySelectorAll('link[rel~=stylesheet]')){const cp=norm(b,l.getAttribute('href'));if(E.z[cp]&&!seen.has(cp)){seen.add(cp);css.push(await fixCss(dec.decode(E.z[cp]),dir(cp)))}}
+  for(const s of d.querySelectorAll('style'))css.push(await fixCss(s.textContent,b));
+  for(const el of body.querySelectorAll('[src]')){const sp=norm(b,el.getAttribute('src'));if(E.z[sp])el.setAttribute('src',await dataUrl(sp))}
+  for(const a of body.querySelectorAll('a[href]')){const h=a.getAttribute('href');if(/^(https?:|mailto:|#)/.test(h))continue;const t=norm(b,h);if(idx[t]!==undefined)a.setAttribute('href','#d'+idx[t])}
+  const cv=!body.textContent.trim()&&body.querySelectorAll('img').length===1&&i<2;if(cv&&i===0)E.cover=true;
+  secs.push(`<section class="doc${cv?' cv':''}" id="d${i}">${body.innerHTML}</section>`)}
+ E.parts={body:secs.join('\n'),css:css.join('\n')}}
+function ov(){const fs=+$('#fs').value;return `html,body{margin:0!important;padding:0!important}${fs?`body{font-size:${fs}pt!important}`:''}${$('#ch').checked?'h1,h2{text-align:center!important}':''}\nsection.doc{border-top:1px dashed #bbb}\n${$('#xc').value}`}
+const full=()=>`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(E.title)}</title><style>${E.parts.css}</style><style>${ov()}</style></head><body>${E.parts.body}</body></html>`;
+const renderFrame=()=>new Promise(r=>{const f=$('#fr');f.onload=()=>r();f.srcdoc=full()});
+let t0;const show=()=>{clearTimeout(t0);t0=setTimeout(()=>E&&E.parts&&renderFrame(),200)};
+['#sz','#mg','#fs','#xc','#ch'].forEach(s=>$(s).addEventListener('input',show));
+
+/* ---------- minimal PDF writer (Times fonts, JPEG images) ---------- */
+const WIN={0x20AC:128,0x201A:130,0x0192:131,0x201E:132,0x2026:133,0x2020:134,0x2021:135,0x02C6:136,0x2030:137,0x0160:138,0x2039:139,0x0152:140,0x017D:142,0x2018:145,0x2019:146,0x201C:147,0x201D:148,0x2022:149,0x2013:150,0x2014:151,0x02DC:152,0x2122:153,0x0161:154,0x203A:155,0x0153:156,0x017E:158,0x0178:159};
+const wa=c=>{const k=c.codePointAt(0);return k<256?k:(WIN[k]||(k===0x3000?32:63))};
+const pstr=s=>{let o='';for(const ch of s){const c=wa(ch);o+=(c===40||c===41||c===92?'\\':'')+String.fromCharCode(c)}return '('+o+')'};
+const S8=s=>{const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i)&255;return u};
+async function buildPdf(pages,imgs,W,H){const parts=[],offs=[];let len=0;const add=u=>{parts.push(u);len+=u.length};
+ const obj=(n,head,data)=>{offs[n]=len;add(S8(`${n} 0 obj\n${head}`));if(data){add(S8('\nstream\n'));add(data);add(S8('\nendstream'))}add(S8('\nendobj\n'))};
+ add(S8('%PDF-1.4\n%\xe2\xe3\xcf\xd3\n'));const nI=imgs.length,first=7+nI,N=first+pages.length*2;
+ obj(1,'<< /Type /Catalog /Pages 2 0 R >>');obj(2,`<< /Type /Pages /Kids [${pages.map((_,i)=>`${first+2*i+1} 0 R`).join(' ')}] /Count ${pages.length} >>`);
+ ['Times-Roman','Times-Bold','Times-Italic','Times-BoldItalic'].forEach((f,i)=>obj(3+i,`<< /Type /Font /Subtype /Type1 /BaseFont /${f} /Encoding /WinAnsiEncoding >>`));
+ imgs.forEach((m,i)=>obj(7+i,`<< /Type /XObject /Subtype /Image /Width ${m.w} /Height ${m.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${m.bytes.length} >>`,m.bytes));
+ for(let i=0;i<pages.length;i++){const z=new Uint8Array(await new Response(new Blob([S8(pages[i].ops.join('\n'))]).stream().pipeThrough(new CompressionStream('deflate'))).arrayBuffer());
+  obj(first+2*i,`<< /Length ${z.length} /Filter /FlateDecode >>`,z);
+  obj(first+2*i+1,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W.toFixed(2)} ${H.toFixed(2)}] /Contents ${first+2*i} 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R >> /XObject << ${[...pages[i].im].map(k=>`/Im${k} ${7+k} 0 R`).join(' ')} >> >> >>`)}
+ const xr=len;add(S8(`xref\n0 ${N}\n0000000000 65535 f \n`+offs.slice(1,N).map(o=>String(o).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size ${N} /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF`));
+ return new Blob(parts,{type:'application/pdf'})}
+
+/* ---------- layout engine: computed CSS of the rendered EPUB -> PDF pages ---------- */
+const cx=document.createElement('canvas').getContext('2d');
+const tw=(s,f,sz)=>{cx.font=`${f&2?'italic ':''}${f&1?'bold ':''}100px "Times New Roman","Liberation Serif",Times,serif`;return cx.measureText(s).width*sz/100};
+const rgb=c=>{const m=(c||'').match(/[\d.]+/g);return m&&m.length>=3?m.slice(0,3).map(v=>(+v/255).toFixed(3)).join(' '):'0 0 0'};
+const BRK=/^(page|always|left|right|recto|verso)$/;
+async function toPdf(){const fr=$('#fr'),w=fr.contentWindow,doc=fr.contentDocument,Z={A4:[210,297],A5:[148,210],Letter:[216,279],'6x9':[152,229]}[$('#sz').value],K=72/25.4,PW=Z[0]*K,PH=Z[1]*K,M=Math.max(0,+$('#mg').value||0)*K,CW=PW-2*M,bottom=PH-M,ip=$('#ip').checked;
+ const pages=[],imgs=[],imc=new Map();let pg=null,y=0,pmb=0,pend=false;
+ const np=()=>{pg={ops:[],im:new Set(),has:false};pages.push(pg);y=M;pmb=0};
+ const cs=e=>w.getComputedStyle(e),isBlk=e=>!/^inline/.test(cs(e).display);
+ async function imgInfo(src){if(imc.has(src))return imc.get(src);const im=new Image();await new Promise((r,j)=>{im.onload=r;im.onerror=j;im.src=src});let bytes;
+  if(/^data:image\/jpe?g/.test(src))bytes=Uint8Array.from(atob(src.split(',')[1]),c=>c.charCodeAt(0));
+  else{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0);bytes=Uint8Array.from(atob(c.toDataURL('image/jpeg',.92).split(',')[1]),x=>x.charCodeAt(0))}
+  const m={n:imgs.length,w:im.naturalWidth,h:im.naturalHeight,bytes};imgs.push(m);imc.set(src,m);return m}
+ async function drawImg(src,full){let m;try{m=await imgInfo(src)}catch{return}
+  const bw=full?PW:CW,bh=full?PH:PH-2*M,s=Math.min(bw/m.w,bh/m.h),dw=m.w*s,dh=m.h*s;
+  if(!pg||(pg.has&&(ip||full||y+dh>bottom)))np();else if(pend)np();pend=false;
+  const top=(ip||full)?(PH-dh)/2:y,x=(PW-dw)/2;pg.ops.push(`q ${dw.toFixed(2)} 0 0 ${dh.toFixed(2)} ${x.toFixed(2)} ${(PH-top-dh).toFixed(2)} cm /Im${m.n} Do Q`);pg.im.add(m.n);pg.has=true;y=top+dh;pmb=0;if(ip||full)pend=true}
+ function collect(nodes,out){for(const n of nodes){if(n.nodeType===3){const p=n.parentElement,c=cs(p);out.r.push({t:n.textContent.replace(/\s+/g,' '),sz:parseFloat(c.fontSize)*.75,f:(+c.fontWeight>=600?1:0)|(c.fontStyle==='italic'?2:0),col:rgb(c.color)})}
+  else if(n.nodeType===1){if(n.tagName==='BR')out.r.push({br:1});else if(n.tagName==='IMG')out.i.push(n);else if(!/^(SCRIPT|STYLE)$/.test(n.tagName))collect(n.childNodes,out)}}}
+ async function block(el,nodes,own){const c=cs(el),out={r:[],i:[]};collect(nodes,out);const toks=[];let sp=false;
+  for(const r of out.r){if(r.br){toks.push({br:1});sp=false;continue}if(r.t[0]===' ')sp=true;r.t.split(' ').forEach((s,k)=>{if(k>0)sp=true;if(s){toks.push({s,f:r.f,sz:r.sz,col:r.col,sp:sp&&toks.length>0&&!toks[toks.length-1].br});sp=false}})}
+  if(toks.length){const sz0=parseFloat(c.fontSize)*.75,lhv=parseFloat(c.lineHeight),lh=isNaN(lhv)?sz0*1.4:lhv*.75,head=/^H[1-6]$/.test(el.tagName),al=(head&&$('#ch').checked&&/^H[12]$/.test(el.tagName))?'center':({start:'left',left:'left',center:'center',right:'right',end:'right',justify:'justify'}[c.textAlign]||'left'),
+    ind=own?(parseFloat(c.textIndent)||0)*.75:0,mt=own?(parseFloat(c.marginTop)||0)*.75:0,mb=own?(parseFloat(c.marginBottom)||0)*.75:sz0*.8,bb=own&&(BRK.test(c.breakBefore)||c.pageBreakBefore==='always'),ba=own&&(BRK.test(c.breakAfter)||c.pageBreakAfter==='always');
+   if(!pg||bb||pend){if(!pg||pg.has)np();pend=false}
+   const gap=Math.max(pmb,mt);if(head&&y+gap+3*lh>bottom&&pg.has)np();else if(pg.has)y+=gap;
+   const lines=[];let ln=[],lw=0,first=true;const lim=()=>CW-(first?ind:0);
+   for(let t of toks){if(t.br){lines.push({w:ln,lw,br:1});ln=[];lw=0;first=false;continue}
+    let spw=t.sp&&ln.length?tw(' ',t.f,t.sz):0,ww=tw(t.s,t.f,t.sz);
+    while(ww>CW&&t.s.length>1){const n=Math.max(1,Math.floor(t.s.length*CW/ww)-1);if(ln.length){lines.push({w:ln,lw});ln=[];lw=0;first=false}lines.push({w:[{...t,s:t.s.slice(0,n),sp:false,x:0,ww:tw(t.s.slice(0,n),t.f,t.sz)}],lw:tw(t.s.slice(0,n),t.f,t.sz)});first=false;t={...t,s:t.s.slice(n)};ww=tw(t.s,t.f,t.sz);spw=0}
+    if(ln.length&&lw+spw+ww>lim()){lines.push({w:ln,lw});ln=[];lw=0;first=false;spw=0}
+    ln.push({...t,spw,ww});lw+=spw+ww}
+   if(ln.length)lines.push({w:ln,lw,last:1});
+   lines.forEach((L,i)=>{if(y+lh>bottom)np();const f0=i===0,avail=CW-(f0?ind:0),ms=Math.max(...L.w.map(t=>t.sz),sz0),base=PH-(y+lh*.5+ms*.32);let x=M+(f0?ind:0),ex=0;
+    if(al==='center')x=M+(CW-L.lw)/2;else if(al==='right')x=M+CW-L.lw;else if(al==='justify'&&!L.last&&!L.br&&L.w.length>1)ex=(avail-L.lw)/(L.w.length-1);
+    L.w.forEach((t,k)=>{if(k)x+=t.spw+ex;pg.ops.push(`BT /F${1+(t.f&1)+2*((t.f>>1)&1)} ${t.sz.toFixed(2)} Tf ${t.col} rg ${x.toFixed(2)} ${base.toFixed(2)} Td ${pstr(t.s)} Tj ET`);x+=t.ww});pg.has=true;y+=lh});
+   pmb=mb;if(ba)pend=true}
+  for(const im of out.i)await drawImg(im.getAttribute('src'),false)}
+ async function walk(el){let buf=[];const flush=async()=>{if(buf.some(n=>n.nodeType===1||n.textContent.trim()))await block(el,buf,false);buf=[]};
+  for(const c of el.childNodes){if(c.nodeType===1&&c.tagName==='IMG'){await flush();await drawImg(c.getAttribute('src'),false)}
+   else if(c.nodeType===1&&isBlk(c)){await flush();if([...c.children].some(k=>k.tagName==='IMG'||isBlk(k)))await walk(c);else await block(c,[...c.childNodes],true)}
+   else if(c.nodeType===1||c.nodeType===3)buf.push(c)}await flush()}
+ const secs=[...doc.querySelectorAll('section.doc')];
+ for(const [i,s] of secs.entries()){msg(`Laying out pages… ${i+1}/${secs.length}`);
+  if(s.classList.contains('cv')){const im=s.querySelector('img');if(im)await drawImg(im.getAttribute('src'),true);continue}
+  if(pg&&pg.has)np();pend=false;await walk(s);await new Promise(r=>setTimeout(r))}
+ msg(`Writing PDF… (${pages.length} pages)`);return buildPdf(pages,imgs,PW,PH)}
+$('#pr').onclick=async()=>{try{$('#pr').disabled=true;await renderFrame();const blob=await toPdf(),fn=E.base+'.pdf';let d=null;try{d=await claude.use('downloads')}catch{}
+ if(d)await d.save({filename:fn,data:blob});else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;a.click()}msg(`Saved ${fn} (${(blob.size/1048576).toFixed(1)} MB)`,1)}catch(e){msg('Could not finish: '+(e.message||e.code||e))}finally{$('#pr').disabled=false}};
+const dz=$('#drop');dz.onclick=()=>$('#f').click();$('#f').onchange=e=>e.target.files[0]&&load(e.target.files[0]);
+dz.ondragover=e=>{e.preventDefault();dz.classList.add('on')};dz.ondragleave=()=>dz.classList.remove('on');dz.ondrop=e=>{e.preventDefault();dz.classList.remove('on');e.dataTransfer.files[0]&&load(e.dataTransfer.files[0])};
+</script></body></html>
