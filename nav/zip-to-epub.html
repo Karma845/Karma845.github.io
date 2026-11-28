@@ -50,13 +50,15 @@ function writeZip(files){const parts=[],cd=[];let off=0;
  const sz=cd.reduce((a,x)=>a+x.byteLength,0),e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,sz,true);e.setUint32(16,off,true);
  return new Blob([...parts,...cd,e],{type:'application/epub+zip'})}
 
-const D=/^-{5,}$/,H=/^(?:Chapter \d+(?:\.\d+)?|Prologue|Epilogue|Interlude|Final Chapter|Short Story|Afterword)\b/,SEP=/^[\*＊◇◆★☆\s]{3,}$/;
+const D=/^-{5,}$/,H=/^(?:(?:[Aa]rc|ARC|[Ee]pisode|EPISODE|[Cc]hapter|CHAPTER|[Pp]art|PART|[Vv]olume|[Bb]ook|[Aa]ct|[Ee]p|[Cc]h)\.?\s*(?:\d+(?:\.\d+)?|[IVXLC]+)(?:\s*[:.\-–—]\s*\S.*|\s+[A-Z“"‘'].*)?|(?:[Pp]rologue|PROLOGUE|[Ee]pilogue|EPILOGUE|[Ii]nterlude|[Aa]fterword|[Ff]inal [Cc]hapter|[Ss]hort [Ss]tory|[Ss]ide [Ss]tory|[Ii]ntermission)(?:\s*[:.\-–—]\s*\S.*)?|\d{1,4}[.:)]?|\d{1,4}[.:)]\s+\S.*)$/,SEP=/^[\*＊◇◆★☆\s]{3,}$/;
 function parseTxt(text,mode){const L=text.replace(/\r/g,'').split('\n'),ch=[];let title='',cur=null,s0=0;
  if(L[1]&&/^={5,}$/.test(L[1].trim())){title=L[0].trim();s0=2}
  const nn=i=>{i++;while(i<L.length&&!L[i].trim())i++;return i};
  for(let i=s0;i<L.length;i++){const t=L[i].trim();if(!t||D.test(t)||/^={5,}$/.test(t))continue;
-  const j=nn(i),isH=mode?H.test(t):(j<L.length&&D.test(L[j].trim())&&!t.startsWith('<img'));
-  if(isH){let h=t;const m=h.match(/^Chapter (\d+(?:\.\d+)?)\.? (.+?) Ch \1\. (.+)$/);if(m&&m[2]===m[3])h=`Chapter ${m[1]}: ${m[2]}`;cur={title:h,items:[]};ch.push(cur);continue}
+  const j=nn(i),isH=mode?(((/^\d/.test(t))?t.length<=100:t.length<=220)&&H.test(t)&&(i===0||!L[i-1].trim())):(j<L.length&&D.test(L[j].trim())&&!t.startsWith('<img'));
+  if(isH){let h=t;if(/^\d{1,4}[.:)]?$/.test(h))h='Chapter '+parseInt(h,10);const m=h.match(/^Chapter (\d+(?:\.\d+)?)\.? (.+?) Ch \1\. (.+)$/);if(m&&m[2]===m[3])h=`Chapter ${m[1]}: ${m[2]}`;const pv=ch[ch.length-1],num=s=>(s.match(/\d+(?:\.\d+)?/)||[])[0],kw=s=>(s.match(/^[A-Za-z]+/)||[''])[0].toLowerCase();
+  if(pv&&!pv.items.length&&num(h)!==undefined&&num(h)===num(pv.title)&&(/^\d/.test(h)||kw(h)===kw(pv.title))){pv.title=/^\d/.test(h)?pv.title+': '+h.replace(/^\d+(?:\.\d+)?[.:)]?\s*/,''):h;cur=pv;continue}
+  cur={title:h,items:[]};ch.push(cur);continue}
   if(!cur)continue;const g=t.match(/^<img src=\\?"?([^"\\ ]+)/);
   if(g)cur.items.push({img:g[1]});else if(SEP.test(t))cur.items.push({sep:1});
   else if(/^<p>.*<\/p>$/.test(t))cur.items.push({h:t.slice(3,-4)});else cur.items.push({p:t.replace(/\\\*/g,'*')})}
@@ -78,7 +80,7 @@ let S=null;
 async function load(file){msg('Reading zip…');const z=await readZip(await file.arrayBuffer()),imgs={};
  for(const [n,d] of Object.entries(z))if(/\.(jpe?g|png|webp|gif)$/i.test(n))imgs[n.split('/').pop()]=d;
  const txt=Object.keys(z).find(n=>/\.txt$/i.test(n));let p;
- if(txt){const t=dec.decode(z[txt]);p=parseTxt(t,0);if(p.ch.length<2)p=parseTxt(t,1);if(!p.title)p.title=txt.split('/').pop().replace(/\.txt$/i,'').replace(/_/g,' ')}
+ if(txt){const t=dec.decode(z[txt]);p=parseTxt(t,1);if(p.ch.length<2)p=parseTxt(t,0);if(!p.title)p.title=txt.split('/').pop().replace(/\.txt$/i,'').replace(/_/g,' ').trim()}
  else p=parseJson(z);
  if(!p.ch.length)return msg('No chapters found. Expected a .txt file or ch*.json files.');
  const used=new Set(p.ch.flatMap(c=>c.items.filter(i=>i.img).map(i=>i.img))),names=Object.keys(imgs).sort((a,b)=>parseInt(a)-parseInt(b)||a.localeCompare(b)),extras=names.filter(n=>!used.has(n));
